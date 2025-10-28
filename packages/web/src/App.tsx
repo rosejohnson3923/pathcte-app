@@ -11,6 +11,7 @@ import JoinGamePage from './pages/JoinGamePage';
 import HostGamePage from './pages/HostGamePage';
 import GamePage from './pages/GamePage';
 import QuestionSetsPage from './pages/QuestionSetsPage';
+import QuestionSetDetailPage from './pages/QuestionSetDetailPage';
 import StudentsPage from './pages/StudentsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
@@ -91,6 +92,14 @@ function App() {
           element={
             <ProtectedRoute>
               <QuestionSetsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/question-sets/:id"
+          element={
+            <ProtectedRoute>
+              <QuestionSetDetailPage />
             </ProtectedRoute>
           }
         />

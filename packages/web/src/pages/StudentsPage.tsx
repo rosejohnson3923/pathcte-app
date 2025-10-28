@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { DashboardLayout } from '../components/layout';
-import { Card, Button, Badge, Spinner, Input } from '../components/common';
+import { Card, Button, Spinner, Input } from '../components/common';
 import { Users, UserPlus, Search, Trophy, Gamepad2, BookOpen } from 'lucide-react';
 
 export default function StudentsPage() {

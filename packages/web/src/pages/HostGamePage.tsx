@@ -8,17 +8,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { Button, Input, Card, Spinner, Badge } from '../components/common';
-import { useAuth } from '../hooks';
+import { useAuth, useQuestionSets } from '../hooks';
 import { gameService, useGameStore } from '@pathket/shared';
-import { Gamepad2, Settings, Users, BookOpen, Play } from 'lucide-react';
+import { Gamepad2, Settings, Users, BookOpen, Play, ChevronDown } from 'lucide-react';
 import type { GameMode } from '@pathket/shared';
-
-// For now, we'll use a mock question set. In Week 4, this will come from useQuestionSets hook
-const MOCK_QUESTION_SET = {
-  id: 'mock-set-1',
-  title: 'Career Exploration Basics',
-  total_questions: 10,
-};
 
 const GAME_MODES: { value: GameMode; label: string; description: string }[] = [
   {
@@ -43,7 +36,10 @@ export default function HostGamePage() {
   const { user } = useAuth();
   const { setSession, setIsHost } = useGameStore();
 
-  const [selectedQuestionSet] = useState(MOCK_QUESTION_SET.id);
+  // Fetch question sets
+  const { data: questionSets, isLoading: loadingQuestionSets } = useQuestionSets();
+
+  const [selectedQuestionSet, setSelectedQuestionSet] = useState<string>('');
   const [selectedMode, setSelectedMode] = useState<GameMode>('career_quest');
   const [maxPlayers, setMaxPlayers] = useState(30);
   const [isPublic, setIsPublic] = useState(true);
@@ -51,9 +47,22 @@ export default function HostGamePage() {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-select first question set when loaded
+  if (questionSets && questionSets.length > 0 && !selectedQuestionSet) {
+    setSelectedQuestionSet(questionSets[0].id);
+  }
+
+  // Get selected question set details
+  const selectedSet = questionSets?.find((set) => set.id === selectedQuestionSet);
+
   const handleCreateGame = async () => {
     if (!user) {
       setError('You must be logged in to host a game');
+      return;
+    }
+
+    if (!selectedQuestionSet) {
+      setError('Please select a question set');
       return;
     }
 
@@ -120,21 +129,81 @@ export default function HostGamePage() {
               </div>
             </div>
 
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{MOCK_QUESTION_SET.title}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {MOCK_QUESTION_SET.total_questions} questions
-                  </p>
-                </div>
-                <Badge variant="info">Selected</Badge>
+            {loadingQuestionSets ? (
+              <div className="flex items-center justify-center py-8">
+                <Spinner size="md" />
               </div>
-            </div>
+            ) : questionSets && questionSets.length > 0 ? (
+              <>
+                <div className="relative">
+                  <select
+                    value={selectedQuestionSet}
+                    onChange={(e) => setSelectedQuestionSet(e.target.value)}
+                    className="w-full px-4 py-3 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                  >
+                    {questionSets.map((set) => (
+                      <option key={set.id} value={set.id}>
+                        {set.title} ({set.total_questions} questions)
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                    size={20}
+                  />
+                </div>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-              Note: Custom question sets will be available in a future update
-            </p>
+                {selectedSet && (
+                  <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                            {selectedSet.subject}
+                          </p>
+                          {selectedSet.difficulty_level && (
+                            <span
+                              className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                selectedSet.difficulty_level === 'easy'
+                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                  : selectedSet.difficulty_level === 'medium'
+                                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                  : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                              }`}
+                            >
+                              {selectedSet.difficulty_level}
+                            </span>
+                          )}
+                        </div>
+                        {selectedSet.description && (
+                          <p className="text-xs text-blue-800 dark:text-blue-400">
+                            {selectedSet.description}
+                          </p>
+                        )}
+                        {selectedSet.grade_level && selectedSet.grade_level.length > 0 && (
+                          <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                            Grades {Math.min(...selectedSet.grade_level)}-
+                            {Math.max(...selectedSet.grade_level)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <BookOpen size={40} className="text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 dark:text-gray-400 mb-3">No question sets available</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/question-sets')}
+                >
+                  Create Question Set
+                </Button>
+              </div>
+            )}
           </Card>
 
           {/* Game Mode Selection */}
