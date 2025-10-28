@@ -242,23 +242,26 @@ export interface GameSession {
 
 export interface GamePlayer {
   id: string;
-  session_id: string;
+  game_session_id: string;
   user_id: string | null;
   display_name: string;
-  avatar_url: string | null;
 
-  // Progress
+  // Score tracking
   score: number;
-  answers_correct: number;
-  answers_incorrect: number;
-  current_question_index: number;
+  correct_answers: number;
+  total_answers: number;
 
   // Status
-  is_host: boolean;
-  is_ready: boolean;
   is_connected: boolean;
+  placement: number | null;
+
+  // Rewards
+  tokens_earned: number;
+  pathkeys_earned: string[] | null;
+
+  // Timing
   joined_at: string;
-  last_activity_at: string;
+  left_at: string | null;
 }
 
 export interface GameAnswer {

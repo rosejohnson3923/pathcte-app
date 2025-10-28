@@ -7,8 +7,17 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
 
 // Environment variables will be injected at runtime
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+// Use import.meta.env for Vite (web) and fallback to process.env for Node/React Native
+const supabaseUrl =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
+  (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL) ||
+  (typeof process !== 'undefined' && process.env?.SUPABASE_URL) ||
+  '';
+const supabaseAnonKey =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
+  (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY) ||
+  (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) ||
+  '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');

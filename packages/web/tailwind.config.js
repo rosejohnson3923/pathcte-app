@@ -1,88 +1,79 @@
+import { tokens } from '../shared/src/design-system/tokens';
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
+      // Colors from design tokens
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
-        },
-        secondary: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-          900: '#581c87',
-          950: '#3b0764',
-        },
-        success: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
-          950: '#052e16',
-        },
-        warning: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-          950: '#451a03',
-        },
-        danger: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#ef4444',
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
-          950: '#450a0a',
-        },
-        // Pathkey rarity colors
-        rarity: {
-          common: '#9CA3AF',
-          uncommon: '#10B981',
-          rare: '#3B82F6',
-          epic: '#8B5CF6',
-          legendary: '#F59E0B',
-        },
+        ...tokens.colors,
+        // Semantic color aliases
+        primary: tokens.colors.purple,
+        secondary: tokens.colors.teal,
+        success: tokens.colors.green,
+        danger: tokens.colors.red,
+        warning: tokens.colors.amber,
       },
+      // Semantic backgrounds using CSS variables (theme-aware)
+      backgroundColor: {
+        'bg-primary': 'var(--color-bg-primary)',
+        'bg-secondary': 'var(--color-bg-secondary)',
+        'bg-tertiary': 'var(--color-bg-tertiary)',
+        'bg-elevated': 'var(--color-bg-elevated)',
+        'glass-bg-base': 'var(--glass-bg-base)',
+        'glass-bg-elevated': 'var(--glass-bg-elevated)',
+        'glass-bg-subtle': 'var(--glass-bg-subtle)',
+      },
+      // Semantic text colors using CSS variables (theme-aware)
+      textColor: {
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        'text-tertiary': 'var(--color-text-tertiary)',
+        'text-inverse': 'var(--color-text-inverse)',
+      },
+      // Semantic border colors using CSS variables (theme-aware)
+      borderColor: {
+        'border-default': 'var(--color-border)',
+        'border-strong': 'var(--color-border-strong)',
+        'border-subtle': 'var(--color-border-subtle)',
+        'glass-border': 'var(--glass-border)',
+      },
+      // Spacing from design tokens
+      spacing: {
+        ...tokens.spacing,
+      },
+      // Typography from design tokens
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Poppins', 'system-ui', 'sans-serif'],
-        mono: ['Fira Code', 'monospace'],
+        ...tokens.typography.fontFamily,
+        display: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
+      fontSize: {
+        ...tokens.typography.fontSize,
+      },
+      fontWeight: {
+        ...tokens.typography.fontWeight,
+      },
+      lineHeight: {
+        ...tokens.typography.lineHeight,
+      },
+      letterSpacing: {
+        ...tokens.typography.letterSpacing,
+      },
+      // Border radius from design tokens
+      borderRadius: {
+        ...tokens.borders.radius,
+      },
+      // Shadows from design tokens
+      boxShadow: {
+        ...tokens.shadows,
+        // Custom glow effects for game UI
+        'glow-sm': '0 0 10px rgba(59, 130, 246, 0.5)',
+        'glow-md': '0 0 20px rgba(59, 130, 246, 0.5)',
+        'glow-lg': '0 0 30px rgba(59, 130, 246, 0.5)',
+      },
+      // Animations
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'fade-out': 'fadeOut 0.3s ease-in-out',
@@ -122,10 +113,13 @@ export default {
           '100%': { backgroundPosition: '1000px 0' },
         },
       },
-      boxShadow: {
-        'glow-sm': '0 0 10px rgba(59, 130, 246, 0.5)',
-        'glow-md': '0 0 20px rgba(59, 130, 246, 0.5)',
-        'glow-lg': '0 0 30px rgba(59, 130, 246, 0.5)',
+      // Breakpoints
+      screens: {
+        sm: '640px',
+        md: '768px',
+        lg: '1024px',
+        xl: '1280px',
+        '2xl': '1536px',
       },
     },
   },
