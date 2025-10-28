@@ -25,25 +25,27 @@ export default function HomePage() {
       {/* Hero Section */}
       <main className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-lg">
             Explore Careers
             <br />
-            <span className="gradient-text bg-gradient-to-r from-yellow-300 to-orange-300">
+            <span className="bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-400 bg-clip-text text-transparent drop-shadow-none font-extrabold">
               Through Play
             </span>
           </h1>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Unlock career "Pathkeys" by playing educational games. Learn about hundreds of careers
-            while having fun!
-          </p>
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 max-w-2xl mx-auto border border-white/20">
+            <p className="text-xl text-white font-medium leading-relaxed">
+              Unlock career "Pathkeys" by playing educational games. Learn about hundreds of careers
+              while having fun!
+            </p>
+          </div>
           <div className="flex items-center justify-center space-x-4">
             <Link
               to="/signup"
-              className="btn-primary text-lg px-8 py-3 bg-white text-primary-600 hover:bg-gray-100"
+              className="btn-primary text-lg px-8 py-3 bg-white text-primary-600 hover:bg-gray-100 font-semibold shadow-xl"
             >
               Get Started Free
             </Link>
-            <button className="btn-outline text-lg px-8 py-3 border-white text-white hover:bg-white/10">
+            <button className="btn-outline text-lg px-8 py-3 border-2 border-white text-white hover:bg-white/20 font-semibold backdrop-blur-sm">
               Watch Demo
             </button>
           </div>
@@ -90,10 +92,12 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="glass rounded-2xl p-6 text-white border border-white/20 hover:border-white/40 transition-all">
-      <div className="text-yellow-300 mb-4">{icon}</div>
-      <h3 className="font-display text-xl font-bold mb-2">{title}</h3>
-      <p className="text-white/80 text-sm">{description}</p>
+    <div className="bg-white/15 backdrop-blur-md rounded-2xl p-6 text-white border-2 border-white/30 hover:border-white/50 hover:bg-white/20 transition-all shadow-lg">
+      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-300 to-orange-400 flex items-center justify-center mb-4 shadow-lg">
+        <div className="text-white drop-shadow-md">{icon}</div>
+      </div>
+      <h3 className="font-display text-xl font-bold mb-3 drop-shadow-md">{title}</h3>
+      <p className="text-white font-medium text-sm leading-relaxed">{description}</p>
     </div>
   );
 }

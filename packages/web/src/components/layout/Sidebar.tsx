@@ -59,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* Student-specific Links */}
         {isStudent && (
           <>
-            <NavLink to="/games/join" className={navLinkClasses}>
+            <NavLink to="/join-game" className={navLinkClasses}>
               <Gamepad2 size={20} />
               <span>Join Game</span>
             </NavLink>
@@ -84,7 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
               </div>
             </div>
 
-            <NavLink to="/games/host" className={navLinkClasses}>
+            <NavLink to="/host-game" className={navLinkClasses}>
               <Gamepad2 size={20} />
               <span>Host Game</span>
             </NavLink>

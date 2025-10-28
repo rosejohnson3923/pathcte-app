@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore, useUIStore } from '@pathket/shared';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
@@ -10,17 +10,27 @@ import CareersPage from './pages/CareersPage';
 import JoinGamePage from './pages/JoinGamePage';
 import HostGamePage from './pages/HostGamePage';
 import GamePage from './pages/GamePage';
+import QuestionSetsPage from './pages/QuestionSetsPage';
+import StudentsPage from './pages/StudentsPage';
+import AnalyticsPage from './pages/AnalyticsPage';
+import SettingsPage from './pages/SettingsPage';
+import ProfilePage from './pages/ProfilePage';
 import NotFoundPage from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastContainer } from './components/common';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
+  const setTheme = useUIStore((state) => state.setTheme);
+  const theme = useUIStore((state) => state.theme);
 
-  // Initialize auth state on app mount
+  // Initialize auth state and theme on app mount
   useEffect(() => {
     initialize();
-  }, [initialize]);
+    // Apply initial theme to DOM (only on mount)
+    setTheme(theme);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen bg-bg-secondary">
@@ -73,6 +83,46 @@ function App() {
           element={
             <ProtectedRoute>
               <GamePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/question-sets"
+          element={
+            <ProtectedRoute>
+              <QuestionSetsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/students"
+          element={
+            <ProtectedRoute>
+              <StudentsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

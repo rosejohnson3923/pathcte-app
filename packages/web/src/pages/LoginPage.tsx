@@ -82,6 +82,7 @@ export default function LoginPage() {
               error={errors.email}
               leftIcon={<Mail size={20} />}
               fullWidth
+              forceLight
               disabled={isLoading}
               autoComplete="email"
             />
@@ -95,6 +96,7 @@ export default function LoginPage() {
               error={errors.password}
               leftIcon={<Lock size={20} />}
               fullWidth
+              forceLight
               disabled={isLoading}
               autoComplete="current-password"
             />

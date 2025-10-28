@@ -96,10 +96,10 @@ export default function HostGamePage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mb-4">
             <Gamepad2 className="text-white" size={32} />
           </div>
-          <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100 mb-2">
             Host a Game
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Create a live multiplayer game for your students
           </p>
         </div>
@@ -109,22 +109,22 @@ export default function HostGamePage() {
           {/* Question Set Selection */}
           <Card>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <BookOpen className="text-blue-600" size={20} />
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                <BookOpen className="text-blue-600 dark:text-blue-400" size={20} />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Question Set</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Question Set</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Choose which questions to use for this game
                 </p>
               </div>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 border-2 border-blue-200">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-gray-900">{MOCK_QUESTION_SET.title}</h4>
-                  <p className="text-sm text-gray-600">
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{MOCK_QUESTION_SET.title}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     {MOCK_QUESTION_SET.total_questions} questions
                   </p>
                 </div>
@@ -132,7 +132,7 @@ export default function HostGamePage() {
               </div>
             </div>
 
-            <p className="text-xs text-gray-500 mt-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
               Note: Custom question sets will be available in a future update
             </p>
           </Card>
@@ -140,12 +140,12 @@ export default function HostGamePage() {
           {/* Game Mode Selection */}
           <Card>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                <Gamepad2 className="text-purple-600" size={20} />
+              <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                <Gamepad2 className="text-purple-600 dark:text-purple-400" size={20} />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Game Mode</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Game Mode</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Select the gameplay style
                 </p>
               </div>
@@ -158,17 +158,17 @@ export default function HostGamePage() {
                   onClick={() => setSelectedMode(mode.value)}
                   className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                     selectedMode === mode.value
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? 'border-purple-500 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/30'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-semibold text-gray-900">{mode.label}</h4>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">{mode.label}</h4>
                     {selectedMode === mode.value && (
                       <Badge variant="success">Selected</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600">{mode.description}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{mode.description}</p>
                 </button>
               ))}
             </div>
@@ -177,12 +177,12 @@ export default function HostGamePage() {
           {/* Game Settings */}
           <Card>
             <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
-                <Settings className="text-green-600" size={20} />
+              <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                <Settings className="text-green-600 dark:text-green-400" size={20} />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">Settings</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Settings</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Configure game options
                 </p>
               </div>
@@ -191,11 +191,11 @@ export default function HostGamePage() {
             <div className="space-y-4">
               {/* Max Players */}
               <div>
-                <label htmlFor="maxPlayers" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="maxPlayers" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Maximum Players
                 </label>
                 <div className="flex items-center gap-3">
-                  <Users size={20} className="text-gray-400" />
+                  <Users size={20} className="text-gray-400 dark:text-gray-500" />
                   <Input
                     id="maxPlayers"
                     type="number"
@@ -206,7 +206,7 @@ export default function HostGamePage() {
                     className="max-w-xs"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Recommended: 20-40 for classroom size
                 </p>
               </div>
@@ -221,8 +221,8 @@ export default function HostGamePage() {
                     className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Public Game</span>
-                    <p className="text-xs text-gray-500">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Public Game</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Allow anyone with the code to join
                     </p>
                   </div>
@@ -239,8 +239,8 @@ export default function HostGamePage() {
                     className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
                   />
                   <div>
-                    <span className="text-sm font-medium text-gray-900">Allow Late Join</span>
-                    <p className="text-xs text-gray-500">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Allow Late Join</span>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Let players join after the game starts
                     </p>
                   </div>
@@ -251,8 +251,8 @@ export default function HostGamePage() {
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
             </div>
           )}
 
@@ -283,9 +283,9 @@ export default function HostGamePage() {
         </div>
 
         {/* Info */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 mb-2">Next Steps</h4>
-          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+        <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">Next Steps</h4>
+          <ol className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-decimal list-inside">
             <li>Click "Create Game" to generate your game code</li>
             <li>Share the code with your students</li>
             <li>Wait for students to join in the lobby</li>

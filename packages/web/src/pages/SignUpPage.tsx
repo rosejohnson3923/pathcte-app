@@ -139,6 +139,8 @@ export default function SignUpPage() {
                 onChange={(e) => setFirstName(e.target.value)}
                 error={errors.firstName}
                 leftIcon={<User size={20} />}
+                fullWidth
+                forceLight
                 disabled={isLoading}
                 autoComplete="given-name"
               />
@@ -150,6 +152,8 @@ export default function SignUpPage() {
                 onChange={(e) => setLastName(e.target.value)}
                 error={errors.lastName}
                 leftIcon={<User size={20} />}
+                fullWidth
+                forceLight
                 disabled={isLoading}
                 autoComplete="family-name"
               />
@@ -165,6 +169,7 @@ export default function SignUpPage() {
               error={errors.email}
               leftIcon={<Mail size={20} />}
               fullWidth
+              forceLight
               disabled={isLoading}
               autoComplete="email"
             />
@@ -177,6 +182,7 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
+              forceLight
               helperText="Minimum 8 characters"
               leftIcon={<Lock size={20} />}
               fullWidth
