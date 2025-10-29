@@ -8,10 +8,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { Button, Input, Card, Spinner, Badge } from '../components/common';
-import { useAuth, useQuestionSets } from '../hooks';
+import { useAuth, useFilteredQuestionSets } from '../hooks';
 import { gameService, useGameStore } from '@pathket/shared';
-import { Gamepad2, Settings, Users, BookOpen, Play, ChevronDown } from 'lucide-react';
-import type { GameMode } from '@pathket/shared';
+import { Gamepad2, Settings, Users, BookOpen, Play, ChevronDown, UserCheck, Filter } from 'lucide-react';
+import type { GameMode, SessionType } from '@pathket/shared';
 
 const GAME_MODES: { value: GameMode; label: string; description: string }[] = [
   {
@@ -36,14 +36,21 @@ export default function HostGamePage() {
   const { user } = useAuth();
   const { setSession, setIsHost } = useGameStore();
 
-  // Fetch question sets
-  const { data: questionSets, isLoading: loadingQuestionSets } = useQuestionSets();
+  // Filter state
+  const [gradeFilter, setGradeFilter] = useState<number | undefined>(undefined);
+
+  // Fetch question sets with filtering
+  const { data: questionSets, isLoading: loadingQuestionSets } = useFilteredQuestionSets({
+    grade_level: gradeFilter,
+  });
 
   const [selectedQuestionSet, setSelectedQuestionSet] = useState<string>('');
+  const [sessionType, setSessionType] = useState<SessionType>('multiplayer');
   const [selectedMode, setSelectedMode] = useState<GameMode>('career_quest');
   const [maxPlayers, setMaxPlayers] = useState(30);
   const [isPublic, setIsPublic] = useState(true);
   const [allowLateJoin, setAllowLateJoin] = useState(false);
+  const [progressionControl, setProgressionControl] = useState<'auto' | 'manual'>('manual');
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,9 +81,13 @@ export default function HostGamePage() {
         hostId: user.id,
         questionSetId: selectedQuestionSet,
         gameMode: selectedMode,
-        maxPlayers,
-        isPublic,
-        allowLateJoin,
+        sessionType,
+        maxPlayers: sessionType === 'solo' ? 1 : maxPlayers,
+        isPublic: sessionType === 'solo' ? false : isPublic,
+        allowLateJoin: sessionType === 'solo' ? false : allowLateJoin,
+        settings: {
+          progressionControl: sessionType === 'solo' ? 'auto' : progressionControl,
+        },
       });
 
       if (createError || !session) {
@@ -87,8 +98,24 @@ export default function HostGamePage() {
       setSession(session);
       setIsHost(true);
 
-      // Navigate to game lobby
-      navigate(`/game/${session.id}/lobby`);
+      // Solo practice: Auto-join and start immediately
+      if (sessionType === 'solo') {
+        // Join as the only player
+        const { player } = await gameService.joinGame({
+          gameCode: session.game_code,
+          displayName: user.display_name || 'Teacher',
+          userId: user.id,
+        });
+
+        // Auto-start
+        await gameService.startGame(session.id);
+
+        // Go directly to game (skip lobby)
+        navigate(`/game/${session.id}`);
+      } else {
+        // Multiplayer: Go to lobby
+        navigate(`/game/${session.id}/lobby`);
+      }
     } catch (err: any) {
       console.error('Error creating game:', err);
       setError(err.message || 'Failed to create game. Please try again.');
@@ -126,6 +153,40 @@ export default function HostGamePage() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Choose which questions to use for this game
                 </p>
+              </div>
+            </div>
+
+            {/* Grade Level Filter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                <div className="flex items-center gap-2">
+                  <Filter size={16} />
+                  Filter by Grade Level
+                </div>
+              </label>
+              <div className="relative">
+                <select
+                  value={gradeFilter || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setGradeFilter(value ? parseInt(value) : undefined);
+                    setSelectedQuestionSet(''); // Reset selection when filter changes
+                  }}
+                  className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
+                >
+                  <option value="">All Grades</option>
+                  <option value="6">6th Grade</option>
+                  <option value="7">7th Grade</option>
+                  <option value="8">8th Grade</option>
+                  <option value="9">9th Grade</option>
+                  <option value="10">10th Grade</option>
+                  <option value="11">11th Grade</option>
+                  <option value="12">12th Grade</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                  size={20}
+                />
               </div>
             </div>
 
@@ -206,8 +267,82 @@ export default function HostGamePage() {
             )}
           </Card>
 
-          {/* Game Mode Selection */}
+          {/* Session Type Selection */}
           <Card>
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+                <UserCheck className="text-indigo-600 dark:text-indigo-400" size={20} />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Session Type</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Choose between practice or multiplayer
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {/* Multiplayer */}
+              <button
+                onClick={() => setSessionType('multiplayer')}
+                className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  sessionType === 'multiplayer'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Users size={20} className={sessionType === 'multiplayer' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500'} />
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">Multiplayer</h4>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Students join with code
+                </p>
+                {sessionType === 'multiplayer' && (
+                  <div className="mt-2">
+                    <Badge variant="success">Selected</Badge>
+                  </div>
+                )}
+              </button>
+
+              {/* Solo Practice */}
+              <button
+                onClick={() => setSessionType('solo')}
+                className={`p-4 rounded-lg border-2 transition-all text-left ${
+                  sessionType === 'solo'
+                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <UserCheck size={20} className={sessionType === 'solo' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500'} />
+                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">Solo Practice</h4>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Test questions yourself
+                </p>
+                {sessionType === 'solo' && (
+                  <div className="mt-2">
+                    <Badge variant="success">Selected</Badge>
+                  </div>
+                )}
+              </button>
+            </div>
+
+            {sessionType === 'solo' && (
+              <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                <p className="text-sm text-blue-900 dark:text-blue-300">
+                  💡 Solo Practice lets you test your questions before using them in a live game. You'll play through as a student would.
+                </p>
+              </div>
+            )}
+          </Card>
+
+          {/* Game Mode and Settings (only for multiplayer) */}
+          {sessionType === 'multiplayer' && (
+            <>
+            {/* Game Mode Selection */}
+            <Card>
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
                 <Gamepad2 className="text-purple-600 dark:text-purple-400" size={20} />
@@ -315,8 +450,63 @@ export default function HostGamePage() {
                   </div>
                 </label>
               </div>
+
+              {/* Progression Control */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Question Progression
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    progressionControl === 'manual'
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="progressionControl"
+                      value="manual"
+                      checked={progressionControl === 'manual'}
+                      onChange={(e) => setProgressionControl(e.target.value as 'manual')}
+                      className="sr-only"
+                    />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Manual
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      You control when to advance to the next question
+                    </span>
+                  </label>
+
+                  <label className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    progressionControl === 'auto'
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="progressionControl"
+                      value="auto"
+                      checked={progressionControl === 'auto'}
+                      onChange={(e) => setProgressionControl(e.target.value as 'auto')}
+                      className="sr-only"
+                    />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Auto
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      Automatically advance when timer expires
+                    </span>
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Choose how questions progress during gameplay
+                </p>
+              </div>
             </div>
           </Card>
+          </>
+          )}
 
           {/* Error Message */}
           {error && (
@@ -336,12 +526,12 @@ export default function HostGamePage() {
               {isCreating ? (
                 <>
                   <Spinner size="sm" className="mr-2" />
-                  Creating Game...
+                  {sessionType === 'solo' ? 'Starting Practice...' : 'Creating Game...'}
                 </>
               ) : (
                 <>
                   <Play size={20} className="mr-2" />
-                  Create Game
+                  {sessionType === 'solo' ? 'Start Solo Practice' : 'Create Game'}
                 </>
               )}
             </Button>
@@ -353,13 +543,24 @@ export default function HostGamePage() {
 
         {/* Info */}
         <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">Next Steps</h4>
-          <ol className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-decimal list-inside">
-            <li>Click "Create Game" to generate your game code</li>
-            <li>Share the code with your students</li>
-            <li>Wait for students to join in the lobby</li>
-            <li>Start the game when ready!</li>
-          </ol>
+          <h4 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
+            {sessionType === 'solo' ? 'How Solo Practice Works' : 'Next Steps'}
+          </h4>
+          {sessionType === 'solo' ? (
+            <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-disc list-inside">
+              <li>Click "Start Solo Practice" to begin immediately</li>
+              <li>You'll play through as if you were a student</li>
+              <li>Test question difficulty, timing, and correctness</li>
+              <li>Perfect for validating new question sets!</li>
+            </ul>
+          ) : (
+            <ol className="text-sm text-blue-800 dark:text-blue-400 space-y-1 list-decimal list-inside">
+              <li>Click "Create Game" to generate your game code</li>
+              <li>Share the code with your students</li>
+              <li>Wait for students to join in the lobby</li>
+              <li>Start the game when ready!</li>
+            </ol>
+          )}
         </div>
       </div>
     </DashboardLayout>

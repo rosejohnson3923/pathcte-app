@@ -1,16 +1,29 @@
 import { DashboardLayout } from '../components/layout';
-import { useAuth, useUserPathkeys, useGameCount, useUserGamePlayers } from '../hooks';
-import { Card, Spinner } from '../components/common';
-import { Trophy, Gamepad2, BookOpen, TrendingUp } from 'lucide-react';
+import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useUserGamePlayers, useActiveHostedGames, useActiveJoinedGames } from '../hooks';
+import { Card, Spinner, Badge } from '../components/common';
+import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Users as UsersIcon, Zap } from 'lucide-react';
 import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { ensureAzureUrlHasSasToken } from '../config/azure';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { profile, isTeacher, isStudent } = useAuth();
+  const navigate = useNavigate();
 
   // Fetch real data
+  const { data: allPathkeys } = usePathkeys();
   const { data: userPathkeys, isLoading: pathkeysLoading } = useUserPathkeys();
   const gameCount = useGameCount();
   const { data: recentGames, isLoading: gamesLoading } = useUserGamePlayers(5);
+  const { data: activeHostedGames, isLoading: activeHostedLoading } = useActiveHostedGames();
+  const { data: activeJoinedGames, isLoading: activeJoinedLoading } = useActiveJoinedGames();
+
+  // Create lookup map for pathkey details
+  const pathkeysMap = useMemo(() => {
+    if (!allPathkeys) return new Map();
+    return new Map(allPathkeys.map(p => [p.id, p]));
+  }, [allPathkeys]);
 
   // Calculate stats
   const pathkeyCount = userPathkeys?.length || 0;
@@ -38,18 +51,18 @@ export default function DashboardPage() {
 
         {/* Stats Grid with Enhanced Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Tokens Card */}
+          {/* XP (Experience Points) Card */}
           <Card className="p-6 relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-50"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-50"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-between mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
-                  <div className="w-7 h-7 rounded-full bg-white/30 backdrop-blur-sm"></div>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform">
+                  <Zap className="text-white" size={28} />
                 </div>
-                <TrendingUp className="text-amber-600 opacity-20 group-hover:opacity-40 transition-opacity" size={40} />
+                <TrendingUp className="text-blue-600 opacity-20 group-hover:opacity-40 transition-opacity" size={40} />
               </div>
               <p className="text-3xl font-bold text-text-primary mb-1">{profile?.tokens || 0}</p>
-              <p className="text-sm font-medium text-text-secondary">Tokens</p>
+              <p className="text-sm font-medium text-text-secondary">Experience Points</p>
             </div>
           </Card>
 
@@ -106,55 +119,86 @@ export default function DashboardPage() {
 
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Active Games for Teachers, Recent Games for Students */}
           <Card className="overflow-hidden">
             <div className="bg-gradient-to-r from-teal-500 to-cyan-600 p-6">
-              <Card.Title className="text-white mb-1">Recent Games</Card.Title>
-              <Card.Description className="text-teal-50">Your latest game sessions</Card.Description>
+              <Card.Title className="text-white mb-1">
+                {isTeacher ? 'Active Games' : 'Recent Games'}
+              </Card.Title>
+              <Card.Description className="text-teal-50">
+                {isTeacher ? 'Your hosted game sessions' : 'Your latest game sessions'}
+              </Card.Description>
             </div>
             <Card.Content className="p-6">
-              {gamesLoading ? (
+              {(isTeacher ? activeHostedLoading : activeJoinedLoading) ? (
                 <div className="flex justify-center py-8">
                   <Spinner />
                 </div>
-              ) : recentGames && recentGames.length > 0 ? (
+              ) : isTeacher && activeHostedGames && activeHostedGames.length > 0 ? (
                 <div className="space-y-3">
-                  {recentGames.map((game) => (
+                  {activeHostedGames.map((game) => (
                     <div
                       key={game.id}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-teal-50/50 to-cyan-50/50 rounded-xl hover:shadow-md transition-all duration-200 border border-teal-100"
+                      onClick={() => navigate(`/game/${game.id}`)}
+                      className="flex items-center justify-between p-4 bg-gradient-to-r from-teal-50/50 to-cyan-50/50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl hover:shadow-md transition-all duration-200 border border-teal-100 dark:border-teal-800 cursor-pointer group"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-md">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                           <Gamepad2 className="text-white" size={22} />
                         </div>
-                        <div>
-                          <p className="font-semibold text-text-primary flex items-center gap-2">
-                            {game.placement === 1 && (
-                              <span className="text-xl">🏆</span>
-                            )}
-                            <span className="text-lg">{game.score || 0}</span>
-                            <span className="text-sm text-text-tertiary font-normal">points</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-text-primary dark:text-gray-100 flex items-center gap-2 truncate">
+                            <span className="font-mono text-lg">{game.game_code}</span>
                           </p>
-                          <p className="text-xs text-text-tertiary font-medium">
-                            {new Date(game.joined_at).toLocaleDateString()}
+                          <p className="text-xs text-text-tertiary dark:text-gray-400 font-medium">
+                            {new Date(game.created_at).toLocaleDateString()} • {game.game_mode.replace('_', ' ')}
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        {game.placement && (
-                          <div className="px-3 py-1 rounded-full bg-teal-100 text-teal-700 text-sm font-bold">
-                            #{game.placement}
-                          </div>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <Badge variant={game.status === 'waiting' ? 'info' : 'success'}>
+                          {game.status === 'waiting' ? 'Waiting' : 'In Progress'}
+                        </Badge>
+                        <Play size={16} className="text-teal-600 dark:text-teal-400 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : !isTeacher && activeJoinedGames && activeJoinedGames.length > 0 ? (
+                <div className="space-y-3">
+                  {activeJoinedGames.map((game) => (
+                    <div
+                      key={game.id}
+                      onClick={() => navigate(`/game/${game.id}`)}
+                      className="flex items-center justify-between p-4 bg-gradient-to-r from-teal-50/50 to-cyan-50/50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-xl hover:shadow-md transition-all duration-200 border border-teal-100 dark:border-teal-800 cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                          <Gamepad2 className="text-white" size={22} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-text-primary dark:text-gray-100 flex items-center gap-2 truncate">
+                            <span className="font-mono text-lg">{game.game_code}</span>
+                          </p>
+                          <p className="text-xs text-text-tertiary dark:text-gray-400 font-medium">
+                            {new Date(game.created_at).toLocaleDateString()} • {game.game_mode.replace('_', ' ')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={game.status === 'waiting' ? 'info' : 'success'}>
+                          {game.status === 'waiting' ? 'Waiting' : 'In Progress'}
+                        </Badge>
+                        <Play size={16} className="text-teal-600 dark:text-teal-400 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-text-secondary">
+                <div className="text-center py-8 text-text-secondary dark:text-gray-400">
                   <Gamepad2 size={48} className="mx-auto mb-2 opacity-50" />
-                  <p>No games played yet</p>
-                  <p className="text-sm">Join a game to get started!</p>
+                  <p>{isTeacher ? 'No active games' : 'No active games'}</p>
+                  <p className="text-sm">{isTeacher ? 'Host a game to get started!' : 'Join a game to get started!'}</p>
                 </div>
               )}
             </Card.Content>
@@ -180,7 +224,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-purple-200 via-purple-300 to-pink-200 flex-shrink-0 shadow-lg ring-2 ring-purple-100 group-hover:ring-purple-300 transition-all group-hover:scale-105">
                           <img
-                            src={getPathkeyImageUrl(userPathkey.pathkey_id)}
+                            src={ensureAzureUrlHasSasToken(pathkeysMap.get(userPathkey.pathkey_id)?.image_url) || getPlaceholderImageUrl('pathkey')}
                             alt="Pathkey"
                             className="w-full h-full object-cover"
                             onError={(e) => {

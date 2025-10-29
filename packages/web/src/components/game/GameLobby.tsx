@@ -111,8 +111,8 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
       <Card>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Users size={20} className="text-gray-600" />
-            <h3 className="text-lg font-bold text-gray-900">
+            <Users size={20} className="text-gray-600 dark:text-gray-400" />
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
               Players ({players.filter((p) => p.is_connected).length}/{session.max_players})
             </h3>
           </div>
@@ -128,8 +128,8 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
           </div>
         ) : players.length === 0 ? (
           <div className="text-center py-8">
-            <Users size={48} className="mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">Waiting for players to join...</p>
+            <Users size={48} className="mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+            <p className="text-gray-600 dark:text-gray-400">Waiting for players to join...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -138,16 +138,16 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                 key={player.id}
                 className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
                   player.is_connected
-                    ? 'border-purple-200 bg-purple-50'
-                    : 'border-gray-200 bg-gray-50 opacity-60'
+                    ? 'border-purple-200 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20'
+                    : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 opacity-60'
                 }`}
               >
                 {/* Player Number */}
                 <div
                   className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
                     player.is_connected
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-400 text-white'
+                      ? 'bg-purple-600 dark:bg-purple-600 text-white'
+                      : 'bg-gray-400 dark:bg-gray-600 text-white'
                   }`}
                 >
                   {index + 1}
@@ -156,7 +156,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                 {/* Player Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-gray-900 truncate">
+                    <p className="font-semibold text-gray-900 dark:text-white truncate">
                       {player.display_name}
                     </p>
                     {index === 0 && isHost && (
@@ -166,13 +166,13 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                   <div className="flex items-center gap-1 text-xs">
                     {player.is_connected ? (
                       <>
-                        <Wifi size={12} className="text-green-600" />
-                        <span className="text-green-600">Connected</span>
+                        <Wifi size={12} className="text-green-600 dark:text-green-400" />
+                        <span className="text-green-600 dark:text-green-400">Connected</span>
                       </>
                     ) : (
                       <>
-                        <WifiOff size={12} className="text-gray-400" />
-                        <span className="text-gray-500">Disconnected</span>
+                        <WifiOff size={12} className="text-gray-400 dark:text-gray-500" />
+                        <span className="text-gray-500 dark:text-gray-400">Disconnected</span>
                       </>
                     )}
                   </div>
@@ -184,16 +184,16 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
       </Card>
 
       {/* Game Info */}
-      <Card className="bg-gray-50">
+      <Card className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
-            <Gamepad2 size={20} className="text-indigo-600" />
+          <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+            <Gamepad2 size={20} className="text-indigo-600 dark:text-indigo-400" />
           </div>
           <div className="flex-1">
-            <h4 className="font-semibold text-gray-900 mb-1">
+            <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
               Game Mode
             </h4>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-300 capitalize">
               {session.game_mode.replace('_', ' ')}
             </p>
           </div>
@@ -225,8 +225,8 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
 
       {/* Host Instructions */}
       {isHost && players.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <p className="text-sm text-blue-800 dark:text-blue-300">
             <strong>Waiting for players...</strong> Share the game code{' '}
             <span className="font-mono font-bold">{session.game_code}</span> with your students so
             they can join.

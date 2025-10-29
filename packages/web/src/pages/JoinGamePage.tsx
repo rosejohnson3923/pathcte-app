@@ -78,10 +78,10 @@ export default function JoinGamePage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 mb-4">
             <Gamepad2 className="text-white" size={32} />
           </div>
-          <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-gray-100 mb-2">
             Join a Game
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Enter the 6-character game code to join your teacher's game
           </p>
         </div>
@@ -91,7 +91,7 @@ export default function JoinGamePage() {
           <form onSubmit={handleJoin} className="space-y-6">
             {/* Game Code Input */}
             <div>
-              <label htmlFor="gameCode" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="gameCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Game Code
               </label>
               <Input
@@ -105,14 +105,14 @@ export default function JoinGamePage() {
                 maxLength={6}
                 autoComplete="off"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Ask your teacher for the game code
               </p>
             </div>
 
             {/* Display Name Input */}
             <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Your Name
               </label>
               <Input
@@ -124,15 +124,15 @@ export default function JoinGamePage() {
                 disabled={isJoining}
                 maxLength={30}
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 This name will be visible to other players
               </p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
               </div>
             )}
 
@@ -160,32 +160,32 @@ export default function JoinGamePage() {
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-          <Card padding="md" className="bg-gradient-to-br from-purple-50 to-indigo-50">
+          <Card padding="md" className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                  <Users className="text-purple-600" size={20} />
+                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-800/50 flex items-center justify-center">
+                  <Users className="text-purple-600 dark:text-purple-400" size={20} />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Multiplayer Fun</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Multiplayer Fun</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Compete with your classmates in real-time games
                 </p>
               </div>
             </div>
           </Card>
 
-          <Card padding="md" className="bg-gradient-to-br from-green-50 to-emerald-50">
+          <Card padding="md" className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
-                  <Gamepad2 className="text-green-600" size={20} />
+                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-800/50 flex items-center justify-center">
+                  <Gamepad2 className="text-green-600 dark:text-green-400" size={20} />
                 </div>
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-1">Earn Rewards</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Earn Rewards</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Win tokens and unlock pathkeys by playing games
                 </p>
               </div>
@@ -195,9 +195,9 @@ export default function JoinGamePage() {
 
         {/* Help Text */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Don't have a game code?{' '}
-            <span className="text-purple-600 font-medium">Ask your teacher to host a game</span>
+            <span className="text-purple-600 dark:text-purple-400 font-medium">Ask your teacher to host a game</span>
           </p>
         </div>
       </div>

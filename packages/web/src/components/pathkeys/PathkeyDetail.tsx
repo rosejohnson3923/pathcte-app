@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { Modal, Badge, Button } from '../common';
 import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { ensureAzureUrlHasSasToken } from '../../config/azure';
 import { Trophy, Calendar, Hash, Star } from 'lucide-react';
 import type { Pathkey, UserPathkey } from '@pathket/shared';
 
@@ -55,7 +56,7 @@ export const PathkeyDetail: React.FC<PathkeyDetailProps> = ({
                 src={
                   imageError
                     ? getPlaceholderImageUrl('pathkey')
-                    : getPathkeyImageUrl(pathkey.id)
+                    : (ensureAzureUrlHasSasToken(pathkey.image_url) || getPlaceholderImageUrl('pathkey'))
                 }
                 alt={pathkey.name}
                 className="w-full h-full object-cover"

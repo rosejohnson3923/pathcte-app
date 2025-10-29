@@ -20,27 +20,35 @@ export interface AzureStorageConfig {
   };
 }
 
+// Environment variable access helpers
+// Works in both Node.js (scripts) and browser (Vite) environments
+const getViteEnv = (key: string): string => {
+  // Browser environment (Vite)
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return (import.meta.env as any)[key] || '';
+  }
+
+  // Node.js environment (scripts)
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key] || '';
+  }
+
+  return '';
+};
+
 /**
  * Get Azure Storage configuration from environment variables
  */
 export const getAzureStorageConfig = (): AzureStorageConfig => {
-  // Web uses VITE_ prefix, other platforms might use different prefixes
-  const getEnv = (key: string): string => {
-    if (typeof process !== 'undefined' && process.env) {
-      return process.env[`VITE_${key}`] || process.env[key] || '';
-    }
-    return '';
-  };
-
   const config: AzureStorageConfig = {
-    accountName: getEnv('AZURE_STORAGE_ACCOUNT') || 'pathket',
-    storageUrl: getEnv('AZURE_STORAGE_URL') || 'https://pathket.blob.core.windows.net',
-    sasToken: getEnv('AZURE_STORAGE_SAS_TOKEN') || '',
+    accountName: getViteEnv('VITE_AZURE_STORAGE_ACCOUNT') || 'pathket',
+    storageUrl: getViteEnv('VITE_AZURE_STORAGE_URL') || 'https://pathket.blob.core.windows.net',
+    sasToken: getViteEnv('VITE_AZURE_STORAGE_SAS_TOKEN') || '',
     containers: {
-      careers: getEnv('AZURE_CONTAINER_CAREERS') || 'careers',
-      pathkeys: getEnv('AZURE_CONTAINER_PATHKEYS') || 'pathkeys',
-      avatars: getEnv('AZURE_CONTAINER_AVATARS') || 'avatars',
-      achievements: getEnv('AZURE_CONTAINER_ACHIEVEMENTS') || 'achievements',
+      careers: getViteEnv('VITE_AZURE_CONTAINER_CAREERS') || 'careers',
+      pathkeys: getViteEnv('VITE_AZURE_CONTAINER_PATHKEYS') || 'pathkeys',
+      avatars: getViteEnv('VITE_AZURE_CONTAINER_AVATARS') || 'avatars',
+      achievements: getViteEnv('VITE_AZURE_CONTAINER_ACHIEVEMENTS') || 'achievements',
     },
   };
 

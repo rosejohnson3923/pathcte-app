@@ -59,13 +59,13 @@ export const Header: React.FC = () => {
                 <span className="text-sm font-medium">Pathkeys</span>
               </Link>
 
-              {/* Token Balance */}
+              {/* XP Balance */}
               {profile && (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/30 rounded-full">
-                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white text-xs font-bold shadow-lg">
-                    T
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-500/20 dark:to-purple-500/20 border border-blue-300 dark:border-blue-500/30 rounded-full shadow-sm">
+                  <div className="px-1.5 py-0.5 rounded bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow">
+                    XP
                   </div>
-                  <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">{profile.tokens}</span>
+                  <span className="text-sm font-bold bg-gradient-to-r from-blue-700 to-purple-700 dark:from-blue-300 dark:to-purple-300 bg-clip-text text-transparent">{profile.tokens}</span>
                 </div>
               )}
 

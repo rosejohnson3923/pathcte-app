@@ -6,5 +6,6 @@
 
 export * from './GameLobby';
 export * from './QuestionDisplay';
+export * from './HostView';
 export * from './Leaderboard';
 export * from './GameResults';

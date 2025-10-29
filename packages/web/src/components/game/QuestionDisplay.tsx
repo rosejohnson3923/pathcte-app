@@ -4,16 +4,19 @@
  * Display current question with answer options and timer
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Badge } from '../common';
 import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import { shuffleQuestionOptions, type ShuffledOption } from '@pathket/shared';
 import type { Question } from '@pathket/shared';
 
 export interface QuestionDisplayProps {
   question: Question;
   questionNumber: number;
   totalQuestions: number;
-  onSubmitAnswer: (optionIndex: number, timeTaken: number) => void;
+  questionSetTitle: string;
+  onSubmitAnswer: (optionIndex: number, timeTaken: number) => Promise<boolean>;
+  onTimerExpired?: () => void;
   hasAnswered?: boolean;
   isCorrect?: boolean;
   selectedOptionIndex?: number;
@@ -23,15 +26,39 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
   question,
   questionNumber,
   totalQuestions,
+  questionSetTitle,
   onSubmitAnswer,
+  onTimerExpired,
   hasAnswered = false,
   isCorrect,
   selectedOptionIndex,
 }) => {
+  // Shuffle options deterministically based on question ID
+  // This ensures all players see the same shuffle, but answers appear in different positions
+  const shuffledOptions = useMemo(
+    () => shuffleQuestionOptions(question.options, question.id),
+    [question.id, question.options]
+  );
+
+  // Convert original database index to shuffled display index
+  // selectedOptionIndex comes from server as the original index
+  const displaySelectedIndex = useMemo(() => {
+    if (selectedOptionIndex === undefined) return undefined;
+    return shuffledOptions.findIndex(opt => opt.originalIndex === selectedOptionIndex);
+  }, [selectedOptionIndex, shuffledOptions]);
+
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(question.time_limit_seconds);
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Reset component state when question changes
+  useEffect(() => {
+    setSelectedOption(null);
+    setTimeRemaining(question.time_limit_seconds);
+    setStartTime(Date.now());
+    setIsSubmitting(false);
+  }, [question.id, question.time_limit_seconds]);
 
   // Timer countdown
   useEffect(() => {
@@ -40,9 +67,9 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
-          // Time's up - auto-submit if an option is selected
-          if (selectedOption !== null && !hasAnswered) {
-            handleSubmit();
+          // Time's up - notify parent component
+          if (onTimerExpired) {
+            setTimeout(() => onTimerExpired(), 100);
           }
           return 0;
         }
@@ -51,14 +78,26 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeRemaining, hasAnswered, selectedOption]);
+  }, [timeRemaining, hasAnswered, onTimerExpired]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (selectedOption === null || hasAnswered || isSubmitting) return;
 
     setIsSubmitting(true);
     const timeTaken = Date.now() - startTime;
-    onSubmitAnswer(selectedOption, timeTaken);
+
+    // CRITICAL: Submit using original index from database, not shuffled display index
+    const originalIndex = shuffledOptions[selectedOption].originalIndex;
+
+    try {
+      await onSubmitAnswer(originalIndex, timeTaken);
+    } catch (error) {
+      console.error('Error submitting answer:', error);
+    } finally {
+      // Always reset submitting state so button doesn't get stuck
+      // The parent will update hasAnswered which will hide the button
+      setIsSubmitting(false);
+    }
   };
 
   const handleOptionSelect = (index: number) => {
@@ -75,40 +114,64 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
   };
 
   const getOptionStyle = (index: number) => {
-    // If answered, show correct/incorrect
+    // If answered, show correct/incorrect based on server response
     if (hasAnswered) {
-      const option = question.options[index];
+      // If this is the selected option, show green (correct) or red (incorrect)
+      if (index === displaySelectedIndex) {
+        if (isCorrect) {
+          return 'border-green-500 bg-green-500/10 cursor-not-allowed';
+        } else {
+          return 'border-red-500 bg-red-500/10 cursor-not-allowed';
+        }
+      }
+      // For hosts who can see answers, highlight the correct answer in green
+      const option = shuffledOptions[index];
       if (option.is_correct) {
-        return 'border-green-500 bg-green-50 cursor-not-allowed';
+        return 'border-green-500 bg-green-500/10 cursor-not-allowed';
       }
-      if (index === selectedOptionIndex && !option.is_correct) {
-        return 'border-red-500 bg-red-50 cursor-not-allowed';
-      }
-      return 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60';
+      // Other unselected options are dimmed
+      return 'border-border-default bg-bg-tertiary cursor-not-allowed opacity-60';
     }
 
     // Before answering
     if (selectedOption === index) {
-      return 'border-purple-500 bg-purple-50 hover:border-purple-600';
+      return 'border-purple-500 bg-purple-500/10 hover:border-purple-600';
     }
-    return 'border-gray-300 bg-white hover:border-purple-400 cursor-pointer';
+    return 'border-border-default bg-bg-primary hover:border-purple-400 cursor-pointer';
   };
 
   const getOptionIcon = (index: number) => {
     if (!hasAnswered) return null;
 
-    const option = question.options[index];
+    // If this is the selected option, show icon based on correctness
+    if (index === displaySelectedIndex) {
+      if (isCorrect) {
+        return <CheckCircle className="text-green-600" size={24} />;
+      } else {
+        return <XCircle className="text-red-600" size={24} />;
+      }
+    }
+
+    // For hosts who can see answers, show checkmark on correct answer
+    const option = shuffledOptions[index];
     if (option.is_correct) {
       return <CheckCircle className="text-green-600" size={24} />;
     }
-    if (index === selectedOptionIndex && !option.is_correct) {
-      return <XCircle className="text-red-600" size={24} />;
-    }
+
     return null;
   };
 
   return (
     <div className="space-y-6">
+      {/* Question Set Title */}
+      {questionSetTitle && (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {questionSetTitle}
+          </h2>
+        </div>
+      )}
+
       {/* Question Header */}
       <div className="flex items-center justify-between">
         <Badge variant="info">
@@ -123,9 +186,9 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
       </div>
 
       {/* Question Card */}
-      <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200">
+      <Card className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-2 border-purple-500/30">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-text-primary mb-4">
             {question.question_text}
           </h2>
 
@@ -141,8 +204,8 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           )}
 
           {/* Points Display */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 rounded-full">
-            <span className="text-sm font-medium text-amber-900">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30">
+            <span className="text-sm font-medium text-amber-500">
               Worth {question.points} points
             </span>
           </div>
@@ -151,7 +214,7 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
 
       {/* Answer Options */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {question.options.map((option, index) => (
+        {shuffledOptions.map((option, index) => (
           <button
             key={index}
             onClick={() => handleOptionSelect(index)}
@@ -162,13 +225,15 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
               {/* Option Letter */}
               <div
                 className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
-                  hasAnswered && option.is_correct
+                  hasAnswered && index === displaySelectedIndex && isCorrect
                     ? 'bg-green-600 text-white'
-                    : hasAnswered && index === selectedOptionIndex
+                    : hasAnswered && index === displaySelectedIndex && !isCorrect
                     ? 'bg-red-600 text-white'
+                    : hasAnswered && option.is_correct
+                    ? 'bg-green-600 text-white'
                     : selectedOption === index
                     ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700'
+                    : 'bg-bg-tertiary text-text-primary'
                 }`}
               >
                 {String.fromCharCode(65 + index)}
@@ -176,7 +241,7 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
 
               {/* Option Text */}
               <div className="flex-1">
-                <p className="text-lg font-medium text-gray-900">{option.text}</p>
+                <p className="text-lg font-medium text-text-primary">{option.text}</p>
               </div>
 
               {/* Correct/Incorrect Icon */}
@@ -191,7 +256,7 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         <Button
           variant="primary"
           onClick={handleSubmit}
-          disabled={selectedOption === null || isSubmitting || timeRemaining === 0}
+          disabled={selectedOption === null || isSubmitting}
           className="w-full py-4 text-lg font-bold"
         >
           {isSubmitting ? 'Submitting...' : 'Submit Answer'}
@@ -203,13 +268,13 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
         <div
           className={`p-4 rounded-lg border-2 ${
             isCorrect
-              ? 'bg-green-50 border-green-300'
-              : 'bg-red-50 border-red-300'
+              ? 'bg-green-500/10 border-green-500'
+              : 'bg-red-500/10 border-red-500'
           }`}
         >
           <p
             className={`text-center font-bold text-lg ${
-              isCorrect ? 'text-green-900' : 'text-red-900'
+              isCorrect ? 'text-green-500' : 'text-red-500'
             }`}
           >
             {isCorrect ? '✓ Correct!' : '✗ Incorrect'}

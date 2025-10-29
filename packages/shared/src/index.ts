@@ -20,6 +20,7 @@ export * from './services/auth.service';
 export * from './services/supabase.service';
 export * from './services/game.service';
 export * from './services/realtime.service';
+export * from './services/analytics.service';
 
 // Hooks (will be added)
 // export * from './hooks';

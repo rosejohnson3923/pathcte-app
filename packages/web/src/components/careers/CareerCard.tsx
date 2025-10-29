@@ -58,8 +58,12 @@ export const CareerCard: React.FC<CareerCardProps> = ({
         <img
           src={
             imageError
-              ? getPlaceholderImageUrl('career')
-              : getCareerImageUrl(career.onet_code || career.id)
+              ? getPlaceholderImageUrl('career', {
+                  industry: career.industry,
+                  sector: career.sector || undefined,
+                  title: career.title,
+                })
+              : getCareerImageUrl(career.title)
           }
           alt={career.title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"

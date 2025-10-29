@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { ensureAzureUrlHasSasToken } from '../../config/azure';
 import { Trophy, Lock, Star } from 'lucide-react';
 import clsx from 'clsx';
 import type { Pathkey, UserPathkey } from '@pathket/shared';
@@ -82,7 +83,7 @@ export const PathkeyCard: React.FC<PathkeyCardProps> = ({
       <div className="relative aspect-[3/4] overflow-hidden">
         {/* Pathkey Image */}
         <img
-          src={imageError ? getPlaceholderImageUrl('pathkey') : getPathkeyImageUrl(pathkey.id)}
+          src={imageError ? getPlaceholderImageUrl('pathkey') : (ensureAzureUrlHasSasToken(pathkey.image_url) || getPlaceholderImageUrl('pathkey'))}
           alt={pathkey.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={() => setImageError(true)}

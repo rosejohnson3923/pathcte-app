@@ -7,10 +7,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
-import { GameLobby, QuestionDisplay, Leaderboard, GameResults } from '../components/game';
+import { GameLobby, QuestionDisplay, HostView, Leaderboard, GameResults } from '../components/game';
 import { Button, Spinner, Card } from '../components/common';
 import { useAuth } from '../hooks';
-import { useGameStore, gameService, realtimeService } from '@pathket/shared';
+import { useGameStore, gameService, realtimeService, toast, supabase } from '@pathket/shared';
 import { ArrowLeft } from 'lucide-react';
 import type { GamePlayer } from '@pathket/shared';
 
@@ -32,6 +32,7 @@ export default function GamePage() {
     setPlayers,
     setQuestions,
     setCurrentQuestionIndex,
+    setIsHost,
     nextQuestion,
     addPlayer,
     updatePlayer,
@@ -42,6 +43,7 @@ export default function GamePage() {
   const [error, setError] = useState<string | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean; selectedIndex: number } | null>(null);
+  const [questionSetTitle, setQuestionSetTitle] = useState<string>('');
 
   // Load game session and questions
   useEffect(() => {
@@ -64,6 +66,23 @@ export default function GamePage() {
 
         setSession(gameSession);
 
+        // Fetch question set title
+        const { data: questionSet, error: questionSetError } = await supabase
+          .from('question_sets')
+          .select('title')
+          .eq('id', gameSession.question_set_id)
+          .single();
+
+        if (questionSet && !questionSetError) {
+          setQuestionSetTitle(questionSet.title);
+        }
+
+        // BUG FIX: Determine if current user is the host
+        // In solo mode, the user is always a player (even if they created the game)
+        // In multiplayer mode, check if user is the host
+        const userIsHost = gameSession.session_type === 'multiplayer' && user?.id === gameSession.host_id;
+        setIsHost(userIsHost);
+
         // Get players
         const { players: gamePlayers, error: playersError } = await gameService.getGamePlayers(sessionId);
 
@@ -73,16 +92,22 @@ export default function GamePage() {
 
         setPlayers(gamePlayers);
 
-        // Find current player
-        const player = gamePlayers.find((p: GamePlayer) => p.user_id === user?.id || p.id === currentPlayer?.id);
-        if (player) {
-          setCurrentPlayer(player);
+        // Find current player (skip for hosts - they don't play, they facilitate)
+        if (!userIsHost) {
+          const player = gamePlayers.find((p: GamePlayer) => p.user_id === user?.id || p.id === currentPlayer?.id);
+          if (player) {
+            setCurrentPlayer(player);
+          }
+        } else {
+          // Clear currentPlayer for hosts
+          setCurrentPlayer(null);
         }
 
         // Load questions if game is in progress or completed
         if (gameSession.status !== 'waiting') {
           const { questions: gameQuestions, error: questionsError } = await gameService.getGameQuestions(
-            gameSession.question_set_id
+            gameSession.question_set_id,
+            userIsHost  // Hosts get answers, students don't
           );
 
           if (questionsError || !gameQuestions) {
@@ -90,6 +115,10 @@ export default function GamePage() {
           }
 
           setQuestions(gameQuestions);
+
+          // Load current question index from database
+          // This ensures the game state is preserved across page refreshes
+          setCurrentQuestionIndex(gameSession.current_question_index || 0);
         }
       } catch (err: any) {
         console.error('Error loading game:', err);
@@ -100,7 +129,14 @@ export default function GamePage() {
     };
 
     loadGame();
-  }, [sessionId, user, setSession, setPlayers, setCurrentPlayer, setQuestions]);
+  }, [sessionId, user, setSession, setPlayers, setCurrentPlayer, setQuestions, setIsHost]);
+
+  // Reset answer state whenever question changes
+  // This ensures clean state when advancing to next question
+  useEffect(() => {
+    setHasAnswered(false);
+    setLastAnswer(null);
+  }, [currentQuestionIndex]);
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -110,9 +146,15 @@ export default function GamePage() {
       onGameUpdate: (updatedSession: any) => {
         setSession(updatedSession);
 
+        // Sync current question index from database (fallback for missed broadcasts)
+        if (updatedSession.current_question_index !== undefined && updatedSession.current_question_index !== currentQuestionIndex) {
+          setCurrentQuestionIndex(updatedSession.current_question_index);
+          // Note: hasAnswered/lastAnswer reset handled by separate useEffect above
+        }
+
         // If game just started, load questions
         if (updatedSession.status === 'in_progress' && questions.length === 0) {
-          gameService.getGameQuestions(updatedSession.question_set_id).then(({ questions: gameQuestions }: any) => {
+          gameService.getGameQuestions(updatedSession.question_set_id, isHost).then(({ questions: gameQuestions }: any) => {
             if (gameQuestions) {
               setQuestions(gameQuestions);
             }
@@ -133,8 +175,7 @@ export default function GamePage() {
     // Subscribe to broadcast events for question changes
     realtimeService.subscribeToBroadcast(sessionId, 'question_changed', (payload: any) => {
       setCurrentQuestionIndex(payload.question_index);
-      setHasAnswered(false);
-      setLastAnswer(null);
+      // Note: hasAnswered/lastAnswer reset handled by separate useEffect above
     });
 
     return () => {
@@ -156,8 +197,8 @@ export default function GamePage() {
       // Notify all players
       await realtimeService.notifyGameStarting(sessionId);
 
-      // Load questions
-      const { questions: gameQuestions } = await gameService.getGameQuestions(updatedSession.question_set_id);
+      // Load questions (with answers since we're the host)
+      const { questions: gameQuestions } = await gameService.getGameQuestions(updatedSession.question_set_id, true);
       if (gameQuestions) {
         setQuestions(gameQuestions);
       }
@@ -173,13 +214,36 @@ export default function GamePage() {
     const nextIndex = currentQuestionIndex + 1;
 
     if (nextIndex < questions.length) {
+      // Update local state (useEffect will reset hasAnswered/lastAnswer automatically)
       nextQuestion();
+
+      // Persist to database so it survives page refreshes
+      await supabase
+        .from('game_sessions')
+        .update({ current_question_index: nextIndex })
+        .eq('id', sessionId);
+
+      // Notify all players
       await realtimeService.notifyQuestionChanged(sessionId, nextIndex, questions[nextIndex].id);
-      setHasAnswered(false);
-      setLastAnswer(null);
     } else {
       // End game
       await handleEndGame();
+    }
+  };
+
+  const handleTimerExpired = async () => {
+    // Get progression control setting
+    const progressionControl = (session?.settings as any)?.progressionControl || 'manual';
+    const isSoloSession = session?.session_type === 'solo';
+
+    // Solo Mode: Timer is just for tracking, student controls pace with "Next Question" button
+    // Multiplayer Auto Mode: Timer triggers auto-advance (teacher view only)
+    //   - Teacher advances via handleNextQuestion
+    //   - Students get auto-advanced via real-time broadcast
+    //   - Students who haven't answered lose the opportunity (like Blooket)
+    // Multiplayer Manual Mode: Teacher manually clicks "Next Question" when ready
+    if (!isSoloSession && progressionControl === 'auto' && isHost) {
+      await handleNextQuestion();
     }
   };
 
@@ -194,8 +258,8 @@ export default function GamePage() {
     }
   };
 
-  const handleSubmitAnswer = async (optionIndex: number, timeTaken: number) => {
-    if (!currentPlayer || !currentQuestion || !sessionId || hasAnswered) return;
+  const handleSubmitAnswer = async (optionIndex: number, timeTaken: number): Promise<boolean> => {
+    if (!currentPlayer || !currentQuestion || !sessionId || hasAnswered) return false;
 
     try {
       const { isCorrect, error } = await gameService.submitAnswer({
@@ -222,8 +286,45 @@ export default function GamePage() {
           setCurrentPlayer(updated);
         }
       }
-    } catch (err) {
+
+      return true;
+    } catch (err: any) {
       console.error('Error submitting answer:', err);
+
+      // Show user-friendly error message
+      const errorMessage = err?.message || 'Failed to submit answer';
+
+      if (errorMessage.includes('already submitted')) {
+        toast.warning('You have already answered this question');
+
+        // Fetch the existing answer to display it correctly
+        const { answer: existingAnswer } = await gameService.getExistingAnswer(
+          currentPlayer.id,
+          currentQuestion.id
+        );
+
+        // Mark as answered and set the previous answer info
+        setHasAnswered(true);
+        if (existingAnswer) {
+          setLastAnswer({
+            isCorrect: existingAnswer.is_correct,
+            selectedIndex: existingAnswer.selected_option_index,
+          });
+        }
+
+        // Note: Timer expiration will handle auto-advance for auto mode
+        // Manual mode requires teacher to click "Next Question"
+
+        return false;
+      } else if (errorMessage.includes('too fast')) {
+        toast.error('Answer submitted too quickly. Please take your time.');
+      } else if (errorMessage.includes('too slow')) {
+        toast.error('Time limit exceeded for this question');
+      } else {
+        toast.error('Failed to submit answer. Please try again.');
+      }
+
+      return false;
     }
   };
 
@@ -288,25 +389,45 @@ export default function GamePage() {
         {/* Game Status: In Progress */}
         {session.status === 'in_progress' && currentQuestion && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main: Question */}
+            {/* Main: Question or Host View */}
             <div className="lg:col-span-2">
-              <QuestionDisplay
-                question={currentQuestion}
-                questionNumber={currentQuestionIndex + 1}
-                totalQuestions={questions.length}
-                onSubmitAnswer={handleSubmitAnswer}
-                hasAnswered={hasAnswered}
-                isCorrect={lastAnswer?.isCorrect}
-                selectedOptionIndex={lastAnswer?.selectedIndex}
-              />
+              {isHost ? (
+                /* Host View: Teacher facilitates but doesn't answer */
+                <HostView
+                  question={currentQuestion}
+                  questionNumber={currentQuestionIndex + 1}
+                  totalQuestions={questions.length}
+                  questionSetTitle={questionSetTitle}
+                  players={players}
+                  onNextQuestion={handleNextQuestion}
+                  progressionControl={(session?.settings as any)?.progressionControl || 'manual'}
+                  onTimerExpired={handleTimerExpired}
+                />
+              ) : (
+                /* Student View: Answer questions */
+                <>
+                  <QuestionDisplay
+                    question={currentQuestion}
+                    questionNumber={currentQuestionIndex + 1}
+                    totalQuestions={questions.length}
+                    questionSetTitle={questionSetTitle}
+                    onSubmitAnswer={handleSubmitAnswer}
+                    onTimerExpired={handleTimerExpired}
+                    hasAnswered={hasAnswered}
+                    isCorrect={lastAnswer?.isCorrect}
+                    selectedOptionIndex={lastAnswer?.selectedIndex}
+                  />
 
-              {/* Host Controls */}
-              {isHost && hasAnswered && (
-                <div className="mt-6">
-                  <Button variant="primary" onClick={handleNextQuestion} className="w-full">
-                    {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'End Game'}
-                  </Button>
-                </div>
+                  {/* Solo Session Controls (only for solo student practice) */}
+                  {/* In multiplayer teacher-led games, students should NOT see this button */}
+                  {session.session_type === 'solo' && hasAnswered && (
+                    <div className="mt-6">
+                      <Button variant="primary" onClick={handleNextQuestion} className="w-full">
+                        {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'End Game'}
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

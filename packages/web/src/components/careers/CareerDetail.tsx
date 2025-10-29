@@ -5,8 +5,10 @@
  */
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal, Badge, Button } from '../common';
-import { getCareerImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { getCareerImageUrl, getPlaceholderImageUrl, gameService, toast } from '@pathket/shared';
+import { useAuth } from '../../hooks';
 import {
   TrendingUp,
   TrendingDown,
@@ -32,8 +34,42 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
   onClose,
 }) => {
   const [imageError, setImageError] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   if (!career) return null;
+
+  const handleStartCareerQuest = async () => {
+    if (!user) {
+      toast.error('Please log in to explore careers');
+      return;
+    }
+
+    setIsStarting(true);
+
+    try {
+      const { session, player, error } = await gameService.startCareerQuest({
+        userId: user.id,
+        careerId: career.id,
+        careerTitle: career.title,
+        careerSector: career.sector || career.industry,
+      });
+
+      if (error || !session) {
+        throw error || new Error('Failed to start career quest');
+      }
+
+      // Navigate to the game page
+      navigate(`/game/${session.id}`);
+      onClose(); // Close the modal
+    } catch (err: any) {
+      console.error('Error starting career quest:', err);
+      toast.error(err?.message || 'Failed to start career quest. Please try again.');
+    } finally {
+      setIsStarting(false);
+    }
+  };
 
   // Format numbers
   const formatNumber = (num: number | null) => {
@@ -64,8 +100,12 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
             <img
               src={
                 imageError
-                  ? getPlaceholderImageUrl('career')
-                  : getCareerImageUrl(career.onet_code || career.id)
+                  ? getPlaceholderImageUrl('career', {
+                      industry: career.industry,
+                      sector: career.sector || undefined,
+                      title: career.title,
+                    })
+                  : getCareerImageUrl(career.title)
               }
               alt={career.title}
               className="w-full h-full object-cover"
@@ -289,8 +329,12 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button variant="primary">
-            Explore This Career
+          <Button
+            variant="primary"
+            onClick={handleStartCareerQuest}
+            disabled={isStarting}
+          >
+            {isStarting ? 'Starting...' : 'Explore This Career'}
           </Button>
         </div>
       </div>

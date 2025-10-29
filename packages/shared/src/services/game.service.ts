@@ -11,6 +11,7 @@ import type {
   GameAnswer,
   GameMode,
   GameStatus,
+  SessionType,
   Question
 } from '../types/database.types';
 
@@ -18,6 +19,7 @@ export interface CreateGameParams {
   hostId: string;
   questionSetId: string;
   gameMode: GameMode;
+  sessionType?: SessionType;
   maxPlayers?: number;
   isPublic?: boolean;
   allowLateJoin?: boolean;
@@ -57,6 +59,7 @@ export const gameService = {
           host_id: params.hostId,
           question_set_id: params.questionSetId,
           game_mode: params.gameMode,
+          session_type: params.sessionType || 'multiplayer',
           status: 'waiting' as GameStatus,
           max_players: params.maxPlayers || 50,
           is_public: params.isPublic ?? true,
@@ -176,6 +179,28 @@ export const gameService = {
         throw new Error('Game has already started');
       }
 
+      // Check if player already joined this game
+      if (params.userId) {
+        const { data: existingPlayer } = (await supabase
+          .from('game_players')
+          .select('*')
+          .eq('game_session_id', gameSession.id)
+          .eq('user_id', params.userId)
+          .maybeSingle()) as { data: GamePlayer | null; error: any };
+
+        if (existingPlayer) {
+          // Player already joined - update connection status and return existing player
+          const { data: updatedPlayer } = (await (supabase
+            .from('game_players') as any)
+            .update({ is_connected: true })
+            .eq('id', existingPlayer.id)
+            .select()
+            .single()) as { data: GamePlayer | null; error: any };
+
+          return { player: updatedPlayer || existingPlayer, session: gameSession, error: null };
+        }
+      }
+
       // Check player count
       const { count } = await supabase
         .from('game_players')
@@ -272,7 +297,7 @@ export const gameService = {
         .from('game_sessions') as any)
         .update({
           status: 'completed' as GameStatus,
-          completed_at: new Date().toISOString(),
+          ended_at: new Date().toISOString(),
         })
         .eq('id', sessionId)
         .select()
@@ -398,71 +423,59 @@ export const gameService = {
 
   /**
    * Submit an answer to a question
+   * SECURITY: Uses database function with SECURITY DEFINER to prevent score manipulation
    */
   async submitAnswer(params: SubmitAnswerParams) {
     try {
-      // Get the question to check if answer is correct
-      const { data: question, error: questionError } = (await supabase
-        .from('questions')
-        .select('*')
-        .eq('id', params.questionId)
-        .single()) as { data: Question | null; error: any };
+      // Call secure database function
+      // This function validates timing, prevents duplicates, and updates scores
+      // It runs with SECURITY DEFINER, bypassing RLS while maintaining security
+      const { data, error } = await supabase.rpc('submit_answer_securely', {
+        p_player_id: params.playerId,
+        p_game_session_id: params.sessionId,
+        p_question_id: params.questionId,
+        p_selected_option_index: params.selectedOptionIndex,
+        p_time_taken_ms: params.timeTakenMs,
+      });
 
-      if (questionError || !question) throw questionError || new Error('Question not found');
+      if (error) throw error;
 
-      const isCorrect = question.options[params.selectedOptionIndex]?.is_correct || false;
+      const result = data?.[0];
+      if (!result) throw new Error('No result returned from answer submission');
 
-      // Calculate points (base points from question, bonus for speed)
-      let pointsAwarded = 0;
-      if (isCorrect) {
-        pointsAwarded = question.points;
-
-        // Speed bonus: up to 50% more points for fast answers
-        const timeLimit = question.time_limit_seconds * 1000; // Convert to ms
-        const timeRemaining = Math.max(0, timeLimit - params.timeTakenMs);
-        const speedBonus = Math.floor((timeRemaining / timeLimit) * (question.points * 0.5));
-        pointsAwarded += speedBonus;
-      }
-
-      // Record the answer
-      const { data: answer, error: answerError } = (await supabase
-        .from('game_answers')
-        .insert({
-          session_id: params.sessionId,
-          player_id: params.playerId,
-          question_id: params.questionId,
-          selected_option_index: params.selectedOptionIndex,
-          is_correct: isCorrect,
-          time_taken_ms: params.timeTakenMs,
-          points_awarded: pointsAwarded,
-        } as any)
-        .select()
-        .single()) as { data: GameAnswer | null; error: any };
-
-      if (answerError) throw answerError;
-
-      // Update player's score
-      const { data: player, error: playerError } = (await supabase
-        .from('game_players')
-        .select('score, correct_answers, total_answers')
-        .eq('id', params.playerId)
-        .single()) as { data: { score: number; correct_answers: number; total_answers: number } | null; error: any };
-
-      if (playerError || !player) throw playerError || new Error('Player not found');
-
-      await (supabase
-        .from('game_players') as any)
-        .update({
-          score: player.score + pointsAwarded,
-          correct_answers: isCorrect ? player.correct_answers + 1 : player.correct_answers,
-          total_answers: player.total_answers + 1,
-        })
-        .eq('id', params.playerId);
-
-      return { answer, isCorrect, pointsAwarded, error: null };
+      return {
+        answer: { id: result.answer_id } as GameAnswer,
+        isCorrect: result.is_correct,
+        pointsAwarded: result.points_earned,
+        error: null,
+      };
     } catch (error) {
       console.error('Error submitting answer:', error);
       return { answer: null, isCorrect: false, pointsAwarded: 0, error };
+    }
+  },
+
+  /**
+   * Get existing answer for a player and question (for duplicate detection)
+   */
+  async getExistingAnswer(playerId: string, questionId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('game_answers')
+        .select('selected_option_index, is_correct, points_earned')
+        .eq('player_id', playerId)
+        .eq('question_id', questionId)
+        .single();
+
+      if (error) throw error;
+
+      return {
+        answer: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error('Error fetching existing answer:', error);
+      return { answer: null, error };
     }
   },
 
@@ -490,8 +503,9 @@ export const gameService = {
 
   /**
    * Get questions for a game session
+   * SECURITY: Answer keys (is_correct) are removed from client response
    */
-  async getGameQuestions(questionSetId: string) {
+  async getGameQuestions(questionSetId: string, includeAnswers: boolean = false) {
     try {
       const { data: questions, error } = (await supabase
         .from('questions')
@@ -501,7 +515,19 @@ export const gameService = {
 
       if (error) throw error;
 
-      return { questions, error: null };
+      // SECURITY FIX: Remove is_correct flag from options before sending to client
+      // This prevents students from viewing answer keys in browser DevTools
+      // Exception: Hosts/teachers need to see correct answers, so they pass includeAnswers=true
+      const sanitizedQuestions = questions?.map(q => ({
+        ...q,
+        options: q.options.map(opt =>
+          includeAnswers
+            ? opt  // Host: return full option with is_correct
+            : { text: opt.text }  // Student: only return text
+        )
+      }));
+
+      return { questions: sanitizedQuestions, error: null };
     } catch (error) {
       console.error('Error fetching questions:', error);
       return { questions: null, error };
@@ -528,6 +554,106 @@ export const gameService = {
     } catch (error) {
       console.error('Error checking if player answered:', error);
       return { hasAnswered: false, error };
+    }
+  },
+
+  /**
+   * Start a Career Quest (solo practice game for a specific career)
+   */
+  async startCareerQuest(params: {
+    userId: string;
+    careerId: string;
+    careerTitle: string;
+    careerSector: string;
+  }) {
+    try {
+      // PRIORITY 1: Find career-specific Explore Careers question set
+      const { data: careerSet, error: careerSetError } = await supabase
+        .from('question_sets')
+        .select('id, title, total_questions')
+        .eq('is_public', true)
+        .eq('career_id', params.careerId)
+        .eq('question_set_type', 'explore_careers')
+        .limit(1)
+        .single();
+
+      let questionSetId: string;
+
+      if (careerSet && !careerSetError) {
+        // Found career-specific Explore Careers question set
+        questionSetId = careerSet.id;
+      } else {
+        // PRIORITY 2: Fall back to sector-based Career Quest question set
+        const { data: sectorSets, error: sectorError } = await supabase
+          .from('question_sets')
+          .select('id, title, total_questions')
+          .eq('is_public', true)
+          .eq('career_sector', params.careerSector)
+          .limit(1);
+
+        if (sectorSets && sectorSets.length > 0 && !sectorError) {
+          questionSetId = sectorSets[0].id;
+        } else {
+          // PRIORITY 3: Fall back to any public question set
+          const { data: anySet, error: anySetError } = await supabase
+            .from('question_sets')
+            .select('id')
+            .eq('is_public', true)
+            .limit(1)
+            .single();
+
+          if (anySetError || !anySet) {
+            throw new Error('No question sets available. Please contact your teacher to create some.');
+          }
+
+          questionSetId = anySet.id;
+        }
+      }
+
+      // Create a career quest game session
+      const { session, error: sessionError } = await this.createGame({
+        hostId: params.userId,
+        questionSetId,
+        gameMode: 'career_quest' as any,
+        sessionType: 'solo', // Solo student practice
+        maxPlayers: 1,
+        isPublic: false,
+        allowLateJoin: false,
+        settings: {
+          progressionControl: 'auto', // Solo games always auto-advance
+        },
+      });
+
+      if (sessionError || !session) {
+        throw sessionError || new Error('Failed to create career quest');
+      }
+
+      // Auto-join as the only player
+      const { player, error: joinError } = await this.joinGame({
+        gameCode: session.game_code,
+        displayName: 'Explorer',
+        userId: params.userId,
+      });
+
+      if (joinError || !player) {
+        throw joinError || new Error('Failed to join career quest');
+      }
+
+      // Auto-start the game immediately
+      const { session: startedSession, error: startError } = await this.startGame(session.id);
+
+      if (startError || !startedSession) {
+        throw startError || new Error('Failed to start career quest');
+      }
+
+      return {
+        session: startedSession,
+        player,
+        error: null,
+      };
+    } catch (error) {
+      console.error('Error starting career quest:', error);
+      return { session: null, player: null, error };
     }
   },
 };
