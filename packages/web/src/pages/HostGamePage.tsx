@@ -38,10 +38,14 @@ export default function HostGamePage() {
 
   // Filter state
   const [gradeFilter, setGradeFilter] = useState<number | undefined>(undefined);
+  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'all' | 'industry' | 'career' | 'subject'>('all');
+  const [businessDriverFilter, setBusinessDriverFilter] = useState<string>('all');
 
   // Fetch question sets with filtering
+  // Note: business_driver is NOT used here - it's passed to game settings
   const { data: questionSets, isLoading: loadingQuestionSets } = useFilteredQuestionSets({
     grade_level: gradeFilter,
+    exploration_type: explorationTypeFilter,
   });
 
   const [selectedQuestionSet, setSelectedQuestionSet] = useState<string>('');
@@ -87,6 +91,7 @@ export default function HostGamePage() {
         allowLateJoin: sessionType === 'solo' ? false : allowLateJoin,
         settings: {
           progressionControl: sessionType === 'solo' ? 'auto' : progressionControl,
+          businessDriver: businessDriverFilter !== 'all' ? businessDriverFilter : undefined,
         },
       });
 
@@ -182,6 +187,67 @@ export default function HostGamePage() {
                   <option value="10">10th Grade</option>
                   <option value="11">11th Grade</option>
                   <option value="12">12th Grade</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                  size={20}
+                />
+              </div>
+            </div>
+
+            {/* Exploration Type Filter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                <div className="flex items-center gap-2">
+                  <Filter size={16} />
+                  Exploration Type
+                </div>
+              </label>
+              <div className="relative">
+                <select
+                  value={explorationTypeFilter}
+                  onChange={(e) => {
+                    setExplorationTypeFilter(e.target.value as 'all' | 'industry' | 'career' | 'subject');
+                    setSelectedQuestionSet(''); // Reset selection when filter changes
+                  }}
+                  className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  <option value="industry">Industry</option>
+                  <option value="career">Career</option>
+                  <option value="subject">Subject</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                  size={20}
+                />
+              </div>
+            </div>
+
+            {/* Business Driver Filter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                <div className="flex items-center gap-2">
+                  <Filter size={16} />
+                  Business Driver (6 P's)
+                </div>
+              </label>
+              <div className="relative">
+                <select
+                  value={businessDriverFilter}
+                  onChange={(e) => {
+                    setBusinessDriverFilter(e.target.value);
+                    setSelectedQuestionSet(''); // Reset selection when filter changes
+                  }}
+                  className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
+                >
+                  <option value="all">All Drivers</option>
+                  <option value="people">People</option>
+                  <option value="product">Product</option>
+                  <option value="pricing">Pricing</option>
+                  <option value="process">Process</option>
+                  <option value="proceeds">Proceeds</option>
+                  <option value="profits">Profits</option>
                 </select>
                 <ChevronDown
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"

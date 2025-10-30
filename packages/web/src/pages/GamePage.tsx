@@ -105,9 +105,11 @@ export default function GamePage() {
 
         // Load questions if game is in progress or completed
         if (gameSession.status !== 'waiting') {
+          const businessDriver = (gameSession.settings as any)?.businessDriver;
           const { questions: gameQuestions, error: questionsError } = await gameService.getGameQuestions(
             gameSession.question_set_id,
-            userIsHost  // Hosts get answers, students don't
+            userIsHost,  // Hosts get answers, students don't
+            businessDriver
           );
 
           if (questionsError || !gameQuestions) {
@@ -154,7 +156,8 @@ export default function GamePage() {
 
         // If game just started, load questions
         if (updatedSession.status === 'in_progress' && questions.length === 0) {
-          gameService.getGameQuestions(updatedSession.question_set_id, isHost).then(({ questions: gameQuestions }: any) => {
+          const businessDriver = (updatedSession.settings as any)?.businessDriver;
+          gameService.getGameQuestions(updatedSession.question_set_id, isHost, businessDriver).then(({ questions: gameQuestions }: any) => {
             if (gameQuestions) {
               setQuestions(gameQuestions);
             }
@@ -198,7 +201,13 @@ export default function GamePage() {
       await realtimeService.notifyGameStarting(sessionId);
 
       // Load questions (with answers since we're the host)
-      const { questions: gameQuestions } = await gameService.getGameQuestions(updatedSession.question_set_id, true);
+      // Apply business_driver filter from session settings if specified
+      const businessDriver = (updatedSession.settings as any)?.businessDriver;
+      const { questions: gameQuestions } = await gameService.getGameQuestions(
+        updatedSession.question_set_id,
+        true,
+        businessDriver
+      );
       if (gameQuestions) {
         setQuestions(gameQuestions);
       }
@@ -251,10 +260,39 @@ export default function GamePage() {
     if (!sessionId) return;
 
     try {
-      await gameService.endGame(sessionId);
+      console.log('Starting end game process...');
+      const result = await gameService.endGame(sessionId);
+
+      if (result.error) {
+        console.error('End game error:', result.error);
+        toast.error('Failed to end game. Please try again.');
+        return;
+      }
+
+      // Immediately update local session state to show game results
+      // Real-time subscription will also update this, but this ensures immediate UI response
+      if (result.session) {
+        setSession(result.session);
+      }
+
+      // Reload players to get updated placement and rewards
+      console.log('Reloading players with updated stats...');
+      const { players: updatedPlayers } = await gameService.getGamePlayers(sessionId);
+      if (updatedPlayers) {
+        setPlayers(updatedPlayers);
+        // Update current player with fresh data
+        const updated = updatedPlayers.find((p: GamePlayer) => p.id === currentPlayer?.id);
+        if (updated) {
+          setCurrentPlayer(updated);
+        }
+      }
+
+      console.log('Game ended successfully, notifying players...');
       await realtimeService.notifyGameEnded(sessionId);
-    } catch (err) {
+      console.log('End game complete');
+    } catch (err: any) {
       console.error('Error ending game:', err);
+      toast.error(err?.message || 'Failed to end game. Please try again.');
     }
   };
 

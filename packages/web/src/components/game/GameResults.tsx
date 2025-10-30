@@ -4,6 +4,7 @@
  * Final results screen showing stats, rewards, and leaderboard
  */
 
+import { useNavigate } from 'react-router-dom';
 import { Card, Button } from '../common';
 import { Leaderboard } from './Leaderboard';
 import { Trophy, Award, Target, Zap, Home, PlayCircle } from 'lucide-react';
@@ -23,6 +24,8 @@ export const GameResults: React.FC<GameResultsProps> = ({
   onPlayAgain,
   onReturnHome,
 }) => {
+  const navigate = useNavigate();
+
   const calculateAccuracy = (player: GamePlayer) => {
     if (player.total_answers === 0) return 0;
     return Math.round((player.correct_answers / player.total_answers) * 100);
@@ -35,6 +38,10 @@ export const GameResults: React.FC<GameResultsProps> = ({
     if (placement === 3) return '🥉 Third Place!';
     if (placement <= 10) return `Top 10 Finish!`;
     return 'Good effort!';
+  };
+
+  const handleViewCollection = () => {
+    navigate('/collection');
   };
 
   const currentPlayerPathkeys = currentPlayer?.pathkeys_earned || [];
@@ -147,7 +154,7 @@ export const GameResults: React.FC<GameResultsProps> = ({
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full mt-2" size="sm">
+                <Button variant="outline" className="w-full mt-2" size="sm" onClick={handleViewCollection}>
                   View Collection
                 </Button>
               </div>

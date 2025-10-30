@@ -117,11 +117,26 @@ export const useFilteredQuestionSets = (filters: {
   career_sector?: string;
   difficulty?: string;
   search?: string;
+  exploration_type?: 'all' | 'industry' | 'career' | 'subject';
 }) => {
   const { data, ...rest } = useQuestionSets();
 
   const filteredData = data?.filter((set) => {
-    // Subject filter
+    // Exploration Type filter
+    if (filters.exploration_type && filters.exploration_type !== 'all') {
+      if (filters.exploration_type === 'industry') {
+        // Industry: career_id IS NULL
+        if (set.career_id !== null) return false;
+      } else if (filters.exploration_type === 'career') {
+        // Career: career_id IS NOT NULL
+        if (set.career_id === null) return false;
+      } else if (filters.exploration_type === 'subject') {
+        // Subject filter handled below
+        // Allow both career_id NULL and NOT NULL, just filter by subject
+      }
+    }
+
+    // Subject filter (only applies when exploration_type is 'subject' or not set)
     if (filters.subject && set.subject !== filters.subject) return false;
 
     // Grade level filter
@@ -142,6 +157,9 @@ export const useFilteredQuestionSets = (filters: {
       const descMatch = set.description?.toLowerCase().includes(searchLower);
       if (!titleMatch && !descMatch) return false;
     }
+
+    // Note: business_driver is NOT filtered here
+    // It's stored in game session settings and applied when loading questions
 
     return true;
   });

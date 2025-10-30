@@ -286,12 +286,23 @@ export const gameService = {
    */
   async endGame(sessionId: string) {
     try {
-      // Calculate final placements
-      await this.calculatePlacements(sessionId);
+      console.log('Step 1: Calculating placements...');
+      const placementsResult = await this.calculatePlacements(sessionId);
+      if (!placementsResult.success) {
+        console.error('Failed to calculate placements:', placementsResult.error);
+        throw placementsResult.error || new Error('Failed to calculate placements');
+      }
+      console.log('Placements calculated successfully');
 
-      // Award tokens and pathkeys
-      await this.awardRewards(sessionId);
+      console.log('Step 2: Awarding rewards...');
+      const rewardsResult = await this.awardRewards(sessionId);
+      if (!rewardsResult.success) {
+        console.error('Failed to award rewards:', rewardsResult.error);
+        throw rewardsResult.error || new Error('Failed to award rewards');
+      }
+      console.log('Rewards awarded successfully');
 
+      console.log('Step 3: Updating session status...');
       // Update session status
       const { data: session, error } = (await (supabase
         .from('game_sessions') as any)
@@ -303,7 +314,11 @@ export const gameService = {
         .select()
         .single()) as { data: GameSession | null; error: any };
 
-      if (error) throw error;
+      if (error) {
+        console.error('Failed to update session status:', error);
+        throw error;
+      }
+      console.log('Session status updated successfully');
 
       return { session, error: null };
     } catch (error) {
@@ -314,6 +329,7 @@ export const gameService = {
 
   /**
    * Calculate player placements based on score
+   * SECURITY: Uses database function with SECURITY DEFINER to prevent placement manipulation
    */
   async calculatePlacements(sessionId: string) {
     try {
@@ -329,17 +345,17 @@ export const gameService = {
       if (error) throw error;
       if (!players) return { success: false, error: 'No players found' };
 
-      // Update placements
-      const updates = players.map((player, index) => ({
-        id: player.id,
-        placement: index + 1,
-      }));
+      // Update placements using secure function
+      for (let i = 0; i < players.length; i++) {
+        const { error: updateError } = await supabase.rpc('update_player_placement', {
+          p_player_id: players[i].id,
+          p_placement: i + 1,
+        });
 
-      for (const update of updates) {
-        await (supabase
-          .from('game_players') as any)
-          .update({ placement: update.placement })
-          .eq('id', update.id);
+        if (updateError) {
+          console.error(`Error updating placement for player ${players[i].id}:`, updateError);
+          throw updateError;
+        }
       }
 
       return { success: true, error: null };
@@ -351,6 +367,7 @@ export const gameService = {
 
   /**
    * Award tokens and pathkeys to players
+   * SECURITY: Uses database function with SECURITY DEFINER to prevent reward manipulation
    */
   async awardRewards(sessionId: string) {
     try {
@@ -365,6 +382,8 @@ export const gameService = {
 
       // Award tokens based on score and placement
       for (const player of players) {
+        console.log(`Processing player: ${player.display_name}, user_id: ${player.user_id}, placement: ${player.placement}`);
+
         // Calculate tokens: base (10) + score/10 + placement bonus
         let tokensEarned = 10; // Base tokens for participation
         tokensEarned += Math.floor(player.score / 10); // 1 token per 10 points
@@ -374,11 +393,56 @@ export const gameService = {
         else if (player.placement === 2) tokensEarned += 30;
         else if (player.placement === 3) tokensEarned += 20;
 
-        // Update player's token earnings
-        await (supabase
-          .from('game_players') as any)
-          .update({ tokens_earned: tokensEarned })
-          .eq('id', player.id);
+        let pathkeysEarned: string[] | null = null;
+
+        // Award pathkeys for top 3 finishers (if registered)
+        if (player.user_id && player.placement && player.placement <= 3) {
+          console.log(`Player ${player.display_name} (user_id: ${player.user_id}) finished in place ${player.placement}, awarding pathkey...`);
+
+          // Get a random pathkey to award (simplified - could be based on career/topic)
+          const { data: pathkeys, error: pathkeyError } = (await supabase
+            .from('pathkeys')
+            .select('id')
+            .eq('is_active', true)
+            .limit(1)) as { data: { id: string }[] | null; error: any };
+
+          if (pathkeyError) {
+            console.error('Error fetching pathkey:', pathkeyError);
+          }
+
+          if (pathkeys && pathkeys.length > 0) {
+            const pathkeyId = pathkeys[0].id;
+            console.log(`Awarding pathkey ${pathkeyId} to user ${player.user_id}`);
+
+            const { error: awardError } = await (supabase.rpc as any)('award_pathkey', {
+              p_user_id: player.user_id,
+              p_pathkey_id: pathkeyId,
+            });
+
+            if (awardError) {
+              console.error('Error awarding pathkey:', awardError);
+            } else {
+              console.log('Pathkey awarded successfully');
+              pathkeysEarned = [pathkeyId];
+            }
+          } else {
+            console.warn('No pathkeys available to award');
+          }
+        } else {
+          console.log(`Skipping pathkey award for ${player.display_name}: user_id=${player.user_id}, placement=${player.placement}`);
+        }
+
+        // Update player's rewards using secure function
+        const { error: rewardError } = await supabase.rpc('award_player_rewards', {
+          p_player_id: player.id,
+          p_tokens_earned: tokensEarned,
+          p_pathkeys_earned: pathkeysEarned,
+        });
+
+        if (rewardError) {
+          console.error(`Error awarding rewards to player ${player.id}:`, rewardError);
+          throw rewardError;
+        }
 
         // If user is registered, award tokens to their profile
         if (player.user_id) {
@@ -386,31 +450,6 @@ export const gameService = {
             p_user_id: player.user_id,
             p_amount: tokensEarned,
           });
-        }
-
-        // Award pathkeys for top 3 finishers (if registered)
-        if (player.user_id && player.placement && player.placement <= 3) {
-          // Get a random pathkey to award (simplified - could be based on career/topic)
-          const { data: pathkeys } = (await supabase
-            .from('pathkeys')
-            .select('id')
-            .eq('is_active', true)
-            .limit(1)) as { data: { id: string }[] | null; error: any };
-
-          if (pathkeys && pathkeys.length > 0) {
-            const pathkeyId = pathkeys[0].id;
-
-            await (supabase.rpc as any)('award_pathkey', {
-              p_user_id: player.user_id,
-              p_pathkey_id: pathkeyId,
-            });
-
-            // Update player's pathkeys_earned
-            await (supabase
-              .from('game_players') as any)
-              .update({ pathkeys_earned: [pathkeyId] })
-              .eq('id', player.id);
-          }
         }
       }
 
@@ -505,12 +544,19 @@ export const gameService = {
    * Get questions for a game session
    * SECURITY: Answer keys (is_correct) are removed from client response
    */
-  async getGameQuestions(questionSetId: string, includeAnswers: boolean = false) {
+  async getGameQuestions(questionSetId: string, includeAnswers: boolean = false, businessDriver?: string) {
     try {
-      const { data: questions, error } = (await supabase
+      let query = supabase
         .from('questions')
         .select('*')
-        .eq('question_set_id', questionSetId)
+        .eq('question_set_id', questionSetId);
+
+      // Filter by business_driver if specified (not 'all')
+      if (businessDriver && businessDriver !== 'all') {
+        query = query.eq('business_driver', businessDriver);
+      }
+
+      const { data: questions, error } = (await query
         .order('order_index', { ascending: true })) as { data: Question[] | null; error: any };
 
       if (error) throw error;
@@ -567,20 +613,20 @@ export const gameService = {
     careerSector: string;
   }) {
     try {
-      // PRIORITY 1: Find career-specific Explore Careers question set
+      // PRIORITY 1: Find career-specific career quest question set
       const { data: careerSet, error: careerSetError } = await supabase
         .from('question_sets')
         .select('id, title, total_questions')
         .eq('is_public', true)
         .eq('career_id', params.careerId)
-        .eq('question_set_type', 'explore_careers')
+        .eq('question_set_type', 'career_quest')
         .limit(1)
         .single();
 
       let questionSetId: string;
 
       if (careerSet && !careerSetError) {
-        // Found career-specific Explore Careers question set
+        // Found career-specific career quest question set
         questionSetId = careerSet.id;
       } else {
         // PRIORITY 2: Fall back to sector-based Career Quest question set
