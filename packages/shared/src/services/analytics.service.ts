@@ -79,11 +79,12 @@ class AnalyticsService {
         };
       }
 
-      // Get all players who participated in teacher's games
+      // Get all players who participated in teacher's games (excluding teacher themselves)
       const { data: players, error: playersError } = await supabase
         .from('game_players')
-        .select('user_id, score, total_correct, total_questions, created_at')
-        .in('session_id', gameIds);
+        .select('user_id, score, correct_answers, total_answers, joined_at')
+        .in('game_session_id', gameIds)
+        .neq('user_id', teacherId);  // Exclude teacher from student stats
 
       if (playersError) throw playersError;
 
@@ -94,11 +95,11 @@ class AnalyticsService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const activeStudents = new Set(
-        players?.filter((p) => new Date(p.created_at) > thirtyDaysAgo).map((p) => p.user_id) || []
+        players?.filter((p) => new Date(p.joined_at) > thirtyDaysAgo).map((p) => p.user_id) || []
       );
 
       // Calculate total questions answered
-      const totalQuestionsAnswered = players?.reduce((sum, p) => sum + (p.total_questions || 0), 0) || 0;
+      const totalQuestionsAnswered = players?.reduce((sum, p) => sum + (p.total_answers || 0), 0) || 0;
 
       // Calculate average score
       const validScores = players?.filter((p) => p.score !== null && p.score !== undefined) || [];
@@ -145,11 +146,12 @@ class AnalyticsService {
         return [];
       }
 
-      // Get all players who participated
+      // Get all players who participated (excluding the teacher themselves)
       const { data: players, error: playersError } = await supabase
         .from('game_players')
-        .select('user_id, display_name, score, total_correct, total_questions, created_at')
-        .in('session_id', gameIds);
+        .select('user_id, display_name, score, correct_answers, total_answers, joined_at')
+        .in('game_session_id', gameIds)
+        .neq('user_id', teacherId);  // Exclude teacher from student stats
 
       if (playersError) throw playersError;
 
@@ -168,19 +170,19 @@ class AnalyticsService {
         if (existing) {
           existing.games += 1;
           existing.totalScore += player.score || 0;
-          existing.totalCorrect += player.total_correct || 0;
-          existing.totalQuestions += player.total_questions || 0;
-          if (new Date(player.created_at) > new Date(existing.lastActive)) {
-            existing.lastActive = player.created_at;
+          existing.totalCorrect += player.correct_answers || 0;
+          existing.totalQuestions += player.total_answers || 0;
+          if (new Date(player.joined_at) > new Date(existing.lastActive)) {
+            existing.lastActive = player.joined_at;
           }
         } else {
           userStatsMap.set(player.user_id, {
             display_name: player.display_name || 'Unknown',
             games: 1,
             totalScore: player.score || 0,
-            totalCorrect: player.total_correct || 0,
-            totalQuestions: player.total_questions || 0,
-            lastActive: player.created_at,
+            totalCorrect: player.correct_answers || 0,
+            totalQuestions: player.total_answers || 0,
+            lastActive: player.joined_at,
           });
         }
       });
@@ -195,7 +197,7 @@ class AnalyticsService {
 
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, tokens_balance, email')
+        .select('id, tokens, email')
         .in('id', userIds);
 
       const pathkeysMap = new Map<string, number>();
@@ -206,7 +208,7 @@ class AnalyticsService {
       const tokensMap = new Map<string, number>();
       const emailMap = new Map<string, string>();
       profiles?.forEach((p) => {
-        tokensMap.set(p.id, p.tokens_balance || 0);
+        tokensMap.set(p.id, p.tokens || 0);
         emailMap.set(p.id, p.email);
       });
 
@@ -280,18 +282,18 @@ class AnalyticsService {
       const sessionIds = sessions.map((s) => s.id);
       const { data: players, error: playersError } = await supabase
         .from('game_players')
-        .select('session_id, score, placement')
-        .in('session_id', sessionIds);
+        .select('game_session_id, score, placement')
+        .in('game_session_id', sessionIds);
 
       if (playersError) throw playersError;
 
       // Group players by session
       const playersMap = new Map<string, typeof players>();
       players?.forEach((player) => {
-        if (!playersMap.has(player.session_id)) {
-          playersMap.set(player.session_id, []);
+        if (!playersMap.has(player.game_session_id)) {
+          playersMap.set(player.game_session_id, []);
         }
-        playersMap.get(player.session_id)?.push(player);
+        playersMap.get(player.game_session_id)?.push(player);
       });
 
       // Build game stats
@@ -380,7 +382,7 @@ class AnalyticsService {
       const { data: players, error: playersError } = await supabase
         .from('game_players')
         .select('*')
-        .eq('session_id', sessionId)
+        .eq('game_session_id', sessionId)
         .order('placement', { ascending: true, nullsFirst: false });
 
       if (playersError) throw playersError;

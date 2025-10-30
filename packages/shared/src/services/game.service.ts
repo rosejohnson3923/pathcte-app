@@ -380,6 +380,8 @@ export const gameService = {
       if (error) throw error;
       if (!players) return { success: false, error: 'No players found' };
 
+      const totalPlayers = players.length;
+
       // Award tokens based on score and placement
       for (const player of players) {
         console.log(`Processing player: ${player.display_name}, user_id: ${player.user_id}, placement: ${player.placement}`);
@@ -395,8 +397,9 @@ export const gameService = {
 
         let pathkeysEarned: string[] | null = null;
 
-        // Award pathkeys for top 3 finishers (if registered)
-        if (player.user_id && player.placement && player.placement <= 3) {
+        // Award pathkeys for top 3 finishers in competitive games (3+ players)
+        // Requires meaningful competition - at least 3 players competing
+        if (player.user_id && player.placement && player.placement <= 3 && totalPlayers >= 3) {
           console.log(`Player ${player.display_name} (user_id: ${player.user_id}) finished in place ${player.placement}, awarding pathkey...`);
 
           // Get a random pathkey to award (simplified - could be based on career/topic)
@@ -431,7 +434,7 @@ export const gameService = {
             console.warn('No pathkeys available to award');
           }
         } else {
-          console.log(`Skipping pathkey award for ${player.display_name}: user_id=${player.user_id}, placement=${player.placement}`);
+          console.log(`Skipping pathkey award for ${player.display_name}: user_id=${player.user_id}, placement=${player.placement}, totalPlayers=${totalPlayers}`);
         }
 
         // Update player's rewards using secure function
