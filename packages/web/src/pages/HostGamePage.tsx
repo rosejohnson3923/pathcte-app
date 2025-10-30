@@ -4,7 +4,7 @@
  * Create and configure a new game session (teacher view)
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { Button, Input, Card, Spinner, Badge } from '../components/common';
@@ -38,14 +38,16 @@ export default function HostGamePage() {
 
   // Filter state
   const [gradeFilter, setGradeFilter] = useState<number | undefined>(undefined);
-  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'all' | 'industry' | 'career' | 'subject'>('all');
+  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'industry' | 'career' | 'subject' | ''>('');
+  const [subjectFilter, setSubjectFilter] = useState<string>('');
   const [businessDriverFilter, setBusinessDriverFilter] = useState<string>('all');
 
   // Fetch question sets with filtering
-  // Note: business_driver is NOT used here - it's passed to game settings
+  // Note: business_driver is NOT used here - it's passed to game settings and filters QUESTIONS during gameplay
   const { data: questionSets, isLoading: loadingQuestionSets } = useFilteredQuestionSets({
     grade_level: gradeFilter,
-    exploration_type: explorationTypeFilter,
+    exploration_type: explorationTypeFilter || undefined,
+    subject: explorationTypeFilter === 'subject' ? subjectFilter : undefined,
   });
 
   const [selectedQuestionSet, setSelectedQuestionSet] = useState<string>('');
@@ -65,6 +67,14 @@ export default function HostGamePage() {
 
   // Get selected question set details
   const selectedSet = questionSets?.find((set) => set.id === selectedQuestionSet);
+
+  // Get unique subjects from ALL question sets (not filtered) for the Subject dropdown
+  const { data: allQuestionSets } = useFilteredQuestionSets({});
+  const uniqueSubjects = React.useMemo(() => {
+    if (!allQuestionSets) return [];
+    const subjects = new Set(allQuestionSets.map((set) => set.subject).filter(Boolean));
+    return Array.from(subjects).sort();
+  }, [allQuestionSets]);
 
   const handleCreateGame = async () => {
     if (!user) {
@@ -195,24 +205,27 @@ export default function HostGamePage() {
               </div>
             </div>
 
-            {/* Exploration Type Filter */}
+            {/* Exploration Type Filter (Required Parent Filter) */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-text-secondary mb-2">
                 <div className="flex items-center gap-2">
                   <Filter size={16} />
-                  Exploration Type
+                  Exploration Type <span className="text-red-500">*</span>
                 </div>
               </label>
               <div className="relative">
                 <select
                   value={explorationTypeFilter}
                   onChange={(e) => {
-                    setExplorationTypeFilter(e.target.value as 'all' | 'industry' | 'career' | 'subject');
-                    setSelectedQuestionSet(''); // Reset selection when filter changes
+                    const value = e.target.value as 'industry' | 'career' | 'subject' | '';
+                    setExplorationTypeFilter(value);
+                    // Reset child filters and selection
+                    setSubjectFilter('');
+                    setSelectedQuestionSet('');
                   }}
                   className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
                 >
-                  <option value="all">All Types</option>
+                  <option value="">Select Exploration Type...</option>
                   <option value="industry">Industry</option>
                   <option value="career">Career</option>
                   <option value="subject">Subject</option>
@@ -224,53 +237,28 @@ export default function HostGamePage() {
               </div>
             </div>
 
-            {/* Business Driver Filter */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                <div className="flex items-center gap-2">
-                  <Filter size={16} />
-                  Business Driver (6 P's)
-                </div>
-              </label>
-              <div className="relative">
-                <select
-                  value={businessDriverFilter}
-                  onChange={(e) => {
-                    setBusinessDriverFilter(e.target.value);
-                    setSelectedQuestionSet(''); // Reset selection when filter changes
-                  }}
-                  className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
-                >
-                  <option value="all">All Drivers</option>
-                  <option value="people">People</option>
-                  <option value="product">Product</option>
-                  <option value="pricing">Pricing</option>
-                  <option value="process">Process</option>
-                  <option value="proceeds">Proceeds</option>
-                  <option value="profits">Profits</option>
-                </select>
-                <ChevronDown
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                  size={20}
-                />
-              </div>
-            </div>
-
-            {loadingQuestionSets ? (
-              <div className="flex items-center justify-center py-8">
-                <Spinner size="md" />
-              </div>
-            ) : questionSets && questionSets.length > 0 ? (
-              <>
+            {/* Child Filter: Subject (when exploration type is 'subject') */}
+            {explorationTypeFilter === 'subject' && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  <div className="flex items-center gap-2">
+                    <Filter size={16} />
+                    Subject
+                  </div>
+                </label>
                 <div className="relative">
                   <select
-                    value={selectedQuestionSet}
-                    onChange={(e) => setSelectedQuestionSet(e.target.value)}
-                    className="w-full px-4 py-3 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                    value={subjectFilter}
+                    onChange={(e) => {
+                      setSubjectFilter(e.target.value);
+                      setSelectedQuestionSet(''); // Reset selection when filter changes
+                    }}
+                    className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
                   >
-                    {questionSets.map((set) => (
-                      <option key={set.id} value={set.id}>
-                        {set.title} ({set.total_questions} questions)
+                    <option value="">All Subjects</option>
+                    {uniqueSubjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
                       </option>
                     ))}
                   </select>
@@ -279,58 +267,126 @@ export default function HostGamePage() {
                     size={20}
                   />
                 </div>
-
-                {selectedSet && (
-                  <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                    <div className="flex items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
-                            {selectedSet.subject}
-                          </p>
-                          {selectedSet.difficulty_level && (
-                            <span
-                              className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                selectedSet.difficulty_level === 'easy'
-                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                  : selectedSet.difficulty_level === 'medium'
-                                  ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                                  : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                              }`}
-                            >
-                              {selectedSet.difficulty_level}
-                            </span>
-                          )}
-                        </div>
-                        {selectedSet.description && (
-                          <p className="text-xs text-blue-800 dark:text-blue-400">
-                            {selectedSet.description}
-                          </p>
-                        )}
-                        {selectedSet.grade_level && selectedSet.grade_level.length > 0 && (
-                          <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-                            Grades {Math.min(...selectedSet.grade_level)}-
-                            {Math.max(...selectedSet.grade_level)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <BookOpen size={40} className="text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-600 dark:text-gray-400 mb-3">No question sets available</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate('/question-sets')}
-                >
-                  Create Question Set
-                </Button>
               </div>
             )}
+
+
+            {/* Question Set Selection - Only shown after Exploration Type is selected */}
+            {explorationTypeFilter && (
+              <div className="mb-4 pt-4 border-t-2 border-gray-200 dark:border-gray-700">
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  <div className="flex items-center gap-2">
+                    <BookOpen size={16} />
+                    Select Question Set <span className="text-red-500">*</span>
+                  </div>
+                </label>
+
+                {loadingQuestionSets ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Spinner size="md" />
+                  </div>
+                ) : questionSets && questionSets.length > 0 ? (
+                  <div className="relative">
+                    <select
+                      value={selectedQuestionSet}
+                      onChange={(e) => setSelectedQuestionSet(e.target.value)}
+                      className="w-full px-4 py-3 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                    >
+                      {questionSets.map((set) => (
+                        <option key={set.id} value={set.id}>
+                          {set.title} ({set.total_questions} questions)
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                      size={20}
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <BookOpen size={40} className="text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-600 dark:text-gray-400 mb-1">No question sets available</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500">
+                      Try adjusting your filters or create a new question set
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+                {selectedSet && (
+                  <>
+                    <div className="mt-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                              {selectedSet.subject}
+                            </p>
+                            {selectedSet.difficulty_level && (
+                              <span
+                                className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                  selectedSet.difficulty_level === 'easy'
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                                    : selectedSet.difficulty_level === 'medium'
+                                    ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
+                                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                                }`}
+                              >
+                                {selectedSet.difficulty_level}
+                              </span>
+                            )}
+                          </div>
+                          {selectedSet.description && (
+                            <p className="text-xs text-blue-800 dark:text-blue-400">
+                              {selectedSet.description}
+                            </p>
+                          )}
+                          {selectedSet.grade_level && selectedSet.grade_level.length > 0 && (
+                            <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
+                              Grades {Math.min(...selectedSet.grade_level)}-
+                              {Math.max(...selectedSet.grade_level)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Business Driver Filter - Filters QUESTIONS within the selected set */}
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-text-secondary mb-2">
+                        <div className="flex items-center gap-2">
+                          <Filter size={16} />
+                          Business Driver (6 P's)
+                          <span className="text-xs text-text-tertiary">(Optional - filters questions during game)</span>
+                        </div>
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={businessDriverFilter}
+                          onChange={(e) => setBusinessDriverFilter(e.target.value)}
+                          className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
+                        >
+                          <option value="all">All Drivers (Use All Questions)</option>
+                          <option value="people">People</option>
+                          <option value="product">Product</option>
+                          <option value="pricing">Pricing</option>
+                          <option value="process">Process</option>
+                          <option value="proceeds">Proceeds</option>
+                          <option value="profits">Profits</option>
+                        </select>
+                        <ChevronDown
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                          size={20}
+                        />
+                      </div>
+                      <p className="text-xs text-text-tertiary mt-1">
+                        Selecting a business driver will only use questions tagged with that driver during the game
+                      </p>
+                    </div>
+                  </>
+                )}
           </Card>
 
           {/* Session Type Selection */}

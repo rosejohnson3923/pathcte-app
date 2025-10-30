@@ -45,6 +45,30 @@ export default function GamePage() {
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean; selectedIndex: number } | null>(null);
   const [questionSetTitle, setQuestionSetTitle] = useState<string>('');
 
+  // Track component lifecycle
+  useEffect(() => {
+    console.log('[GamePage] Component mounted, sessionId:', sessionId);
+    return () => {
+      console.log('[GamePage] Component unmounting, sessionId:', sessionId);
+    };
+  }, [sessionId]);
+
+  // Track session status changes
+  useEffect(() => {
+    if (session) {
+      console.log('[GamePage] Session updated:', {
+        id: session.id,
+        status: session.status,
+        currentQuestionIndex: session.current_question_index,
+      });
+    }
+  }, [session?.status, session?.current_question_index]);
+
+  // Track current question changes
+  useEffect(() => {
+    console.log('[GamePage] Current question index changed:', currentQuestionIndex);
+  }, [currentQuestionIndex]);
+
   // Load game session and questions
   useEffect(() => {
     if (!sessionId) {
@@ -144,44 +168,58 @@ export default function GamePage() {
   useEffect(() => {
     if (!sessionId) return;
 
+    console.log('[GamePage] Setting up realtime subscriptions');
+
     realtimeService.subscribeToGame(sessionId, {
       onGameUpdate: (updatedSession: any) => {
+        console.log('[GamePage] Realtime game update received:', {
+          status: updatedSession.status,
+          currentQuestionIndex: updatedSession.current_question_index,
+        });
         setSession(updatedSession);
 
         // Sync current question index from database (fallback for missed broadcasts)
         if (updatedSession.current_question_index !== undefined && updatedSession.current_question_index !== currentQuestionIndex) {
+          console.log('[GamePage] Syncing question index from realtime:', updatedSession.current_question_index);
           setCurrentQuestionIndex(updatedSession.current_question_index);
           // Note: hasAnswered/lastAnswer reset handled by separate useEffect above
         }
 
         // If game just started, load questions
         if (updatedSession.status === 'in_progress' && questions.length === 0) {
+          console.log('[GamePage] Game started, loading questions');
           const businessDriver = (updatedSession.settings as any)?.businessDriver;
           gameService.getGameQuestions(updatedSession.question_set_id, isHost, businessDriver).then(({ questions: gameQuestions }: any) => {
             if (gameQuestions) {
+              console.log('[GamePage] Questions loaded:', gameQuestions.length);
               setQuestions(gameQuestions);
             }
           });
         }
       },
       onPlayerJoined: (player: GamePlayer) => {
+        console.log('[GamePage] Player joined:', player.name);
         addPlayer(player);
       },
       onPlayerUpdate: (player: GamePlayer) => {
+        console.log('[GamePage] Player updated:', player.name);
         updatePlayer(player.id, player);
       },
       onScoreUpdate: (player: GamePlayer) => {
+        console.log('[GamePage] Player score updated:', player.name, player.score);
         updatePlayer(player.id, player);
       },
     });
 
     // Subscribe to broadcast events for question changes
     realtimeService.subscribeToBroadcast(sessionId, 'question_changed', (payload: any) => {
+      console.log('[GamePage] Question changed broadcast received:', payload.question_index);
       setCurrentQuestionIndex(payload.question_index);
       // Note: hasAnswered/lastAnswer reset handled by separate useEffect above
     });
 
     return () => {
+      console.log('[GamePage] Cleaning up realtime subscriptions');
       realtimeService.unsubscribeFromGame(sessionId);
     };
   }, [sessionId, questions.length, setSession, setQuestions, addPlayer, updatePlayer, setCurrentQuestionIndex]);
@@ -269,13 +307,8 @@ export default function GamePage() {
         return;
       }
 
-      // Immediately update local session state to show game results
-      // Real-time subscription will also update this, but this ensures immediate UI response
-      if (result.session) {
-        setSession(result.session);
-      }
-
-      // Reload players to get updated placement and rewards
+      // CRITICAL: Reload players FIRST to get updated placement and rewards
+      // This ensures GameResults component has complete data when it first renders
       console.log('Reloading players with updated stats...');
       const { players: updatedPlayers } = await gameService.getGamePlayers(sessionId);
       if (updatedPlayers) {
@@ -285,6 +318,12 @@ export default function GamePage() {
         if (updated) {
           setCurrentPlayer(updated);
         }
+      }
+
+      // Now update session to 'completed' - this triggers GameResults to render
+      // By this point, players already have placement/rewards data from reload above
+      if (result.session) {
+        setSession(result.session);
       }
 
       console.log('Game ended successfully, notifying players...');

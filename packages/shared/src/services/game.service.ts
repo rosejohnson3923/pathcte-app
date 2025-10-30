@@ -414,16 +414,18 @@ export const gameService = {
             const pathkeyId = pathkeys[0].id;
             console.log(`Awarding pathkey ${pathkeyId} to user ${player.user_id}`);
 
-            const { error: awardError } = await (supabase.rpc as any)('award_pathkey', {
+            const { data: success, error: awardError } = await (supabase.rpc as any)('award_pathkey', {
               p_user_id: player.user_id,
               p_pathkey_id: pathkeyId,
             });
 
             if (awardError) {
               console.error('Error awarding pathkey:', awardError);
-            } else {
-              console.log('Pathkey awarded successfully');
+            } else if (success) {
+              console.log('Pathkey awarded successfully to user_pathkeys table');
               pathkeysEarned = [pathkeyId];
+            } else {
+              console.error('Pathkey award returned false - operation failed silently');
             }
           } else {
             console.warn('No pathkeys available to award');
@@ -433,6 +435,11 @@ export const gameService = {
         }
 
         // Update player's rewards using secure function
+        console.log(`Calling award_player_rewards for player ${player.id} with:`, {
+          tokens: tokensEarned,
+          pathkeys: pathkeysEarned,
+        });
+
         const { error: rewardError } = await supabase.rpc('award_player_rewards', {
           p_player_id: player.id,
           p_tokens_earned: tokensEarned,
@@ -442,6 +449,19 @@ export const gameService = {
         if (rewardError) {
           console.error(`Error awarding rewards to player ${player.id}:`, rewardError);
           throw rewardError;
+        }
+
+        // Verify the update by reading back the player
+        const { data: verifyPlayer, error: verifyError } = await supabase
+          .from('game_players')
+          .select('pathkeys_earned, tokens_earned')
+          .eq('id', player.id)
+          .single();
+
+        if (!verifyError && verifyPlayer) {
+          console.log(`Verified player ${player.id} rewards:`, verifyPlayer);
+        } else {
+          console.error(`Failed to verify player ${player.id} rewards:`, verifyError);
         }
 
         // If user is registered, award tokens to their profile
