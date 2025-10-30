@@ -6,7 +6,7 @@
 
 import { useFetchMany, useInsertOne, useUpdateOne } from './useSupabase';
 import { useAuth } from './useAuth';
-import type { Pathkey, UserPathkey } from '@pathket/shared';
+import type { Pathkey, UserPathkey } from '@pathcte/shared';
 
 /**
  * Fetch all pathkeys (catalog)

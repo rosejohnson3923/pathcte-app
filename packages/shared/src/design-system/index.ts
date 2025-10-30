@@ -1,7 +1,7 @@
 /**
  * Design System Exports
  * ======================
- * Complete design system for Pathket
+ * Complete design system for Pathcte
  * Works in both web and mobile platforms
  */
 
@@ -13,4 +13,4 @@ export { default as tokens } from './tokens';
 export * from './theme';
 
 // For web: Import the CSS file in your main.tsx or index.css
-// import '@pathket/shared/design-system/tokens.css';
+// import '@pathcte/shared/design-system/tokens.css';

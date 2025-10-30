@@ -7,9 +7,9 @@
 import { useEffect, useState } from 'react';
 import { Card, Badge, Button, Spinner } from '../common';
 import { Users, Copy, Check, Crown, Wifi, WifiOff, Gamepad2 } from 'lucide-react';
-import { useGameStore } from '@pathket/shared';
-import { realtimeService, gameService } from '@pathket/shared';
-import type { GamePlayer } from '@pathket/shared';
+import { useGameStore } from '@pathcte/shared';
+import { realtimeService, gameService } from '@pathcte/shared';
+import type { GamePlayer } from '@pathcte/shared';
 
 export interface GameLobbyProps {
   sessionId: string;

@@ -35,7 +35,7 @@ if (error) {
 console.log(`Found ${pathkeys.length} pathkeys:\n`);
 
 pathkeys.forEach((pk) => {
-  const isAzureUrl = pk.image_url?.includes('pathket.blob.core.windows.net');
+  const isAzureUrl = pk.image_url?.includes('pathcte.blob.core.windows.net');
   const isPlaceholder = pk.image_url?.includes('placehold.co');
 
   console.log(`${pk.key_code}: ${pk.name}`);

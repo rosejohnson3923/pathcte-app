@@ -1,4 +1,4 @@
--- Pathket Question Sets and Questions
+-- Pathcte Question Sets and Questions
 -- Generated: 2025-10-28T19:55:58.053Z
 -- Teacher ID: 0ae5001d-41f0-4969-86a9-96d8dc478a28
 -- Run this entire script in Supabase SQL Editor

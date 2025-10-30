@@ -1,6 +1,6 @@
 # Database Seed Data
 
-This directory contains SQL scripts to populate the Pathket database with test data for development and testing.
+This directory contains SQL scripts to populate the Pathcte database with test data for development and testing.
 
 ## Contents
 

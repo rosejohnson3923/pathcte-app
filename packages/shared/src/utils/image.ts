@@ -118,7 +118,7 @@ export const ensureAzureUrlHasSasToken = (imageUrl: string | null | undefined): 
   if (!imageUrl) return null;
 
   // If it's not an Azure Storage URL, return as-is
-  if (!imageUrl.includes('pathket.blob.core.windows.net')) {
+  if (!imageUrl.includes('pathcte.blob.core.windows.net')) {
     return imageUrl;
   }
 

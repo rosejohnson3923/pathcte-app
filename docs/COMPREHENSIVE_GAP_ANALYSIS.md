@@ -239,7 +239,7 @@ We're using a **hook-based architecture** instead of separate service files for 
 | azure-storage.service.ts | ✅ | ✅ | ✅ | Full upload/download/delete |
 | azure-storage config | ✅ | ✅ | ✅ | Environment-based |
 | Image utilities | ✅ | ✅ | ✅ | URL generation helpers |
-| Storage account | ✅ | ✅ | ✅ | pathket.blob.core.windows.net |
+| Storage account | ✅ | ✅ | ✅ | pathcte.blob.core.windows.net |
 | Containers (4) | ✅ | ✅ | ✅ | careers, pathkeys, avatars, achievements |
 | SAS token | ✅ | ✅ | ✅ | Configured, expires 2027 |
 | Component integration | ✅ | ✅ | ✅ | All components using Azure URLs |
@@ -366,7 +366,7 @@ We're using a **hook-based architecture** instead of separate service files for 
 | Career Clash | ✅ | ❌ | ❌ | Phase 6 |
 | Career Factory | ✅ | ❌ | ❌ | Phase 6 |
 | Career Racing | ✅ | ❌ | ❌ | Phase 6 |
-| Pathket Study | ✅ | ❌ | ❌ | Phase 6 |
+| pathcte Study | ✅ | ❌ | ❌ | Phase 6 |
 
 **Phase 5 Summary:**
 - ✅ Complete live game system working

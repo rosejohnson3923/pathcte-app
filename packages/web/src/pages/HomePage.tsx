@@ -9,7 +9,7 @@ export default function HomePage() {
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Key className="h-8 w-8 text-white" />
-            <span className="text-2xl font-display font-bold text-white">Pathket</span>
+            <span className="text-2xl font-display font-bold text-white">Pathcte</span>
           </div>
           <div className="flex items-center space-x-4">
             <Link to="/login" className="btn-ghost text-white hover:bg-white/10">
@@ -78,7 +78,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-white/70">
-        <p>&copy; 2025 Pathket. All rights reserved.</p>
+        <p>&copy; 2025 Pathcte. All rights reserved.</p>
       </footer>
     </div>
   );

@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <Key className="h-8 w-8 text-purple-400" />
-              <span className="text-2xl font-display font-bold text-white">Pathket</span>
+              <span className="text-2xl font-display font-bold text-white">pathcte</span>
             </Link>
             <p className="text-sm text-gray-400 max-w-md">
               Unlock your future with engaging career exploration games. Learn about careers, earn
@@ -111,7 +111,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
           <p className="text-sm text-gray-400">
-            © {currentYear} Pathket. All rights reserved.
+            © {currentYear} pathcte. All rights reserved.
           </p>
           <p className="text-sm text-gray-400 mt-2 sm:mt-0">
             Built with ❤️ for career exploration

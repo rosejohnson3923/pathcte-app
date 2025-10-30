@@ -7,7 +7,7 @@
 import { DashboardLayout } from '../components/layout';
 import { Card, Badge, Button } from '../components/common';
 import { User, Trophy, Gamepad2, Award, Calendar, Mail } from 'lucide-react';
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore } from '@pathcte/shared';
 import { useUserPathkeys, useGameCount } from '../hooks';
 
 export default function ProfilePage() {

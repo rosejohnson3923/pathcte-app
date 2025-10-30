@@ -6,7 +6,7 @@
 
 import { Card, Badge } from '../common';
 import { Trophy, Medal, Award } from 'lucide-react';
-import type { GamePlayer } from '@pathket/shared';
+import type { GamePlayer } from '@pathcte/shared';
 
 export interface LeaderboardProps {
   players: GamePlayer[];

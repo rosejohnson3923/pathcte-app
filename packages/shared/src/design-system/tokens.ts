@@ -35,7 +35,7 @@ export const colors = {
     950: '#030712',
   },
 
-  // Brand - Pathfinity Purple (shared with Pathket)
+  // Brand - Pathfinity Purple (shared with Pathcte)
   purple: {
     50: '#faf5ff',
     100: '#f3e8ff',
@@ -105,7 +105,7 @@ export const colors = {
     600: '#d97706',
   },
 
-  // Pathket-Specific: Rarity Colors
+  // Pathcte-Specific: Rarity Colors
   rarity: {
     common: '#9ca3af',
     uncommon: '#10b981',

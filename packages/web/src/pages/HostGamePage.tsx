@@ -9,9 +9,9 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { Button, Input, Card, Spinner, Badge } from '../components/common';
 import { useAuth, useFilteredQuestionSets } from '../hooks';
-import { gameService, useGameStore } from '@pathket/shared';
+import { gameService, useGameStore } from '@pathcte/shared';
 import { Gamepad2, Settings, Users, BookOpen, Play, ChevronDown, UserCheck, Filter } from 'lucide-react';
-import type { GameMode, SessionType } from '@pathket/shared';
+import type { GameMode, SessionType } from '@pathcte/shared';
 
 const GAME_MODES: { value: GameMode; label: string; description: string }[] = [
   {

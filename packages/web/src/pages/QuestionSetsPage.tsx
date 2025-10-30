@@ -11,8 +11,8 @@ import { Card, Button, Badge, Spinner } from '../components/common';
 import { FileQuestion, Plus, Edit, Trash2, Copy, Search } from 'lucide-react';
 import { useQuestionSets, useMyQuestionSets, useCreateQuestionSet, useUpdateQuestionSet, useDeleteQuestionSet } from '../hooks';
 import { QuestionSetEditorModal } from '../components/QuestionSetEditorModal';
-import { toast } from '@pathket/shared';
-import type { QuestionSet } from '@pathket/shared';
+import { toast } from '@pathcte/shared';
+import type { QuestionSet } from '@pathcte/shared';
 
 export default function QuestionSetsPage() {
   const navigate = useNavigate();

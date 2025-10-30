@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { useUIStore } from '@pathket/shared';
+import { useUIStore } from '@pathcte/shared';
 import clsx from 'clsx';
 
 interface ThemeToggleProps {

@@ -1,7 +1,7 @@
 {
-  "name": "@pathket/web",
+  "name": "@pathcte/web",
   "version": "1.0.0",
-  "description": "Pathket web application",
+  "description": "Pathcte web application",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
-    "@pathket/shared": "*",
+    "@pathcte/shared": "*",
     "@supabase/supabase-js": "^2.38.0",
     "@tanstack/react-query": "^5.90.5",
     "clsx": "^2.0.0",

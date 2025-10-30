@@ -1,6 +1,6 @@
 /**
- * @pathket/shared
- * Shared code for Pathket platform (types, services, hooks, utils)
+ * @pathcte/shared
+ * Shared code for Pathcte platform (types, services, hooks, utils)
  */
 
 // Types

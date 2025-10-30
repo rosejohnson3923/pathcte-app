@@ -11,7 +11,7 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlc3R3ZGtsZHducG1xeHJraXNvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MjczOTgsImV4cCI6MjA3NzEwMzM5OH0.6DPT5zAwGfPGDLcuV8kTq0TKntyh93Ee57oQY3hHZJA'
 );
 
-const AZURE_STORAGE_URL = 'https://pathket.blob.core.windows.net';
+const AZURE_STORAGE_URL = 'https://pathcte.blob.core.windows.net';
 const CONTAINER = 'pathkeys';
 
 // Map of pathkey key_codes to their Azure blob filenames

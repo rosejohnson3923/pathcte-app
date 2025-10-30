@@ -5,11 +5,11 @@
  */
 
 import React, { useState } from 'react';
-import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathcte/shared';
 import { ensureAzureUrlHasSasToken } from '../../config/azure';
 import { Trophy, Lock, Star } from 'lucide-react';
 import clsx from 'clsx';
-import type { Pathkey, UserPathkey } from '@pathket/shared';
+import type { Pathkey, UserPathkey } from '@pathcte/shared';
 
 export interface PathkeyCardProps {
   pathkey: Pathkey;

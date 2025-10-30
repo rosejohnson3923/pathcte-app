@@ -5,10 +5,10 @@
  */
 
 import { useState } from 'react';
-import { getCareerImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { getCareerImageUrl, getPlaceholderImageUrl } from '@pathcte/shared';
 import { TrendingUp, TrendingDown, DollarSign, Briefcase } from 'lucide-react';
 import clsx from 'clsx';
-import type { Career } from '@pathket/shared';
+import type { Career } from '@pathcte/shared';
 
 export interface CareerCardProps {
   career: Career;

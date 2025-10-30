@@ -7,7 +7,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Badge, Button } from '../common';
-import { getCareerImageUrl, getPlaceholderImageUrl, gameService, toast } from '@pathket/shared';
+import { getCareerImageUrl, getPlaceholderImageUrl, gameService, toast } from '@pathcte/shared';
 import { useAuth } from '../../hooks';
 import {
   TrendingUp,
@@ -20,7 +20,7 @@ import {
   Calendar,
   PlayCircle,
 } from 'lucide-react';
-import type { Career } from '@pathket/shared';
+import type { Career } from '@pathcte/shared';
 
 export interface CareerDetailProps {
   career: Career | null;

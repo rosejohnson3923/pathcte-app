@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalFooter } from './common/Modal';
 import { Button, Input } from './common';
 import { useAuth } from '../hooks';
-import { QuestionSet } from '@pathket/shared';
+import { QuestionSet } from '@pathcte/shared';
 
 interface QuestionSetEditorModalProps {
   isOpen: boolean;

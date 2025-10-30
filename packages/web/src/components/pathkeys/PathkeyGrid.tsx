@@ -8,7 +8,7 @@ import React, { useState, useMemo } from 'react';
 import { PathkeyCard } from './PathkeyCard';
 import { Badge, Spinner } from '../common';
 import { Trophy } from 'lucide-react';
-import type { Pathkey, UserPathkey, Rarity } from '@pathket/shared';
+import type { Pathkey, UserPathkey, Rarity } from '@pathcte/shared';
 
 export interface PathkeyGridProps {
   pathkeys: Pathkey[];

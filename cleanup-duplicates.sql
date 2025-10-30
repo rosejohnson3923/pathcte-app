@@ -83,7 +83,7 @@ ORDER BY created_at, title;
 --
 -- COMMIT;
 --
--- -- After running this, you can re-run pathket-questions-runnable.sql
+-- -- After running this, you can re-run pathcte-questions-runnable.sql
 
 -- ============================================
 -- STEP 5: Verify cleanup (run after cleanup)

@@ -17,8 +17,8 @@ import {
   useDeleteQuestion,
 } from '../hooks';
 import { QuestionEditorModal } from '../components/QuestionEditorModal';
-import { toast } from '@pathket/shared';
-import type { Question } from '@pathket/shared';
+import { toast } from '@pathcte/shared';
+import type { Question } from '@pathcte/shared';
 
 export default function QuestionSetDetailPage() {
   const { id } = useParams<{ id: string }>();

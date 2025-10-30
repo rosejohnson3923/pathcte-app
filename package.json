@@ -1,8 +1,8 @@
 {
-  "name": "pathket",
+  "name": "pathcte",
   "version": "1.0.0",
   "private": true,
-  "description": "Pathket - Career Exploration Gaming Platform",
+  "description": "Pathcte - Career Exploration Gaming Platform",
   "author": "Pathfinity",
   "license": "UNLICENSED",
   "workspaces": [

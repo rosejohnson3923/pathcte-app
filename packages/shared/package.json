@@ -1,7 +1,7 @@
 {
-  "name": "@pathket/shared",
+  "name": "@pathcte/shared",
   "version": "1.0.0",
-  "description": "Shared code for Pathket (types, services, hooks, utils)",
+  "description": "Shared code for Pathcte (types, services, hooks, utils)",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {

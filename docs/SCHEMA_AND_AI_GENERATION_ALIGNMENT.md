@@ -1,5 +1,5 @@
 # Schema & AI Generation Alignment Documentation
-## Pathket Question Sets, Questions, and Careers Data Model
+## Pathcte Question Sets, Questions, and Careers Data Model
 
 **Created:** 2025-01-30
 **Last Updated:** 2025-01-30
@@ -19,7 +19,7 @@
 
 ## Overview
 
-This document defines the complete data model for Pathket's career education platform, including:
+This document defines the complete data model for Pathcte's career education platform, including:
 - Database schema for `careers`, `question_sets`, and `questions` tables
 - Relationships between Industry, Sector, Career, and Business Drivers
 - AI content generation requirements to match schema
@@ -330,7 +330,7 @@ if (businessDriver) {
 
 ### Current Scripts
 
-1. **`generate-pathket-questions.mjs`**
+1. **`generate-pathcte-questions.mjs`**
    - Generates Career Quest (sector/industry-based) sets
    - **Does NOT currently generate business_driver**
 
@@ -424,7 +424,7 @@ Tag each question with the PRIMARY business driver it addresses.
 ### ❌ Gap 1: AI Scripts Don't Generate business_driver
 
 **Current State:**
-- `generate-pathket-questions.mjs` generates questions WITHOUT business_driver tags
+- `generate-pathcte-questions.mjs` generates questions WITHOUT business_driver tags
 - `generate-explore-careers-questions.mjs` generates questions WITHOUT business_driver tags
 
 **Required Fix:**
@@ -472,7 +472,7 @@ Tag each question with the PRIMARY business driver it addresses.
 ### Phase 1: Update AI Prompts ✅ READY TO IMPLEMENT
 
 **Files to Update:**
-1. `/pathfinity-app/scripts/generate-pathket-questions.mjs`
+1. `/pathfinity-app/scripts/generate-pathcte-questions.mjs`
 2. `/pathfinity-app/scripts/generate-explore-careers-questions.mjs`
 
 **Changes:**
@@ -621,12 +621,12 @@ Use this checklist when generating or importing questions:
   - `027_add_business_driver_to_questions.sql` - Business driver support
 
 - **AI Generation Scripts:**
-  - `/pathfinity-app/scripts/generate-pathket-questions.mjs`
+  - `/pathfinity-app/scripts/generate-pathcte-questions.mjs`
   - `/pathfinity-app/scripts/generate-explore-careers-questions.mjs`
 
 - **UI Implementation:**
-  - `/pathket.app/packages/web/src/pages/HostGamePage.tsx` - Filter hierarchy
-  - `/pathket.app/packages/shared/src/services/game.service.ts` - Question loading
+  - `/pathcte.app/packages/web/src/pages/HostGamePage.tsx` - Filter hierarchy
+  - `/pathcte.app/packages/shared/src/services/game.service.ts` - Question loading
 
 ---
 

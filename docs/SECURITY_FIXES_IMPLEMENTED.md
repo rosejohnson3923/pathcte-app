@@ -1,4 +1,4 @@
-# Pathket Security Fixes - Implementation Log
+# Pathcte Security Fixes - Implementation Log
 
 **Date**: October 29, 2025
 **Status**: Priority 1 Fixes Implemented
@@ -110,7 +110,7 @@ Implement per-player rate limiting to prevent rapid-fire answer spam:
 **Estimated Time**: 20 minutes
 
 Validate Origin header on Supabase Realtime connections to prevent CSWSH attacks:
-- Only allow connections from `pathket.app` domain
+- Only allow connections from `pathcte.app` domain
 - Reject connections from unknown origins
 
 ### Fix #7: Behavioral Bot Detection
@@ -238,7 +238,7 @@ If you discover a security vulnerability:
 
 1. **Do NOT disclose publicly**
 2. File a private security advisory in GitHub
-3. Email security@pathket.app (if configured)
+3. Email security@pathcte.app (if configured)
 4. Include:
    - Description of vulnerability
    - Steps to reproduce

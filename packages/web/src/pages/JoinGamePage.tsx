@@ -9,8 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { Button, Input, Card, Spinner } from '../components/common';
 import { useAuth } from '../hooks';
-import { gameService } from '@pathket/shared';
-import { useGameStore } from '@pathket/shared';
+import { gameService } from '@pathcte/shared';
+import { useGameStore } from '@pathcte/shared';
 import { Gamepad2, Users, ArrowRight } from 'lucide-react';
 
 export default function JoinGamePage() {

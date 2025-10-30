@@ -21,7 +21,7 @@ console.log(`Found ${pathkeys.length} pathkeys:\n`);
 
 pathkeys.forEach(pk => {
   const hasUrl = !!pk.image_url;
-  const isAzure = pk.image_url && pk.image_url.includes('pathket.blob.core.windows.net');
+  const isAzure = pk.image_url && pk.image_url.includes('pathcte.blob.core.windows.net');
   console.log(`${pk.key_code}: ${pk.name}`);
   console.log(`  URL: ${pk.image_url || 'NULL'}`);
   console.log(`  Has URL: ${hasUrl ? 'YES' : 'NO'}, Is Azure: ${isAzure ? 'YES' : 'NO'}`);

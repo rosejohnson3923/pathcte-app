@@ -34,7 +34,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const AZURE_BASE_URL = 'https://pathket.blob.core.windows.net/pathkeys';
+const AZURE_BASE_URL = 'https://pathcte.blob.core.windows.net/pathkeys';
 
 // Pathkey mappings
 const updates = [
@@ -120,7 +120,7 @@ async function main() {
   }
 
   data.forEach(pathkey => {
-    const isAzure = pathkey.image_url.includes('pathket.blob.core.windows.net');
+    const isAzure = pathkey.image_url.includes('pathcte.blob.core.windows.net');
     const icon = isAzure ? '✅' : '⚠️';
     console.log(`  ${icon} ${pathkey.key_code}: ${pathkey.name}`);
   });

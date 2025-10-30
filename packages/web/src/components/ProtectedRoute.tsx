@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore } from '@pathcte/shared';
 import { FullPageSpinner } from './common';
 
 interface ProtectedRouteProps {

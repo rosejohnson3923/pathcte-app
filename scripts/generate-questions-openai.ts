@@ -2,7 +2,7 @@
  * Generate Question Sets Using OpenAI
  * ===================================
  * This script uses OpenAI to generate realistic question sets and questions
- * for the Pathket platform, then inserts them into Supabase.
+ * for the Pathcte platform, then inserts them into Supabase.
  *
  * Usage:
  *   npm install openai dotenv

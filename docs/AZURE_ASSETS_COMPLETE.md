@@ -45,7 +45,7 @@ All 16 pathkey images have been successfully:
 ## Azure Storage Details
 
 ### Container: `pathkeys`
-**Endpoint:** https://pathket.blob.core.windows.net/pathkeys
+**Endpoint:** https://pathcte.blob.core.windows.net/pathkeys
 
 ### Files Uploaded:
 ```
@@ -78,10 +78,10 @@ All pathkey records in the `pathkeys` table have been updated with Azure Storage
 
 ```sql
 -- Example URLs:
-https://pathket.blob.core.windows.net/pathkeys/DEV-001.png
-https://pathket.blob.core.windows.net/pathkeys/SKILL-CODE.png
-https://pathket.blob.core.windows.net/pathkeys/IND-TECH.png
-https://pathket.blob.core.windows.net/pathkeys/MILE-FIRST.png
+https://pathcte.blob.core.windows.net/pathkeys/DEV-001.png
+https://pathcte.blob.core.windows.net/pathkeys/SKILL-CODE.png
+https://pathcte.blob.core.windows.net/pathkeys/IND-TECH.png
+https://pathcte.blob.core.windows.net/pathkeys/MILE-FIRST.png
 ```
 
 **Status:** All 16 pathkey image_url fields updated ✅

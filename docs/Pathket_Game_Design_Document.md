@@ -1,11 +1,11 @@
-# PATHKET GAME DESIGN DOCUMENT
+#  PATHCTE GAME DESIGN DOCUMENT
 ## Educational Career Exploration Game Platform
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-**Game Name:** Pathket  
+**Game Name:** Pathcte  
 **Tagline:** "Unlock Your Future, One Key at a Time"  
 **Platform:** Web-based (desktop, tablet, mobile)  
 **Target Audience:** Students grades 6-12 (ages 11-18)  
@@ -65,7 +65,7 @@ Pathkeys are collectible digital keys that students earn through gameplay. Each 
 
 **Pathkey Collection:**
 - Students earn tokens through correct answers
-- Tokens can be spent in the Pathket Market to unlock key packs
+- Tokens can be spent in the Pathcte Market to unlock key packs
 - Duplicate keys convert to bonus tokens
 - Students build a virtual "keyring" visible on their profile
 
@@ -493,7 +493,7 @@ All Blooket game modes adapted with career focus:
 
 ---
 
-### 2.19 PATHKET STUDY (adapts Study)
+### 2.19 PATHCTE STUDY (adapts Study)
 **Duration:** 5 minutes  
 **Players:** Solo/Homework only  
 **Difficulty:** Normal  
@@ -618,7 +618,7 @@ All Blooket game modes adapted with career focus:
 - Career Factory
 - Path Defense (1 & 2)
 - Career Kingdom
-- Pathket Study
+- Pathcte Study
 - Plushie Panic
 - Key Cottage
 - Path Portal
@@ -654,7 +654,7 @@ All Blooket game modes adapted with career focus:
 - **Play:** Quick access to host games
 - **Discover:** Browse question sets
 - **My Sets:** Manage created sets
-- **Market:** (Student view shows Pathket Market)
+- **Market:** (Student view shows Pathcte Market)
 - **Homework:** Create and monitor assignments
 - **History:** View past games
 - **Reports:** Detailed analytics
@@ -695,7 +695,7 @@ All Blooket game modes adapted with career focus:
 - Integration with LMS gradebooks
 - Share reports with parents/administrators
 
-**Career Exploration Analytics (UNIQUE TO PATHKET):**
+**Career Exploration Analytics (UNIQUE TO PATHCTE):**
 - Track which careers students explore most
 - Identify student interest patterns
 - Career sector engagement
@@ -705,7 +705,7 @@ All Blooket game modes adapted with career focus:
 
 ---
 
-## 6. PATHKET MARKET
+## 6. PATHCTE MARKET
 
 ### 6.1 Market Overview
 
@@ -840,7 +840,7 @@ When students unlock career keys, they access:
 - Access to Discover library
 - Basic reporting
 
-**Pathket Plus (Monthly Subscription):**
+**Pathcte Plus (Monthly Subscription):**
 - Host up to 300 players
 - Priority support
 - Advanced analytics with exports
@@ -853,7 +853,7 @@ When students unlock career keys, they access:
 - Career curriculum guides
 - Industry partnership content
 
-**Pathket Plus Flex (Annual Subscription):**
+**Pathcte Plus Flex (Annual Subscription):**
 - All Plus features
 - Discounted annual rate
 - Additional storage for question sets
@@ -894,7 +894,7 @@ When students unlock career keys, they access:
 
 **Live Games:**
 - Teacher device shows game code and controls
-- Students join via play.pathket.com
+- Students join via play.pathcte.com
 - Enter game code
 - Choose display name or random name
 - Wait for teacher to start
@@ -1010,7 +1010,7 @@ When students unlock career keys, they access:
 
 ### 12.2 Paid Tiers
 
-**Pathket Plus (Teachers):**
+**Pathcte Plus (Teachers):**
 - $35.99/month or $119.99/year
 - Up to 300 players
 - Advanced analytics
@@ -1213,7 +1213,7 @@ When students unlock career keys, they access:
 
 **Logo:**
 - Stylized key with career pathways inside
-- "Pathket" wordmark in friendly, modern font
+- "Pathcte" wordmark in friendly, modern font
 - Finn mascot optional integration
 
 ### 17.2 Voice & Tone
@@ -1373,7 +1373,7 @@ When students unlock career keys, they access:
 - Knowledge base
 - Community forums
 - Video tutorials on YouTube
-- Social media support (@PathketEdu)
+- Social media support (@Pathcte)
 
 ### 20.3 Professional Development
 
@@ -1395,12 +1395,12 @@ When students unlock career keys, they access:
 
 ## CONCLUSION
 
-Pathket represents the evolution of educational gaming by connecting engaging gameplay with meaningful career exploration. By replacing generic collectibles (Blooks) with purposeful career keys (Pathkeys), we create an experience where every game played and every question answered brings students closer to understanding their future possibilities.
+Pathcte represents the evolution of educational gaming by connecting engaging gameplay with meaningful career exploration. By replacing generic collectibles (Blooks) with purposeful career keys (Pathkeys), we create an experience where every game played and every question answered brings students closer to understanding their future possibilities.
 
-With Finn as their guide, students don't just play games—they unlock their potential, explore careers they never knew existed, and build confidence in their ability to shape their futures. For teachers and counselors, Pathket provides actionable data about student interests and engagement, supporting the critical work of college and career readiness.
+With Finn as their guide, students don't just play games—they unlock their potential, explore careers they never knew existed, and build confidence in their ability to shape their futures. For teachers and counselors, Pathcte provides actionable data about student interests and engagement, supporting the critical work of college and career readiness.
 
 **Mission Statement:**
-*Pathket empowers students to discover their futures through engaging gameplay, turning every question answered into a step toward unlocking their potential.*
+*Pathcte empowers students to discover their futures through engaging gameplay, turning every question answered into a step toward unlocking their potential.*
 
 **Vision Statement:**
 *A world where every student explores careers with curiosity, confidence, and joy—where learning about the future is as fun as playing a game.*
@@ -1429,7 +1429,7 @@ With Finn as their guide, students don't just play games—they unlock their pot
 | Career Kingdom | 10 min | 1-300 | Complex | Strategy | ✅ |
 | Path Portal | 7 min | 2-300 | Normal | Speed | ✅ |
 | Key Cottage | 7 min | 1-60 | Normal | Management | ✅ |
-| Pathket Study | 5 min | Solo | Normal | Accuracy | ✅ |
+| Pathcte Study | 5 min | Solo | Normal | Accuracy | ✅ |
 | Plushie Panic | 7 min | 1-300 | Normal | Speed | ✅ |
 
 ---
@@ -1478,7 +1478,7 @@ With Finn as their guide, students don't just play games—they unlock their pot
 
 **Document Version:** 1.0  
 **Last Updated:** October 27, 2025  
-**Author:** Pathket Design Team  
+**Author:** Pathcte Design Team  
 **Status:** Ready for Development
 
 ---

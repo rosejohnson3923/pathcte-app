@@ -8,7 +8,7 @@ import React, { Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
 import { Key, User, LogOut, Settings, Home, BookOpen, Trophy } from 'lucide-react';
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore } from '@pathcte/shared';
 import { Button, ThemeToggle } from '../common';
 import clsx from 'clsx';
 
@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <Key className="h-8 w-8 text-purple-600" />
-            <span className="text-2xl font-display font-bold text-text-primary">Pathket</span>
+            <span className="text-2xl font-display font-bold text-text-primary">Pathcte</span>
           </Link>
 
           {/* Navigation */}

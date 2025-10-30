@@ -7,7 +7,7 @@
 
 ## Overview
 
-Pathket uses **Azure Blob Storage** to host all images and media assets including:
+Pathcte uses **Azure Blob Storage** to host all images and media assets including:
 - 🔑 Pathkey artwork (static and animated)
 - 💼 Career images and videos
 - 👤 User avatars
@@ -18,9 +18,9 @@ Pathket uses **Azure Blob Storage** to host all images and media assets includin
 ## Azure Storage Account Configuration
 
 ### Account Details
-- **Account Name:** `pathket`
+- **Account Name:** `pathcte`
 - **Location:** Central US (with RA-GRS replication to East US 2)
-- **Endpoint:** `https://pathket.blob.core.windows.net`
+- **Endpoint:** `https://pathcte.blob.core.windows.net`
 - **Performance Tier:** Standard
 - **Replication:** Read-access geo-redundant storage (RA-GRS)
 
@@ -42,8 +42,8 @@ Add the following to your `.env` file:
 
 ```bash
 # Azure Blob Storage Configuration
-VITE_AZURE_STORAGE_ACCOUNT=pathket
-VITE_AZURE_STORAGE_URL=https://pathket.blob.core.windows.net
+VITE_AZURE_STORAGE_ACCOUNT=pathcte
+VITE_AZURE_STORAGE_URL=https://pathcte.blob.core.windows.net
 VITE_AZURE_STORAGE_SAS_TOKEN=your_sas_token_here
 
 # Container Names
@@ -148,7 +148,7 @@ getImageWithFallback(imageUrl: string | null, fallbackType: string): string
 ### Display a Pathkey Image in React
 
 ```tsx
-import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathket/shared';
+import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathcte/shared';
 
 function PathkeyCard({ pathkeyId }: { pathkeyId: string }) {
   return (
@@ -166,7 +166,7 @@ function PathkeyCard({ pathkeyId }: { pathkeyId: string }) {
 ### Upload a Pathkey Image
 
 ```typescript
-import { azureStorageService } from '@pathket/shared';
+import { azureStorageService } from '@pathcte/shared';
 
 async function uploadPathkey(pathkeyId: string, imageFile: File) {
   const result = await azureStorageService.uploadPathkeyImage(
@@ -183,7 +183,7 @@ async function uploadPathkey(pathkeyId: string, imageFile: File) {
 ### Upload a Career Image with Progress
 
 ```typescript
-import { azureStorageService } from '@pathket/shared';
+import { azureStorageService } from '@pathcte/shared';
 
 async function uploadCareerImage(careerCode: string, file: File) {
   const result = await azureStorageService.uploadBlob({
@@ -203,7 +203,7 @@ async function uploadCareerImage(careerCode: string, file: File) {
 ### List All Pathkeys in Storage
 
 ```typescript
-import { azureStorageService } from '@pathket/shared';
+import { azureStorageService } from '@pathcte/shared';
 
 async function listAllPathkeys() {
   const blobs = await azureStorageService.listBlobs({
@@ -293,7 +293,7 @@ async function listAllPathkeys() {
 ### CORS Configuration
 If accessing from web browsers, configure CORS in Azure:
 ```
-Allowed origins: https://app.pathket.com, http://localhost:5173
+Allowed origins: https://app.pathcte.com, http://localhost:5173
 Allowed methods: GET, HEAD
 Allowed headers: *
 Max age: 3600

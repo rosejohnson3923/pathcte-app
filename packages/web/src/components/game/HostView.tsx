@@ -8,8 +8,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Badge } from '../common';
 import { Clock, Users, ArrowRight, Sparkles } from 'lucide-react';
-import { shuffleQuestionOptions } from '@pathket/shared';
-import type { Question, GamePlayer } from '@pathket/shared';
+import { shuffleQuestionOptions } from '@pathcte/shared';
+import type { Question, GamePlayer } from '@pathcte/shared';
 
 export interface HostViewProps {
   question: Question;

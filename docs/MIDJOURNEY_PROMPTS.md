@@ -1,4 +1,4 @@
-# Midjourney Prompts for Pathket Pathkeys
+# Midjourney Prompts for Pathcte Pathkeys
 **Status:** 8/16 complete (Career pathkeys done ✅)
 **Remaining:** 8 pathkeys (4 skill + 3 industry + 1 milestone)
 

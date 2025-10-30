@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { DashboardLayout } from '../components/layout';
 import { Card, Button, Input, Badge } from '../components/common';
 import { Settings, Bell, Lock, Mail, Globe, Palette } from 'lucide-react';
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore } from '@pathcte/shared';
 
 export default function SettingsPage() {
   const { profile } = useAuthStore();
@@ -185,7 +185,7 @@ export default function SettingsPage() {
                   Appearance
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Customize how Pathket looks
+                  Customize how Pathcte looks
                 </p>
               </div>
             </div>

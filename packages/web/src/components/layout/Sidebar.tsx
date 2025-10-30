@@ -17,7 +17,7 @@ import {
   Users,
   Settings,
 } from 'lucide-react';
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore } from '@pathcte/shared';
 import clsx from 'clsx';
 
 interface SidebarProps {

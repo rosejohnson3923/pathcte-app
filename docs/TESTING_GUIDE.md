@@ -1,4 +1,4 @@
-# Testing Guide: Pathket Game System
+# Testing Guide: Pathcte Game System
 
 Quick reference for testing the live multiplayer game system.
 

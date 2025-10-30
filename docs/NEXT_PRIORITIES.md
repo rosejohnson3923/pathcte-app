@@ -21,7 +21,7 @@
 ### Priority 1: Pathkey Collection UI (8-10 hours) 🔑
 
 **Why First:**
-- Core value proposition of Pathket
+- Core value proposition of Pathcte
 - Already have: Database ✅, Hooks ✅, Azure Images ✅
 - Dashboard already shows count, just need detail views
 

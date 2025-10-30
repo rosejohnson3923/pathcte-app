@@ -1,8 +1,8 @@
-# Pathket
+# Pathcte
 
 **Career Exploration Gaming Platform**
 
-Pathket is a gamified career exploration platform that makes learning about careers fun through interactive games and collectible "Pathkeys". Students play educational games to unlock career collectibles, while teachers can create custom question sets and host live multiplayer sessions.
+Pathcte is a gamified career exploration platform that makes learning about careers fun through interactive games and collectible "Pathkeys". Students play educational games to unlock career collectibles, while teachers can create custom question sets and host live multiplayer sessions.
 
 ## 🎯 Project Overview
 
@@ -17,7 +17,7 @@ Pathket is a gamified career exploration platform that makes learning about care
 This is a monorepo managed with npm workspaces:
 
 ```
-pathket.app/
+pathcte.app/
 ├── packages/
 │   ├── shared/          # Shared code (types, services, hooks, utils)
 │   ├── web/             # React web application
@@ -82,13 +82,13 @@ npm run dev
 
 ## 🎨 Design System
 
-Pathket uses a custom design system built with Tailwind CSS and shared design tokens. All components are built to work seamlessly across web and mobile platforms.
+Pathcte uses a custom design system built with Tailwind CSS and shared design tokens. All components are built to work seamlessly across web and mobile platforms.
 
 ## 📱 Mobile Development
 
 Native iOS and Android apps are planned for Q2 2025 using React Native with Expo. The codebase is architected with mobile-first principles to enable 70% code reuse between web and mobile platforms.
 
-See [Mobile App Strategy](./docs/Pathket_Mobile_App_Strategy.md) for details.
+See [Mobile App Strategy](./docs/Pathcte_Mobile_App_Strategy.md) for details.
 
 ## 🔐 Security
 
@@ -99,8 +99,8 @@ See [Mobile App Strategy](./docs/Pathket_Mobile_App_Strategy.md) for details.
 
 ## 🤝 Integration with Pathfinity
 
-Pathket integrates seamlessly with Pathfinity:
-- Premium Pathfinity subscribers get full Pathket access
+pathcte integrates seamlessly with Pathfinity:
+- Premium Pathfinity subscribers get full pathcte access
 - SSO authentication between platforms
 - Featured placement in Discovered Live! Arcade
 - Shared career content and data
@@ -111,9 +111,9 @@ Proprietary - All Rights Reserved
 
 ## 🌐 Links
 
-- **Production**: https://pathket.com
-- **Documentation**: [Implementation Guide](./docs/Pathket_Implementation_Guide_Claude_Code.md)
-- **Mobile Strategy**: [Mobile App Strategy](./docs/Pathket_Mobile_App_Strategy.md)
+- **Production**: https://pathcte.com
+- **Documentation**: [Implementation Guide](./docs/Pathcte_Implementation_Guide_Claude_Code.md)
+- **Mobile Strategy**: [Mobile App Strategy](./docs/Pathcte_Mobile_App_Strategy.md)
 
 ---
 

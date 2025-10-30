@@ -10,7 +10,7 @@ import { PathkeyGrid, PathkeyDetail } from '../components/pathkeys';
 import { usePathkeys, useUserPathkeys } from '../hooks';
 import { Spinner } from '../components/common';
 import { Trophy } from 'lucide-react';
-import type { Pathkey } from '@pathket/shared';
+import type { Pathkey } from '@pathcte/shared';
 
 export default function CollectionPage() {
   console.log('[CollectionPage] Rendering...');

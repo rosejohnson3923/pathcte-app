@@ -5,7 +5,7 @@
  */
 
 import { useFetchMany } from './useSupabase';
-import type { Career } from '@pathket/shared';
+import type { Career } from '@pathcte/shared';
 
 /**
  * Fetch all careers

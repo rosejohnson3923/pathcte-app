@@ -10,9 +10,9 @@ import { DashboardLayout } from '../components/layout';
 import { GameLobby, QuestionDisplay, HostView, Leaderboard, GameResults } from '../components/game';
 import { Button, Spinner, Card } from '../components/common';
 import { useAuth } from '../hooks';
-import { useGameStore, gameService, realtimeService, toast, supabase } from '@pathket/shared';
+import { useGameStore, gameService, realtimeService, toast, supabase } from '@pathcte/shared';
 import { ArrowLeft } from 'lucide-react';
-import type { GamePlayer } from '@pathket/shared';
+import type { GamePlayer } from '@pathcte/shared';
 
 export default function GamePage() {
   const { sessionId } = useParams<{ sessionId: string }>();

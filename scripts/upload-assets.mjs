@@ -40,7 +40,7 @@ const pathkeysOnly = args.includes('--pathkeys-only');
 const careersOnly = args.includes('--careers-only');
 
 // Configuration
-const AZURE_STORAGE_URL = process.env.VITE_AZURE_STORAGE_URL || 'https://pathket.blob.core.windows.net';
+const AZURE_STORAGE_URL = process.env.VITE_AZURE_STORAGE_URL || 'https://pathcte.blob.core.windows.net';
 const AZURE_SAS_TOKEN = process.env.VITE_AZURE_STORAGE_SAS_TOKEN;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY; // Needs service role for updates

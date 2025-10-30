@@ -7,12 +7,12 @@ const teacherId = '0ae5001d-41f0-4969-86a9-96d8dc478a28';
 
 async function generateSQL() {
   // Read the JSON file
-  const jsonContent = await fs.readFile('pathket-questions.json', 'utf-8');
+  const jsonContent = await fs.readFile('pathcte-questions.json', 'utf-8');
   const questionSets = JSON.parse(jsonContent);
 
   const sql = [];
 
-  sql.push('-- Pathket Question Sets and Questions');
+  sql.push('-- Pathcte Question Sets and Questions');
   sql.push('-- Generated: ' + new Date().toISOString());
   sql.push('-- Teacher ID: ' + teacherId);
   sql.push('-- Run this entire script in Supabase SQL Editor');
@@ -88,9 +88,9 @@ async function generateSQL() {
   sql.push('COMMIT;');
 
   // Write the SQL file
-  await fs.writeFile('pathket-questions-runnable.sql', sql.join('\n'));
+  await fs.writeFile('pathcte-questions-runnable.sql', sql.join('\n'));
 
-  console.log('✅ Generated pathket-questions-runnable.sql');
+  console.log('✅ Generated pathcte-questions-runnable.sql');
   console.log('   This script can be run all at once in Supabase SQL Editor!');
 }
 

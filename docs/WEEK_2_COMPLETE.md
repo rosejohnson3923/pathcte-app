@@ -8,7 +8,7 @@
 
 ## Summary
 
-We have successfully built a **complete live multiplayer game system** for Pathket, including all backend services, state management, and UI components. The game system is now ready for end-to-end testing and deployment.
+We have successfully built a **complete live multiplayer game system** for Pathcte, including all backend services, state management, and UI components. The game system is now ready for end-to-end testing and deployment.
 
 ---
 

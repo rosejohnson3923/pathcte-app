@@ -10,7 +10,7 @@ import { CareerCard, CareerDetail, CareerSearch } from '../components/careers';
 import { useCareers } from '../hooks';
 import { Spinner } from '../components/common';
 import { Compass } from 'lucide-react';
-import type { Career } from '@pathket/shared';
+import type { Career } from '@pathcte/shared';
 
 export default function CareersPage() {
   const { data: careers, isLoading } = useCareers();

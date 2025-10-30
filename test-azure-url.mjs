@@ -5,7 +5,7 @@
 
 // Simulate Vite environment variables
 const VITE_ENV = {
-  VITE_AZURE_STORAGE_URL: 'https://pathket.blob.core.windows.net',
+  VITE_AZURE_STORAGE_URL: 'https://pathcte.blob.core.windows.net',
   VITE_AZURE_STORAGE_SAS_TOKEN: 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D',
   VITE_AZURE_CONTAINER_PATHKEYS: 'pathkeys',
 };
@@ -29,7 +29,7 @@ const buildAzureUrl = (container, blobName) => {
 const ensureAzureUrlHasSasToken = (imageUrl) => {
   if (!imageUrl) return null;
 
-  if (!imageUrl.includes('pathket.blob.core.windows.net')) {
+  if (!imageUrl.includes('pathcte.blob.core.windows.net')) {
     return imageUrl;
   }
 
@@ -56,10 +56,10 @@ const ensureAzureUrlHasSasToken = (imageUrl) => {
 console.log('Testing Azure URL SAS Token Appending\n');
 
 const testUrls = [
-  'https://pathket.blob.core.windows.net/pathkeys/DEV-001.png',
-  'https://pathket.blob.core.windows.net/pathkeys/SKILL-CODE.png',
-  'https://pathket.blob.core.windows.net/pathkeys/IND-TECH.png',
-  'https://pathket.blob.core.windows.net/pathkeys/DEV-001.png?sv=2024-11-04&ss=bfqt', // Already has token
+  'https://pathcte.blob.core.windows.net/pathkeys/DEV-001.png',
+  'https://pathcte.blob.core.windows.net/pathkeys/SKILL-CODE.png',
+  'https://pathcte.blob.core.windows.net/pathkeys/IND-TECH.png',
+  'https://pathcte.blob.core.windows.net/pathkeys/DEV-001.png?sv=2024-11-04&ss=bfqt', // Already has token
   'https://example.com/image.png', // Non-Azure URL
   null, // Null URL
 ];

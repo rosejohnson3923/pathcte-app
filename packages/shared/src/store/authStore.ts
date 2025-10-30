@@ -278,7 +278,7 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
     }),
     {
-      name: 'pathket-auth-storage',
+      name: 'pathcte-auth-storage',
       storage: getStorage(),
       partialize: (state) => ({
         // Only persist user, session, and profile

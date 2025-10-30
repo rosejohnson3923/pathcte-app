@@ -1,17 +1,17 @@
 Connection String
-BlobEndpoint=https://pathket.blob.core.windows.net/;QueueEndpoint=https://pathket.queue.core.windows.net/;FileEndpoint=https://pathket.file.core.windows.net/;TableEndpoint=https://pathket.table.core.windows.net/;SharedAccessSignature=sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
+BlobEndpoint=https://pathcte.blob.core.windows.net/;QueueEndpoint=https://pathcte.queue.core.windows.net/;FileEndpoint=https://pathcte.file.core.windows.net/;TableEndpoint=https://pathcte.table.core.windows.net/;SharedAccessSignature=sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
 
 SAS Token
 sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
 
 Blob Service SAS URL
-https://pathket.blob.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
+https://pathcte.blob.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
 
 File Service SAS URL
-https://pathket.file.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
+https://pathcte.file.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
 
 Queue Service SAS URL
-https://pathket.queue.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
+https://pathcte.queue.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
 
 Table Service SAS URL
-https://pathket.table.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D
+https://pathcte.table.core.windows.net/?sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-10-27T05:00:00Z&st=2025-10-27T05:00:00Z&spr=https&sig=7noNXMMaQ6mFod4DRudZJGWGs92fIObF7eqB52XkdU0%3D

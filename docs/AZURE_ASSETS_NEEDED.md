@@ -193,7 +193,7 @@ Features:
 Use Azure Portal or Azure Storage Explorer:
 
 1. **Azure Portal:**
-   - Navigate to pathket storage account
+   - Navigate to pathcte storage account
    - Select container
    - Click "Upload"
    - Select files
@@ -247,13 +247,13 @@ Use Azure Portal or Azure Storage Explorer:
 
 ```sql
 -- Update pathkey image URLs
-UPDATE pathkeys SET image_url = 'https://pathket.blob.core.windows.net/pathkeys/DEV-001.png?{sas}' WHERE key_code = 'DEV-001';
-UPDATE pathkeys SET image_url = 'https://pathket.blob.core.windows.net/pathkeys/NURSE-001.png?{sas}' WHERE key_code = 'NURSE-001';
+UPDATE pathkeys SET image_url = 'https://pathcte.blob.core.windows.net/pathkeys/DEV-001.png?{sas}' WHERE key_code = 'DEV-001';
+UPDATE pathkeys SET image_url = 'https://pathcte.blob.core.windows.net/pathkeys/NURSE-001.png?{sas}' WHERE key_code = 'NURSE-001';
 -- ... repeat for all pathkeys
 
 -- Update career image URLs (using career_code derived from onet_code)
-UPDATE careers SET image_url = 'https://pathket.blob.core.windows.net/careers/software-developer/main.jpg?{sas}' WHERE onet_code = '15-1252.00';
-UPDATE careers SET image_url = 'https://pathket.blob.core.windows.net/careers/registered-nurse/main.jpg?{sas}' WHERE onet_code = '29-1141.00';
+UPDATE careers SET image_url = 'https://pathcte.blob.core.windows.net/careers/software-developer/main.jpg?{sas}' WHERE onet_code = '15-1252.00';
+UPDATE careers SET image_url = 'https://pathcte.blob.core.windows.net/careers/registered-nurse/main.jpg?{sas}' WHERE onet_code = '29-1141.00';
 -- ... repeat for all careers
 ```
 
@@ -304,7 +304,7 @@ After uploading assets:
 ## Files to Create
 
 ```
-pathket.app/
+pathcte.app/
 ├── assets/                    # Local asset storage (not committed)
 │   ├── pathkeys/
 │   │   ├── DEV-001.png

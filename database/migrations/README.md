@@ -1,6 +1,6 @@
-# Pathket Database Migrations
+# Pathcte Database Migrations
 
-This directory contains SQL migration files for the Pathket database schema using Supabase PostgreSQL.
+This directory contains SQL migration files for the Pathcte database schema using Supabase PostgreSQL.
 
 ## Migration Order
 

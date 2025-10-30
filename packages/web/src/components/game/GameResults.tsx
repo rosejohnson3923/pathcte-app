@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Button } from '../common';
 import { Leaderboard } from './Leaderboard';
 import { Trophy, Award, Target, Zap, Home, PlayCircle } from 'lucide-react';
-import type { GamePlayer, GameSession } from '@pathket/shared';
+import type { GamePlayer, GameSession } from '@pathcte/shared';
 
 export interface GameResultsProps {
   session: GameSession;

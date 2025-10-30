@@ -5,8 +5,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { analyticsService } from '@pathket/shared';
-import type { StudentStats, GameStats, QuestionSetStats, TeacherOverview } from '@pathket/shared';
+import { analyticsService } from '@pathcte/shared';
+import type { StudentStats, GameStats, QuestionSetStats, TeacherOverview } from '@pathcte/shared';
 import { useAuth } from './useAuth';
 
 /**

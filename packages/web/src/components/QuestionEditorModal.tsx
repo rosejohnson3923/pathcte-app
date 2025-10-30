@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { Modal, ModalContent, ModalFooter } from './common/Modal';
 import { Button, Input } from './common';
 import { Plus, X, Check } from 'lucide-react';
-import { Question } from '@pathket/shared';
+import { Question } from '@pathcte/shared';
 
 interface QuestionOption {
   text: string;

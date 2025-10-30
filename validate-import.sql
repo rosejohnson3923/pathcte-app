@@ -1,4 +1,4 @@
--- Validation Queries for Pathket Question Import
+-- Validation Queries for Pathcte Question Import
 -- Run these queries in Supabase SQL Editor to verify the import
 
 -- ============================================

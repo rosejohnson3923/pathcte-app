@@ -6,7 +6,7 @@
 
 import { useFetchMany, useFetchOne, useInsertOne, useUpdateOne, useDeleteOne } from './useSupabase';
 import { useAuth } from './useAuth';
-import type { QuestionSet, Question } from '@pathket/shared';
+import type { QuestionSet, Question } from '@pathcte/shared';
 
 /**
  * Fetch all question sets (public + user's own)

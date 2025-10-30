@@ -6,7 +6,7 @@
 
 import { useFetchMany } from './useSupabase';
 import { useAuth } from './useAuth';
-import type { GameSession, GamePlayer } from '@pathket/shared';
+import type { GameSession, GamePlayer } from '@pathcte/shared';
 
 /**
  * Fetch user's game history

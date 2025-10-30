@@ -1,6 +1,6 @@
 # Data Generation Scripts
 
-Scripts for generating realistic data using AI to populate the Pathket database.
+Scripts for generating realistic data using AI to populate the Pathcte database.
 
 ## Setup
 

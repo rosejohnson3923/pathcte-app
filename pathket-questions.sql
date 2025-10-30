@@ -1,4 +1,4 @@
--- Pathket Question Sets and Questions
+-- Pathcte Question Sets and Questions
 -- Generated: 2025-10-28T19:47:02.070Z
 -- Teacher ID: 0ae5001d-41f0-4969-86a9-96d8dc478a28
 

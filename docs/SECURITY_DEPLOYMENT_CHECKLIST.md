@@ -1,4 +1,4 @@
-# Pathket Security - Deployment Checklist
+# Pathte Security - Deployment Checklist
 
 ## ✅ Before You Test (REQUIRED)
 
@@ -157,7 +157,7 @@ After Priority 1 testing is complete, implement:
    - Max 10 requests/second per player
 
 2. **WebSocket origin validation** (20 min)
-   - Only allow `pathket.app` origin
+   - Only allow `pathcte.app` origin
    - Reject unknown origins
 
 3. **Behavioral bot detection** (1 hour)
@@ -176,7 +176,7 @@ After Priority 1 testing is complete, implement:
 
 **Report vulnerabilities to:**
 - GitHub: Private security advisory
-- Email: security@pathket.app (if configured)
+- Email: security@pathcte.app (if configured)
 
 **Do NOT:**
 - Post vulnerabilities publicly

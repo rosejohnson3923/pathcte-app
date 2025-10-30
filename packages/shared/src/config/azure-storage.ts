@@ -1,11 +1,11 @@
 /**
  * Azure Blob Storage Configuration
  * =================================
- * Configuration for Pathket Azure Storage Account
+ * Configuration for Pathcte Azure Storage Account
  *
- * Storage Account: pathket
+ * Storage Account: pathcte
  * Location: Central US (with RA-GRS replication to East US 2)
- * Endpoint: https://pathket.blob.core.windows.net
+ * Endpoint: https://pathcte.blob.core.windows.net
  */
 
 export interface AzureStorageConfig {
@@ -41,8 +41,8 @@ const getViteEnv = (key: string): string => {
  */
 export const getAzureStorageConfig = (): AzureStorageConfig => {
   const config: AzureStorageConfig = {
-    accountName: getViteEnv('VITE_AZURE_STORAGE_ACCOUNT') || 'pathket',
-    storageUrl: getViteEnv('VITE_AZURE_STORAGE_URL') || 'https://pathket.blob.core.windows.net',
+    accountName: getViteEnv('VITE_AZURE_STORAGE_ACCOUNT') || 'pathcte',
+    storageUrl: getViteEnv('VITE_AZURE_STORAGE_URL') || 'https://pathcte.blob.core.windows.net',
     sasToken: getViteEnv('VITE_AZURE_STORAGE_SAS_TOKEN') || '',
     containers: {
       careers: getViteEnv('VITE_AZURE_CONTAINER_CAREERS') || 'careers',
