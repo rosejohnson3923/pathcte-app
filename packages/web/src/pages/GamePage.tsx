@@ -261,14 +261,19 @@ export default function GamePage() {
     const nextIndex = currentQuestionIndex + 1;
 
     if (nextIndex < questions.length) {
-      // Update local state (useEffect will reset hasAnswered/lastAnswer automatically)
-      nextQuestion();
-
-      // Persist to database so it survives page refreshes
-      (supabase
+      // Persist to database FIRST so it survives page refreshes
+      const { error: updateError } = await (supabase
         .from('game_sessions') as any)
         .update({ current_question_index: nextIndex })
         .eq('id', sessionId);
+
+      if (updateError) {
+        console.error('[GamePage] Failed to update question index:', updateError);
+        return;
+      }
+
+      // Update local state after database succeeds (useEffect will reset hasAnswered/lastAnswer automatically)
+      nextQuestion();
 
       // Notify all players
       await realtimeService.notifyQuestionChanged(sessionId, nextIndex, questions[nextIndex].id);
