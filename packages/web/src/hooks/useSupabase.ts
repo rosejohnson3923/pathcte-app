@@ -5,8 +5,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { supabaseService } from '@pathket/shared';
-import type { Database } from '@pathket/shared';
+import { supabaseService } from '@pathcte/shared';
+import type { Database } from '@pathcte/shared';
 
 type TableName = keyof Database['public']['Tables'];
 

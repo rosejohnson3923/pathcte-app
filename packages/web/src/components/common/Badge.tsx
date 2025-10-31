@@ -46,7 +46,7 @@ export const Badge: React.FC<BadgeProps> = ({
     warning: 'bg-amber-100 text-amber-800',
     danger: 'bg-red-100 text-red-800',
     info: 'bg-blue-100 text-blue-800',
-    outline: 'bg-transparent border border-gray-300 text-gray-700',
+    outline: 'bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300',
   };
 
   const colorClasses = rarity ? rarityClasses[rarity] : variantClasses[variant];

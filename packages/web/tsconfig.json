@@ -25,8 +25,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@pathket/shared": ["../shared/src"],
-      "@pathket/shared/*": ["../shared/src/*"]
+      "@pathcte/shared": ["../shared/src"],
+      "@pathcte/shared/*": ["../shared/src/*"]
     }
   },
   "include": ["src"],

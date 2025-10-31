@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Key, Mail, Lock } from 'lucide-react';
-import { useAuthStore, toast } from '@pathket/shared';
+import { useAuthStore, toast } from '@pathcte/shared';
 import { Button, Input } from '../components/common';
 
 export default function LoginPage() {
@@ -62,7 +62,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
             <Key className="h-10 w-10 text-white" />
-            <span className="text-3xl font-display font-bold text-white">Pathket</span>
+            <span className="text-3xl font-display font-bold text-white">Pathcte</span>
           </Link>
         </div>
 
@@ -82,6 +82,7 @@ export default function LoginPage() {
               error={errors.email}
               leftIcon={<Mail size={20} />}
               fullWidth
+              forceLight
               disabled={isLoading}
               autoComplete="email"
             />
@@ -95,6 +96,7 @@ export default function LoginPage() {
               error={errors.password}
               leftIcon={<Lock size={20} />}
               fullWidth
+              forceLight
               disabled={isLoading}
               autoComplete="current-password"
             />

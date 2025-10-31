@@ -7,9 +7,9 @@
 ## Configuration Details
 
 ### Storage Account
-- **Account Name:** `pathket`
+- **Account Name:** `pathcte`
 - **Location:** Central US
-- **Endpoint:** `https://pathket.blob.core.windows.net`
+- **Endpoint:** `https://pathcte.blob.core.windows.net`
 - **Replication:** RA-GRS (Read-access geo-redundant storage)
 
 ### Containers Created
@@ -28,8 +28,8 @@
 
 ### Environment Variables (.env)
 ```bash
-✅ VITE_AZURE_STORAGE_ACCOUNT=pathket
-✅ VITE_AZURE_STORAGE_URL=https://pathket.blob.core.windows.net
+✅ VITE_AZURE_STORAGE_ACCOUNT=pathcte
+✅ VITE_AZURE_STORAGE_URL=https://pathcte.blob.core.windows.net
 ✅ VITE_AZURE_STORAGE_SAS_TOKEN=sv=2024-11-04&ss=bfqt&srt=sco&sp=...
 ✅ VITE_AZURE_CONTAINER_CAREERS=careers
 ✅ VITE_AZURE_CONTAINER_PATHKEYS=pathkeys
@@ -79,7 +79,7 @@
 ```typescript
 // Generate URL
 const imageUrl = getPathkeyImageUrl('abc123');
-// Returns: https://pathket.blob.core.windows.net/pathkeys/abc123.png?sv=...
+// Returns: https://pathcte.blob.core.windows.net/pathkeys/abc123.png?sv=...
 
 // In React component
 <img
@@ -94,14 +94,14 @@ const imageUrl = getPathkeyImageUrl('abc123');
 ```typescript
 // Generate URL
 const imageUrl = getCareerImageUrl('software-engineer');
-// Returns: https://pathket.blob.core.windows.net/careers/software-engineer/main.jpg?sv=...
+// Returns: https://pathcte.blob.core.windows.net/careers/software-engineer/main.jpg?sv=...
 ```
 
 ### User Avatars
 ```typescript
 // Generate URL
 const avatarUrl = getAvatarUrl(userId);
-// Returns: https://pathket.blob.core.windows.net/avatars/{userId}.jpg?sv=...
+// Returns: https://pathcte.blob.core.windows.net/avatars/{userId}.jpg?sv=...
 ```
 
 ---
@@ -110,7 +110,7 @@ const avatarUrl = getAvatarUrl(userId);
 
 ### Upload a Pathkey Image
 ```typescript
-import { azureStorageService } from '@pathket/shared';
+import { azureStorageService } from '@pathcte/shared';
 
 const file = // File from input
 const result = await azureStorageService.uploadPathkeyImage(
@@ -120,7 +120,7 @@ const result = await azureStorageService.uploadPathkeyImage(
 );
 
 console.log('Uploaded to:', result.url);
-// https://pathket.blob.core.windows.net/pathkeys/pathkey-123.png
+// https://pathcte.blob.core.windows.net/pathkeys/pathkey-123.png
 ```
 
 ### Upload a Career Image
@@ -132,7 +132,7 @@ const result = await azureStorageService.uploadCareerImage(
 );
 
 console.log('Uploaded to:', result.url);
-// https://pathket.blob.core.windows.net/careers/software-engineer/main.jpg
+// https://pathcte.blob.core.windows.net/careers/software-engineer/main.jpg
 ```
 
 ### Upload with Progress Tracking
@@ -280,7 +280,7 @@ careers/data-scientist/main.jpg
 
 ### CORS Errors?
 Configure CORS in Azure Storage Account:
-- Allowed origins: `https://app.pathket.com`, `http://localhost:5173`
+- Allowed origins: `https://app.pathcte.com`, `http://localhost:5173`
 - Allowed methods: `GET`, `HEAD`, `OPTIONS`
 - Allowed headers: `*`
 - Max age: `3600`

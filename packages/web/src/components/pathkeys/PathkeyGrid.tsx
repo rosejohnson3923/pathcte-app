@@ -8,7 +8,7 @@ import React, { useState, useMemo } from 'react';
 import { PathkeyCard } from './PathkeyCard';
 import { Badge, Spinner } from '../common';
 import { Trophy } from 'lucide-react';
-import type { Pathkey, UserPathkey, Rarity } from '@pathket/shared';
+import type { Pathkey, UserPathkey, Rarity } from '@pathcte/shared';
 
 export interface PathkeyGridProps {
   pathkeys: Pathkey[];
@@ -21,6 +21,7 @@ export interface PathkeyGridProps {
 
 type SortOption = 'recent' | 'rarity' | 'name';
 type FilterRarity = 'all' | Rarity;
+type FilterType = 'all' | 'career' | 'skill' | 'industry' | 'milestone';
 
 export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
   pathkeys,
@@ -32,6 +33,7 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
 }) => {
   const [sortBy, setSortBy] = useState<SortOption>('recent');
   const [filterRarity, setFilterRarity] = useState<FilterRarity>('all');
+  const [filterType, setFilterType] = useState<FilterType>('all');
   const [showOnlyOwned, setShowOnlyOwned] = useState(false);
 
   // Create a map of user pathkeys for quick lookup
@@ -48,6 +50,11 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
     // Filter by ownership
     if (showOnlyOwned) {
       result = result.filter((p) => userPathkeysMap.has(p.id));
+    }
+
+    // Filter by type
+    if (filterType !== 'all') {
+      result = result.filter((p) => p.key_type === filterType);
     }
 
     // Filter by rarity
@@ -78,7 +85,7 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
     });
 
     return result;
-  }, [pathkeys, filterRarity, showOnlyOwned, sortBy, userPathkeysMap]);
+  }, [pathkeys, filterRarity, filterType, showOnlyOwned, sortBy, userPathkeysMap]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -98,7 +105,19 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
       return acc;
     }, {} as Record<string, { total: number; owned: number }>);
 
-    return { total, owned, percentage, rarityBreakdown };
+    const typeBreakdown = pathkeys.reduce((acc, p) => {
+      const userPathkey = userPathkeysMap.get(p.id);
+      if (!acc[p.key_type]) {
+        acc[p.key_type] = { total: 0, owned: 0 };
+      }
+      acc[p.key_type].total++;
+      if (userPathkey) {
+        acc[p.key_type].owned++;
+      }
+      return acc;
+    }, {} as Record<string, { total: number; owned: number }>);
+
+    return { total, owned, percentage, rarityBreakdown, typeBreakdown };
   }, [pathkeys, userPathkeys, userPathkeysMap]);
 
   if (isLoading) {
@@ -125,6 +144,31 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
               {stats.owned} of {stats.total} collected ({stats.percentage}%)
             </p>
           </div>
+        </div>
+
+        {/* Type Breakdown */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          {Object.entries(stats.typeBreakdown).map(([type, counts]) => (
+            <div
+              key={type}
+              className="bg-white dark:bg-gray-700/50 rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-600 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-semibold text-gray-900 dark:text-white capitalize">
+                  {type.replace('_', ' ')}
+                </span>
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  {counts.owned}/{counts.total}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
+                <div
+                  className="bg-purple-600 h-1.5 rounded-full transition-all"
+                  style={{ width: `${counts.total > 0 ? (counts.owned / counts.total) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Rarity Breakdown */}
@@ -185,6 +229,22 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
             </div>
           </div>
 
+          {/* Type Filter */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Type:</span>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as FilterType)}
+              className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="all">All Types</option>
+              <option value="career">Career</option>
+              <option value="skill">Skill</option>
+              <option value="industry">Industry</option>
+              <option value="milestone">Milestone</option>
+            </select>
+          </div>
+
           {/* Rarity Filter */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Rarity:</span>
@@ -193,7 +253,7 @@ export const PathkeyGrid: React.FC<PathkeyGridProps> = ({
               onChange={(e) => setFilterRarity(e.target.value as FilterRarity)}
               className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="all">All</option>
+              <option value="all">All Rarities</option>
               <option value="common">Common</option>
               <option value="uncommon">Uncommon</option>
               <option value="rare">Rare</option>

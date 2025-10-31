@@ -6,7 +6,7 @@
 
 import { useFetchMany, useInsertOne, useUpdateOne } from './useSupabase';
 import { useAuth } from './useAuth';
-import type { Pathkey, UserPathkey } from '@pathket/shared';
+import type { Pathkey, UserPathkey } from '@pathcte/shared';
 
 /**
  * Fetch all pathkeys (catalog)
@@ -21,9 +21,21 @@ export const usePathkeys = () => {
 export const useUserPathkeys = () => {
   const { user } = useAuth();
 
-  return useFetchMany<UserPathkey>('user_pathkeys', user ? { user_id: user.id } : undefined, {
+  console.log('[useUserPathkeys] Hook called, user:', user?.id);
+
+  const result = useFetchMany<UserPathkey>('user_pathkeys', user ? { user_id: user.id } : undefined, {
     enabled: !!user,
+    refetchOnMount: 'always', // Always refetch to show newly earned pathkeys
   });
+
+  console.log('[useUserPathkeys] Query state:', {
+    dataCount: result.data?.length || 0,
+    isLoading: result.isLoading,
+    isFetching: result.isFetching,
+    isError: result.isError,
+  });
+
+  return result;
 };
 
 /**

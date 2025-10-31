@@ -1,14 +1,14 @@
-# Pathket Setup Guide
+# Pathcte Setup Guide
 
 ## Initial Setup
 
-Follow these steps to get Pathket up and running on your local machine.
+Follow these steps to get Pathcte up and running on your local machine.
 
 ### 1. Install Dependencies
 
 ```bash
 # From the root directory
-cd /mnt/c/Users/rosej/Documents/Projects/pathket.app
+cd /mnt/c/Users/rosej/Documents/Projects/pathcte.app
 npm install
 ```
 
@@ -55,7 +55,7 @@ This will create an optimized production build in `packages/web/dist/`.
 ## Project Structure
 
 ```
-pathket.app/
+pathcte.app/
 ├── packages/
 │   ├── shared/           # Shared types, services, hooks
 │   │   ├── src/

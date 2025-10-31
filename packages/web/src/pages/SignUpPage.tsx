@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Key, Mail, Lock, User } from 'lucide-react';
-import { useAuthStore, toast } from '@pathket/shared';
+import { useAuthStore, toast } from '@pathcte/shared';
 import { Button, Input } from '../components/common';
 
 export default function SignUpPage() {
@@ -82,7 +82,7 @@ export default function SignUpPage() {
     });
 
     if (result.success) {
-      toast.success('Account created! Welcome to Pathket!');
+      toast.success('Account created! Welcome to Pathcte!');
       navigate('/dashboard');
     } else {
       toast.error(result.error || 'Failed to create account');
@@ -96,7 +96,7 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center space-x-2">
             <Key className="h-10 w-10 text-white" />
-            <span className="text-3xl font-display font-bold text-white">Pathket</span>
+            <span className="text-3xl font-display font-bold text-white">Pathcte</span>
           </Link>
         </div>
 
@@ -139,6 +139,8 @@ export default function SignUpPage() {
                 onChange={(e) => setFirstName(e.target.value)}
                 error={errors.firstName}
                 leftIcon={<User size={20} />}
+                fullWidth
+                forceLight
                 disabled={isLoading}
                 autoComplete="given-name"
               />
@@ -150,6 +152,8 @@ export default function SignUpPage() {
                 onChange={(e) => setLastName(e.target.value)}
                 error={errors.lastName}
                 leftIcon={<User size={20} />}
+                fullWidth
+                forceLight
                 disabled={isLoading}
                 autoComplete="family-name"
               />
@@ -165,6 +169,7 @@ export default function SignUpPage() {
               error={errors.email}
               leftIcon={<Mail size={20} />}
               fullWidth
+              forceLight
               disabled={isLoading}
               autoComplete="email"
             />
@@ -177,6 +182,7 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
+              forceLight
               helperText="Minimum 8 characters"
               leftIcon={<Lock size={20} />}
               fullWidth

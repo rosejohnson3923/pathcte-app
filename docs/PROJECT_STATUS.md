@@ -1,4 +1,4 @@
-# Pathket Project Status
+# Pathcte Project Status
 
 **Last Updated:** October 27, 2025
 **Status:** Initial Setup Complete ✅
@@ -15,7 +15,7 @@
 - `.gitignore` and `.prettierrc` configured
 - Project documentation (README, SETUP)
 
-#### ✅ Shared Package (`@pathket/shared`)
+#### ✅ Shared Package (`@pathcte/shared`)
 **Location:** `packages/shared/`
 
 - **Types** (`src/types/`):
@@ -29,13 +29,13 @@
   - Constants (game modes, rarity config, token economy, validation rules)
   - Environment variables handling
 
-#### ✅ Web Package (`@pathket/web`)
+#### ✅ Web Package (`@pathcte/web`)
 **Location:** `packages/web/`
 
 - **Build System**:
   - Vite 5.x configured with React plugin
   - TypeScript 5.3+ with strict mode
-  - Path aliases (`@/` for src, `@pathket/shared` for shared package)
+  - Path aliases (`@/` for src, `@pathcte/shared` for shared package)
   - Code splitting for vendors (React, Supabase)
 
 - **Styling**:
@@ -126,7 +126,7 @@
 - Create indexes for performance
 - Seed initial data (if needed)
 
-**Reference:** See `docs/Pathket_Implementation_Guide_Claude_Code.md` Section 3
+**Reference:** See `docs/Pathcte_Implementation_Guide_Claude_Code.md` Section 3
 
 #### 5. Student Dashboard
 **Priority:** MEDIUM
@@ -180,7 +180,7 @@ Deployment:
 
 ### Monorepo Structure
 ```
-pathket.app/
+pathcte.app/
 ├── packages/
 │   ├── shared/        # Platform-agnostic code (70% reusable for mobile)
 │   │   ├── types/     # TypeScript definitions
@@ -311,8 +311,8 @@ npm run format
 
 - **Main README:** `/README.md`
 - **Setup Guide:** `/SETUP.md`
-- **Implementation Guide:** `/docs/Pathket_Implementation_Guide_Claude_Code.md`
-- **Mobile Strategy:** `/docs/Pathket_Mobile_App_Strategy.md`
+- **Implementation Guide:** `/docs/Pathcte_Implementation_Guide_Claude_Code.md`
+- **Mobile Strategy:** `/docs/Pathcte_Mobile_App_Strategy.md`
 - **This Document:** `/docs/PROJECT_STATUS.md`
 
 ---

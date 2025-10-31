@@ -23,8 +23,8 @@
     /* Path mapping */
     "baseUrl": ".",
     "paths": {
-      "@pathket/shared": ["./packages/shared/src"],
-      "@pathket/shared/*": ["./packages/shared/src/*"]
+      "@pathcte/shared": ["./packages/shared/src"],
+      "@pathcte/shared/*": ["./packages/shared/src/*"]
     }
   }
 }

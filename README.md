@@ -1,8 +1,8 @@
-# PathCTE
+# Pathcte
 
 **Career Exploration Gaming Platform**
 
-PathCTE is a gamified career exploration platform that makes learning about careers fun through interactive games and collectible "Pathkeys". Students play educational games to unlock career collectibles, while teachers can create custom question sets and host live multiplayer sessions.
+Pathcte is a gamified career exploration platform that makes learning about careers fun through interactive games and collectible "Pathkeys". Students play educational games to unlock career collectibles, while teachers can create custom question sets and host live multiplayer sessions.
 
 ## 🎯 Project Overview
 
@@ -82,7 +82,7 @@ npm run dev
 
 ## 🎨 Design System
 
-PathCTE uses a custom design system built with Tailwind CSS and shared design tokens. All components are built to work seamlessly across web and mobile platforms.
+Pathcte uses a custom design system built with Tailwind CSS and shared design tokens. All components are built to work seamlessly across web and mobile platforms.
 
 ## 📱 Mobile Development
 
@@ -99,8 +99,8 @@ See [Mobile App Strategy](./docs/Pathcte_Mobile_App_Strategy.md) for details.
 
 ## 🤝 Integration with Pathfinity
 
-PathCTE integrates seamlessly with Pathfinity:
-- Premium Pathfinity subscribers get full Pathcte access
+pathcte integrates seamlessly with Pathfinity:
+- Premium Pathfinity subscribers get full pathcte access
 - SSO authentication between platforms
 - Featured placement in Discovered Live! Arcade
 - Shared career content and data

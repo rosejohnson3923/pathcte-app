@@ -17,6 +17,7 @@ export type GameMode =
   | 'speed_run'
   | 'team_challenge';
 export type GameStatus = 'waiting' | 'in_progress' | 'completed' | 'cancelled';
+export type SessionType = 'solo' | 'multiplayer';
 
 // ============================================================================
 // PROFILES
@@ -223,6 +224,8 @@ export interface GameSession {
   question_set_id: string;
   game_mode: GameMode;
   status: GameStatus;
+  session_type: SessionType;
+  current_question_index: number;
 
   // Settings
   max_players: number;
@@ -231,7 +234,7 @@ export interface GameSession {
 
   // Timing
   started_at: string | null;
-  completed_at: string | null;
+  ended_at: string | null;
 
   // Metadata
   metadata: Record<string, any>;
@@ -266,7 +269,7 @@ export interface GamePlayer {
 
 export interface GameAnswer {
   id: string;
-  session_id: string;
+  game_session_id: string;
   player_id: string;
   question_id: string;
 
@@ -276,7 +279,7 @@ export interface GameAnswer {
 
   // Timing
   time_taken_ms: number;
-  points_awarded: number;
+  points_earned: number;
 
   answered_at: string;
 }

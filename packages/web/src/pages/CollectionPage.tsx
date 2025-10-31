@@ -4,17 +4,35 @@
  * Full pathkey collection view for students
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../components/layout';
 import { PathkeyGrid, PathkeyDetail } from '../components/pathkeys';
 import { usePathkeys, useUserPathkeys } from '../hooks';
 import { Spinner } from '../components/common';
 import { Trophy } from 'lucide-react';
-import type { Pathkey } from '@pathket/shared';
+import type { Pathkey } from '@pathcte/shared';
 
 export default function CollectionPage() {
+  console.log('[CollectionPage] Rendering...');
+
   const { data: allPathkeys, isLoading: pathkeysLoading } = usePathkeys();
-  const { data: userPathkeys, isLoading: userPathkeysLoading } = useUserPathkeys();
+  const { data: userPathkeys, isLoading: userPathkeysLoading, isFetching: userPathkeysFetching } = useUserPathkeys();
+
+  useEffect(() => {
+    console.log('[CollectionPage] Component mounted');
+    return () => {
+      console.log('[CollectionPage] Component unmounting');
+    };
+  }, []);
+
+  useEffect(() => {
+    console.log('[CollectionPage] User pathkeys updated:', {
+      count: userPathkeys?.length || 0,
+      isLoading: userPathkeysLoading,
+      isFetching: userPathkeysFetching,
+      pathkeys: userPathkeys
+    });
+  }, [userPathkeys, userPathkeysLoading, userPathkeysFetching]);
 
   const [selectedPathkey, setSelectedPathkey] = useState<Pathkey | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);

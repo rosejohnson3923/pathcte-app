@@ -1,11 +1,11 @@
-# PATHKET MOBILE APP STRATEGY
+# PATHCTE MOBILE APP STRATEGY
 ## React Native Implementation Guide
 
 ---
 
 ## EXECUTIVE SUMMARY
 
-This document outlines the strategy for building native iOS and Android apps for Pathket after the web version is stable. By following mobile-first principles during web development, the transition to mobile will be:
+This document outlines the strategy for building native iOS and Android apps for Pathcte after the web version is stable. By following mobile-first principles during web development, the transition to mobile will be:
 
 - **70% code reuse** from web to mobile (all business logic, hooks, services)
 - **3-4 months** to production-ready mobile apps
@@ -31,7 +31,7 @@ This document outlines the strategy for building native iOS and Android apps for
 
 ## 1. WHY REACT NATIVE?
 
-### 1.1 Advantages for Pathket
+### 1.1 Advantages for Pathcte
 
 **Code Reuse:**
 - Share 100% of business logic with web
@@ -66,7 +66,7 @@ This document outlines the strategy for building native iOS and Android apps for
 | Native (Swift/Kotlin) | ⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ |
 | Ionic/Capacitor | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
 
-**Recommendation:** React Native with Expo is the optimal choice for Pathket because:
+**Recommendation:** React Native with Expo is the optimal choice for Pathcte because:
 1. Maximizes code reuse from existing React web app
 2. Single JavaScript/TypeScript codebase
 3. Fast iteration with hot reload
@@ -163,7 +163,7 @@ This document outlines the strategy for building native iOS and Android apps for
 ### 3.1 Monorepo Structure
 
 ```
-pathket/
+pathcte/
 ├── package.json                         # Root workspace
 ├── tsconfig.base.json                   # Shared TS config
 │
@@ -208,7 +208,7 @@ pathket/
 ```json
 // packages/shared/package.json
 {
-  "name": "@pathket/shared",
+  "name": "@pathcte/shared",
   "version": "1.0.0",
   "main": "src/index.ts",
   "dependencies": {
@@ -224,9 +224,9 @@ pathket/
 
 // packages/web/package.json
 {
-  "name": "@pathket/web",
+  "name": "@pathcte/web",
   "dependencies": {
-    "@pathket/shared": "*",
+    "@pathcte/shared": "*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
@@ -236,9 +236,9 @@ pathket/
 
 // packages/mobile/package.json
 {
-  "name": "@pathket/mobile",
+  "name": "@pathcte/mobile",
   "dependencies": {
-    "@pathket/shared": "*",
+    "@pathcte/shared": "*",
     "react": "18.2.0",
     "react-native": "0.73.0",
     "expo": "~50.0.0",
@@ -251,16 +251,16 @@ pathket/
 ### 3.3 Import Strategy
 
 ```typescript
-// Shared code imports from @pathket/shared
-import { useAuth } from '@pathket/shared/hooks/useAuth';
-import { gameService } from '@pathket/shared/services/game.service';
-import { tokens } from '@pathket/shared/design-system/tokens';
+// Shared code imports from @pathcte/shared
+import { useAuth } from '@pathcte/shared/hooks/useAuth';
+import { gameService } from '@pathcte/shared/services/game.service';
+import { tokens } from '@pathcte/shared/design-system/tokens';
 
 // Web imports platform-specific components
-import { Button } from '@pathket/web/components/common/Button';
+import { Button } from '@pathcte/web/components/common/Button';
 
 // Mobile imports platform-specific components
-import { Button } from '@pathket/mobile/components/common/Button';
+import { Button } from '@pathcte/mobile/components/common/Button';
 ```
 
 ---
@@ -430,7 +430,7 @@ export interface PathkeyCardProps {
 // packages/web/src/components/pathkeys/PathkeyCard.tsx
 
 import { motion } from 'framer-motion';
-import { PathkeyCardProps } from '@pathket/shared/components/PathkeyCard/PathkeyCard.types';
+import { PathkeyCardProps } from '@pathcte/shared/components/PathkeyCard/PathkeyCard.types';
 
 export const PathkeyCard = ({ pathkey, owned, quantity, onPress }: PathkeyCardProps) => {
   return (
@@ -461,8 +461,8 @@ import Animated, {
   useSharedValue, 
   withSpring 
 } from 'react-native-reanimated';
-import { PathkeyCardProps } from '@pathket/shared/components/PathkeyCard/PathkeyCard.types';
-import { tokens } from '@pathket/shared/design-system/tokens';
+import { PathkeyCardProps } from '@pathcte/shared/components/PathkeyCard/PathkeyCard.types';
+import { tokens } from '@pathcte/shared/design-system/tokens';
 
 export const PathkeyCard = ({ pathkey, owned, quantity, onPress }: PathkeyCardProps) => {
   const scale = useSharedValue(1);
@@ -666,7 +666,7 @@ export const notificationService = {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Game Starting Soon!',
-        body: `Your Pathket game starts in 5 minutes. Code: ${gameCode}`,
+        body: `Your Pathcte game starts in 5 minutes. Code: ${gameCode}`,
         data: { gameCode },
       },
       trigger: {
@@ -813,8 +813,8 @@ export const shareService = {
   async shareGameCode(gameCode: string) {
     try {
       await Share.share({
-        message: `Join my Pathket game! Code: ${gameCode}\n\nDownload Pathket: https://pathket.app`,
-        title: 'Join Pathket Game',
+        message: `Join my Pathcte game! Code: ${gameCode}\n\nDownload Pathcte: https://pathcte.app`,
+        title: 'Join Pathcte Game',
       });
     } catch (error) {
       console.error('Share failed:', error);
@@ -824,7 +824,7 @@ export const shareService = {
   async shareAchievement(achievement: string, imageUrl?: string) {
     try {
       await Share.share({
-        message: `I just unlocked: ${achievement} in Pathket! 🎉`,
+        message: `I just unlocked: ${achievement} in Pathcte! 🎉`,
         url: imageUrl,
       });
     } catch (error) {
@@ -835,7 +835,7 @@ export const shareService = {
   async sharePathkey(pathkeyName: string) {
     try {
       await Share.share({
-        message: `I just unlocked the ${pathkeyName} Pathkey! 🔑\n\nExplore careers with Pathket: https://pathket.app`,
+        message: `I just unlocked the ${pathkeyName} Pathkey! 🔑\n\nExplore careers with Pathcte: https://pathcte.app`,
       });
     } catch (error) {
       console.error('Share failed:', error);
@@ -1065,7 +1065,7 @@ const loadMore = async () => {
 
 3. **Privacy Manifest**
    ```xml
-   <!-- ios/Pathket/PrivacyInfo.xcprivacy -->
+   <!-- ios/Pathcte/PrivacyInfo.xcprivacy -->
    <key>NSPrivacyTracking</key>
    <false/>
    <key>NSPrivacyTrackingDomains</key>
@@ -1120,7 +1120,7 @@ const loadMore = async () => {
 
 3. **Content Rating**
    - Fill out questionnaire
-   - Pathket likely: E for Everyone or E10+
+   - Pathcte likely: E for Everyone or E10+
    - Complete rating for each region
 
 4. **Data Safety Section**
@@ -1153,8 +1153,8 @@ const loadMore = async () => {
 ### 7.3 App Store Optimization (ASO)
 
 **App Name:**
-- "Pathket - Career Exploration Game"
-- "Pathket: Learn Through Play"
+- "Pathcte - Career Exploration Game"
+- "Pathcte: Learn Through Play"
 - Max 30 characters (iOS), 50 (Android)
 
 **Keywords (iOS):**
@@ -1166,9 +1166,9 @@ job exploration, future planning, college prep
 
 **Description Template:**
 ```
-🔑 Discover Your Future with Pathket!
+🔑 Discover Your Future with Pathcte!
 
-Pathket makes career exploration fun through interactive games. 
+Pathcte makes career exploration fun through interactive games. 
 Students collect "Pathkeys" while learning about hundreds of careers, 
 building skills, and planning their futures.
 
@@ -1198,7 +1198,7 @@ Career Quest, Path Defense, Career Clash, and many more!
 📱 100% FREE for students
 💎 Premium features for teachers
 
-Download Pathket today and start unlocking your future! 🚀
+Download Pathcte today and start unlocking your future! 🚀
 ```
 
 ### 7.4 App Store Assets Checklist
@@ -1384,8 +1384,8 @@ const sendFeedback = async () => {
   
   if (isAvailable) {
     await MailComposer.composeAsync({
-      recipients: ['feedback@pathket.app'],
-      subject: 'Pathket Beta Feedback',
+      recipients: ['feedback@pathcte.app'],
+      subject: 'Pathcte Beta Feedback',
       body: `
         App Version: ${Constants.manifest.version}
         Platform: ${Platform.OS} ${Platform.Version}
@@ -1881,4 +1881,4 @@ const showChangelog = () => {
 
 ---
 
-*With this strategy, Pathket will have native iOS and Android apps within 4 months of web launch, sharing 70% of code and providing a consistent experience across all platforms.* 📱✨
+*With this strategy, Pathcte will have native iOS and Android apps within 4 months of web launch, sharing 70% of code and providing a consistent experience across all platforms.* 📱✨

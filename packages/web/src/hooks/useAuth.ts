@@ -4,7 +4,7 @@
  * Simplified auth hook wrapping authStore
  */
 
-import { useAuthStore } from '@pathket/shared';
+import { useAuthStore } from '@pathcte/shared';
 
 export const useAuth = () => {
   const {

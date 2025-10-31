@@ -1,8 +1,8 @@
-# PATHKET IMPLEMENTATION GUIDE FOR CLAUDE CODE
+# PATHCTE IMPLEMENTATION GUIDE FOR CLAUDE CODE
 
 ## Project Overview
 
-**Project Name:** Pathket
+**Project Name:** Pathcte
 **Tech Stack:** React.js + TypeScript + Supabase + Netlify + Azure Storage
 **Purpose:** Career-focused educational gaming platform with Pathkeys collection system
 **Development Approach:** Phased implementation with Claude Code AI assistance
@@ -1076,7 +1076,7 @@ CREATE TRIGGER update_question_count_on_delete
 ## 4. FILE STRUCTURE
 
 ```
-pathket/
+pathcte/
 ├── .env                                 # Environment variables
 ├── .env.example                         # Template for environment variables
 ├── .gitignore
@@ -1290,7 +1290,7 @@ pathket/
 To prepare for React Native mobile apps, organize code with maximum reusability:
 
 ```
-pathket/
+pathcte/
 ├── packages/                            # Monorepo structure (recommended)
 │   ├── shared/                          # Shared across web & mobile
 │   │   ├── src/
@@ -1382,7 +1382,7 @@ export const Button = ({ onPress, title, ...props }: ButtonProps) => (
 ```json
 // Root package.json
 {
-  "name": "pathket-monorepo",
+  "name": "pathcte-monorepo",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -1663,8 +1663,8 @@ VITE_SUPABASE_ANON_KEY=your-anon-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 
 # Azure Storage Configuration
-VITE_AZURE_STORAGE_ACCOUNT_NAME=pathketstorage
-VITE_AZURE_STORAGE_CONTAINER_NAME=pathket-assets
+VITE_AZURE_STORAGE_ACCOUNT_NAME=pathctestorage
+VITE_AZURE_STORAGE_CONTAINER_NAME=pathcte-assets
 AZURE_STORAGE_CONNECTION_STRING=your-connection-string-here
 AZURE_STORAGE_SAS_TOKEN=your-sas-token-here
 
@@ -1754,7 +1754,7 @@ Create `netlify.toml`:
 1. **Project Setup (Mobile-First)**
    ```bash
    # Option A: Monorepo from day 1 (recommended)
-   mkdir pathket && cd pathket
+   mkdir pathcte && cd pathcte
    npm init -y
    
    # Set up workspaces
@@ -1831,7 +1831,7 @@ Create `netlify.toml`:
    
    // 🌐 Web UI component
    // packages/web/src/components/auth/LoginForm.tsx
-   import { authService } from '@pathket/shared/services/auth.service';
+   import { authService } from '@pathcte/shared/services/auth.service';
    
    export const LoginForm = () => {
      const handleSubmit = async () => {
@@ -1842,7 +1842,7 @@ Create `netlify.toml`:
    
    // 📱 Future mobile UI component
    // packages/mobile/src/screens/auth/LoginScreen.tsx
-   import { authService } from '@pathket/shared/services/auth.service';
+   import { authService } from '@pathcte/shared/services/auth.service';
    
    export const LoginScreen = () => {
      const handleSubmit = async () => {
@@ -2269,10 +2269,10 @@ Create `netlify.toml`:
    - Speed boosts
    - Position tracking
 
-6. **Pathket Study Mode**
+6. **Pathcte Study Mode**
    - Files:
-     - `src/game-engine/modes/PathketStudy.ts`
-     - `src/components/game/modes/PathketStudy.tsx`
+     - `src/game-engine/modes/PathcteStudy.ts`
+     - `src/components/game/modes/PathcteStudy.tsx`
    - Pure question answering
    - Progress tracking
    - Review mode
@@ -2532,7 +2532,7 @@ export const useLoginForm = () => {
 // 🌐 Web-specific UI
 // ============================================
 import { useNavigate } from 'react-router-dom';
-import { useLoginForm } from '@pathket/shared/hooks/useLoginForm';
+import { useLoginForm } from '@pathcte/shared/hooks/useLoginForm';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 
@@ -2559,7 +2559,7 @@ export const LoginForm = () => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Log In to Pathket</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Log In to Pathcte</h2>
       
       <form onSubmit={onSubmit} className="space-y-4">
         <Input
@@ -2611,10 +2611,10 @@ export const LoginForm = () => {
 // ============================================
 import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useLoginForm } from '@pathket/shared/hooks/useLoginForm';
+import { useLoginForm } from '@pathcte/shared/hooks/useLoginForm';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
-import { tokens } from '@pathket/shared/design-system/tokens';
+import { tokens } from '@pathcte/shared/design-system/tokens';
 
 export const LoginScreen = () => {
   const navigation = useNavigation();
@@ -2638,7 +2638,7 @@ export const LoginScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log In to Pathket</Text>
+      <Text style={styles.title}>Log In to Pathcte</Text>
       
       <Input
         label="Email"
@@ -2758,7 +2758,7 @@ export const LoginForm = () => {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-center">Log In to Pathket</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Log In to Pathcte</h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input
@@ -2876,7 +2876,7 @@ export interface ButtonProps {
 // packages/web/src/components/common/Button.tsx
 
 import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { ButtonProps } from '@pathket/shared/components/Button/Button.types';
+import { ButtonProps } from '@pathcte/shared/components/Button/Button.types';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 
@@ -2951,8 +2951,8 @@ import {
   ViewStyle,
   TextStyle 
 } from 'react-native';
-import { ButtonProps } from '@pathket/shared/components/Button/Button.types';
-import { tokens } from '@pathket/shared/design-system/tokens';
+import { ButtonProps } from '@pathcte/shared/components/Button/Button.types';
+import { tokens } from '@pathcte/shared/design-system/tokens';
 
 export const Button: React.FC<ButtonProps> = ({
   onPress,
@@ -3110,7 +3110,7 @@ export interface InputProps {
 // packages/web/src/components/common/Input.tsx
 
 import { forwardRef } from 'react';
-import { InputProps } from '@pathket/shared/components/Input/Input.types';
+import { InputProps } from '@pathcte/shared/components/Input/Input.types';
 
 // Adapt web onChange to onChangeText pattern
 export const Input = forwardRef<HTMLInputElement, InputProps & { 
@@ -3197,8 +3197,8 @@ import {
   TextInput, 
   StyleSheet 
 } from 'react-native';
-import { InputProps } from '@pathket/shared/components/Input/Input.types';
-import { tokens } from '@pathket/shared/design-system/tokens';
+import { InputProps } from '@pathcte/shared/components/Input/Input.types';
+import { tokens } from '@pathcte/shared/design-system/tokens';
 
 export const Input: React.FC<InputProps> = ({
   value,
@@ -4921,7 +4921,7 @@ VITE_SENTRY_DSN=
 
 ### A1. Design Document Features Not Yet in Implementation
 
-This section lists features from `Pathket_Game_Design_Document.md` that are not yet covered in this implementation guide or the codebase.
+This section lists features from `Pathcte_Game_Design_Document.md` that are not yet covered in this implementation guide or the codebase.
 
 #### A1.1 Teacher Tools (Critical Priority)
 
@@ -5000,7 +5000,7 @@ This section lists features from `Pathket_Game_Design_Document.md` that are not 
 #### A1.3 Marketplace (Medium Priority)
 
 **Current Status:** Database schema complete, zero UI
-**Design Doc Reference:** Section 6 (Pathket Market)
+**Design Doc Reference:** Section 6 (Pathcte Market)
 **Gap:** Students can earn tokens but can't spend them
 
 **Required Components:**
@@ -5196,4 +5196,4 @@ The following technical details should be added to this implementation guide as 
 
 ---
 
-This implementation guide provides Claude Code with comprehensive, actionable instructions for building Pathket. The new Implementation Status section tracks progress against the design document, and the Gap Analysis appendix identifies missing features with prioritization and effort estimates.
+This implementation guide provides Claude Code with comprehensive, actionable instructions for building Pathcte. The new Implementation Status section tracks progress against the design document, and the Gap Analysis appendix identifies missing features with prioritization and effort estimates.

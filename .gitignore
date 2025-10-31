@@ -56,3 +56,16 @@ web-build/
 # Temporary
 *.tmp
 .cache/
+
+# Assets (stored in Azure Storage)
+assets/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!public/**/*.gif
+.vs/

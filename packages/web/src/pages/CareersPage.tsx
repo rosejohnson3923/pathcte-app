@@ -10,7 +10,7 @@ import { CareerCard, CareerDetail, CareerSearch } from '../components/careers';
 import { useCareers } from '../hooks';
 import { Spinner } from '../components/common';
 import { Compass } from 'lucide-react';
-import type { Career } from '@pathket/shared';
+import type { Career } from '@pathcte/shared';
 
 export default function CareersPage() {
   const { data: careers, isLoading } = useCareers();
@@ -103,10 +103,10 @@ export default function CareersPage() {
             </div>
             <div>
               <h1 className="text-4xl font-display font-bold text-white mb-1">
-                Explore Careers
+                Gaming & Esports Careers
               </h1>
               <p className="text-indigo-100 text-lg">
-                Discover your future path through hundreds of career options
+                Discover 50+ career paths in the gaming and esports industry
               </p>
             </div>
           </div>

@@ -6,7 +6,7 @@
 
 import { useMemo } from 'react';
 import { Search } from 'lucide-react';
-import type { Career } from '@pathket/shared';
+import type { Career } from '@pathcte/shared';
 
 export interface CareerSearchProps {
   careers: Career[];

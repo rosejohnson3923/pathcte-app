@@ -221,8 +221,16 @@ export const realtimeService = {
     const channel = this.channels.get(channelName);
 
     if (!channel) {
-      console.warn(`No active channel for game ${sessionId}`);
+      // This is OK - means we're relying on Postgres changes only
+      // Broadcast is supplementary to database real-time subscriptions
+      console.debug(`No active channel for game ${sessionId}, using Postgres changes only`);
       return { success: false, error: 'Channel not found' };
+    }
+
+    // Check if channel is subscribed
+    if (channel.state !== 'joined') {
+      console.debug(`Channel not ready for game ${sessionId} (state: ${channel.state}), using Postgres changes only`);
+      return { success: false, error: 'Channel not ready' };
     }
 
     try {

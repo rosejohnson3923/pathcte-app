@@ -21,7 +21,7 @@ CREATE INDEX IF NOT EXISTS idx_schools_country ON public.schools(country);
 CREATE INDEX IF NOT EXISTS idx_schools_state ON public.schools(state);
 
 -- Comments
-COMMENT ON TABLE public.schools IS 'School organizations that use Pathket';
+COMMENT ON TABLE public.schools IS 'School organizations that use pathcte';
 COMMENT ON COLUMN public.schools.license_type IS 'Type of license: free, school, district';
 COMMENT ON COLUMN public.schools.max_students IS 'Maximum number of students allowed';
 COMMENT ON COLUMN public.schools.max_teachers IS 'Maximum number of teachers allowed';

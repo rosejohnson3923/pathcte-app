@@ -4,7 +4,7 @@
 
 ## Executive Summary
 
-This document compares the original **Pathket Implementation Guide** against what has been built so far, identifying gaps and missing requirements before proceeding to Week 2.
+This document compares the original **Pathcte Implementation Guide** against what has been built so far, identifying gaps and missing requirements before proceeding to Week 2.
 
 ### Overall Completion Status
 
@@ -311,7 +311,7 @@ This document compares the original **Pathket Implementation Guide** against wha
 - Career Clash mode
 - Career Factory mode
 - Career Racing mode
-- Pathket Study mode
+- Pathcte Study mode
 
 **What We Built:** Nothing
 
@@ -502,7 +502,7 @@ This document compares the original **Pathket Implementation Guide** against wha
 
 The original plan showed a single-repo structure:
 ```
-pathket/
+pathcte/
 ├── src/
 │   ├── components/
 │   ├── pages/
@@ -514,7 +514,7 @@ pathket/
 
 We implemented a monorepo with shared/web separation:
 ```
-pathket/
+pathcte/
 ├── packages/
 │   ├── shared/  (platform-agnostic)
 │   └── web/     (React web app)
