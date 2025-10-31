@@ -60,9 +60,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <Key className="h-10 w-10 text-white" />
-            <span className="text-3xl font-display font-bold text-white">Pathcte</span>
+          <Link to="/" className="inline-flex items-center space-x-3">
+            <img
+              src="/pathCTE_wNoText_Light.svg"
+              alt="PathCTE"
+              className="h-16 w-16"
+            />
+            <span className="text-3xl font-display font-bold text-white">PathCTE</span>
           </Link>
         </div>
 
@@ -181,6 +185,10 @@ export default function LoginPage() {
             <Link to="/signup" className="text-purple-600 hover:text-purple-700 font-medium">
               Sign up
             </Link>
+          </p>
+
+          <p className="mt-4 text-center text-xs text-gray-500">
+            PathCTE (pronounced <span className="font-semibold text-gray-700">"Path-SET"</span>)
           </p>
         </div>
       </div>
