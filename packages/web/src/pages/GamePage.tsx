@@ -222,7 +222,7 @@ export default function GamePage() {
       console.log('[GamePage] Cleaning up realtime subscriptions');
       realtimeService.unsubscribeFromGame(sessionId);
     };
-  }, [sessionId, questions.length, setSession, setQuestions, addPlayer, updatePlayer, setCurrentQuestionIndex]);
+  }, [sessionId, questions.length]);
 
   // Game flow handlers
   const handleStartGame = async () => {
