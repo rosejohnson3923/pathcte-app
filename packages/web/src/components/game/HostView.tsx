@@ -5,7 +5,7 @@
  * Blooket-style view where host doesn't answer, just facilitates
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, Button, Badge } from '../common';
 import { Clock, Users, ArrowRight, Sparkles } from 'lucide-react';
 import { shuffleQuestionOptions } from '@pathcte/shared';
@@ -42,17 +42,24 @@ export const HostView: React.FC<HostViewProps> = ({
   const [timeRemaining, setTimeRemaining] = useState(question.time_limit_seconds);
   const [playersAnswered, setPlayersAnswered] = useState<Set<string>>(new Set());
 
+  // Store latest onTimerExpired callback in ref to avoid stale closures
+  const onTimerExpiredRef = useRef(onTimerExpired);
+  useEffect(() => {
+    onTimerExpiredRef.current = onTimerExpired;
+  }, [onTimerExpired]);
+
   // Timer countdown
   useEffect(() => {
-    if (timeRemaining <= 0) return;
-
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
         if (prev <= 1) {
           // Time's up - only auto-advance in auto mode
           // In manual mode, timer is just for display
-          if (progressionControl === 'auto' && onTimerExpired) {
-            setTimeout(() => onTimerExpired(), 100);
+          if (progressionControl === 'auto' && onTimerExpiredRef.current) {
+            console.log('[HostView] Timer expired in auto mode, calling onTimerExpired');
+            setTimeout(() => onTimerExpiredRef.current?.(), 100);
+          } else {
+            console.log('[HostView] Timer expired in manual mode, waiting for teacher');
           }
           return 0;
         }
@@ -61,7 +68,7 @@ export const HostView: React.FC<HostViewProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeRemaining, progressionControl, onTimerExpired]);
+  }, [question.id, progressionControl]);
 
   // Reset timer and answered tracking when question changes
   useEffect(() => {
