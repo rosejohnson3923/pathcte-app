@@ -69,3 +69,4 @@ assets/
 !public/**/*.jpeg
 !public/**/*.gif
 .vs/
+*.pdf

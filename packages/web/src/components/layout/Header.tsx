@@ -30,7 +30,12 @@ export const Header: React.FC = () => {
             <img
               src="/pathCTE_wNoText_Light.svg"
               alt="PathCTE"
-              className="h-12 w-12"
+              className="h-12 w-12 dark:hidden"
+            />
+            <img
+              src="/pathCTE_wNoText_Dark.svg"
+              alt="PathCTE"
+              className="h-12 w-12 hidden dark:block"
             />
             <span className="text-2xl font-display font-bold text-text-primary">PathCTE</span>
           </Link>
