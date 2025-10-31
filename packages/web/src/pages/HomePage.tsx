@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { GraduationCap, Sparkles, Users, CheckCircle2 } from 'lucide-react';
+import { GraduationCap, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export default function HomePage() {
   return (

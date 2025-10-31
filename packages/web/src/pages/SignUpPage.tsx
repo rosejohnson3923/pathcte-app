@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Key, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { useAuthStore, toast } from '@pathcte/shared';
 import { Button, Input } from '../components/common';
 

@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Key, User, LogOut, Settings, Home, BookOpen, Trophy, Gamepad2 } from 'lucide-react';
+import { User, LogOut, Settings, Home, BookOpen, Trophy, Gamepad2 } from 'lucide-react';
 import { useAuthStore } from '@pathcte/shared';
 import { Button, ThemeToggle } from '../common';
 import clsx from 'clsx';
