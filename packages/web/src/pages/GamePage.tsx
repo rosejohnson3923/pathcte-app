@@ -98,7 +98,7 @@ export default function GamePage() {
           .single();
 
         if (questionSet && !questionSetError) {
-          setQuestionSetTitle(questionSet.title);
+          setQuestionSetTitle((questionSet as any).title);
         }
 
         // BUG FIX: Determine if current user is the host
@@ -129,7 +129,7 @@ export default function GamePage() {
 
         // Load questions if game is in progress or completed
         if (gameSession.status !== 'waiting') {
-          const businessDriver = (gameSession.settings as any)?.businessDriver;
+          const businessDriver = (gameSession as any).settings?.businessDriver;
           const { questions: gameQuestions, error: questionsError } = await gameService.getGameQuestions(
             gameSession.question_set_id,
             userIsHost,  // Hosts get answers, students don't
@@ -140,7 +140,7 @@ export default function GamePage() {
             throw new Error('Failed to load questions');
           }
 
-          setQuestions(gameQuestions);
+          setQuestions(gameQuestions as any);
 
           // Load current question index from database
           // This ensures the game state is preserved across page refreshes
@@ -198,15 +198,15 @@ export default function GamePage() {
         }
       },
       onPlayerJoined: (player: GamePlayer) => {
-        console.log('[GamePage] Player joined:', player.name);
+        console.log('[GamePage] Player joined:', (player as any).name);
         addPlayer(player);
       },
       onPlayerUpdate: (player: GamePlayer) => {
-        console.log('[GamePage] Player updated:', player.name);
+        console.log('[GamePage] Player updated:', (player as any).name);
         updatePlayer(player.id, player);
       },
       onScoreUpdate: (player: GamePlayer) => {
-        console.log('[GamePage] Player score updated:', player.name, player.score);
+        console.log('[GamePage] Player score updated:', (player as any).name, player.score);
         updatePlayer(player.id, player);
       },
     });
@@ -240,14 +240,14 @@ export default function GamePage() {
 
       // Load questions (with answers since we're the host)
       // Apply business_driver filter from session settings if specified
-      const businessDriver = (updatedSession.settings as any)?.businessDriver;
+      const businessDriver = (updatedSession as any).settings?.businessDriver;
       const { questions: gameQuestions } = await gameService.getGameQuestions(
         updatedSession.question_set_id,
         true,
         businessDriver
       );
       if (gameQuestions) {
-        setQuestions(gameQuestions);
+        setQuestions(gameQuestions as any);
       }
     } catch (err) {
       console.error('Error starting game:', err);
@@ -265,8 +265,8 @@ export default function GamePage() {
       nextQuestion();
 
       // Persist to database so it survives page refreshes
-      await supabase
-        .from('game_sessions')
+      (supabase
+        .from('game_sessions') as any)
         .update({ current_question_index: nextIndex })
         .eq('id', sessionId);
 
@@ -280,7 +280,7 @@ export default function GamePage() {
 
   const handleTimerExpired = async () => {
     // Get progression control setting
-    const progressionControl = (session?.settings as any)?.progressionControl || 'manual';
+    const progressionControl = (session as any)?.settings?.progressionControl || 'manual';
     const isSoloSession = session?.session_type === 'solo';
 
     // Solo Mode: Timer is just for tracking, student controls pace with "Next Question" button
@@ -384,8 +384,8 @@ export default function GamePage() {
         setHasAnswered(true);
         if (existingAnswer) {
           setLastAnswer({
-            isCorrect: existingAnswer.is_correct,
-            selectedIndex: existingAnswer.selected_option_index,
+            isCorrect: (existingAnswer as any).is_correct,
+            selectedIndex: (existingAnswer as any).selected_option_index,
           });
         }
 
@@ -477,7 +477,7 @@ export default function GamePage() {
                   questionSetTitle={questionSetTitle}
                   players={players}
                   onNextQuestion={handleNextQuestion}
-                  progressionControl={(session?.settings as any)?.progressionControl || 'manual'}
+                  progressionControl={(session as any)?.settings?.progressionControl || 'manual'}
                   onTimerExpired={handleTimerExpired}
                 />
               ) : (
