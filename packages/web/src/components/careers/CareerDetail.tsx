@@ -49,7 +49,7 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
     setIsStarting(true);
 
     try {
-      const { session, player, error } = await gameService.startCareerQuest({
+      const { session, error } = await gameService.startCareerQuest({
         userId: user.id,
         careerId: career.id,
         careerTitle: career.title,

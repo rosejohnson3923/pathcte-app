@@ -1,8 +1,8 @@
 import { DashboardLayout } from '../components/layout';
-import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useUserGamePlayers, useActiveHostedGames, useActiveJoinedGames } from '../hooks';
+import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames } from '../hooks';
 import { Card, Spinner, Badge } from '../components/common';
-import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Users as UsersIcon, Zap } from 'lucide-react';
-import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathcte/shared';
+import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Zap } from 'lucide-react';
+import { getPlaceholderImageUrl } from '@pathcte/shared';
 import { ensureAzureUrlHasSasToken } from '../config/azure';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const { data: allPathkeys } = usePathkeys();
   const { data: userPathkeys, isLoading: pathkeysLoading } = useUserPathkeys();
   const gameCount = useGameCount();
-  const { data: recentGames, isLoading: gamesLoading } = useUserGamePlayers(5);
+  // const { data: recentGames, isLoading: gamesLoading } = useUserGamePlayers(5);
   const { data: activeHostedGames, isLoading: activeHostedLoading } = useActiveHostedGames();
   const { data: activeJoinedGames, isLoading: activeJoinedLoading } = useActiveJoinedGames();
 

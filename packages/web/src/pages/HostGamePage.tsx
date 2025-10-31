@@ -103,7 +103,7 @@ export default function HostGamePage() {
           progressionControl: sessionType === 'solo' ? 'auto' : progressionControl,
           businessDriver: businessDriverFilter !== 'all' ? businessDriverFilter : undefined,
         },
-      });
+      } as any);
 
       if (createError || !session) {
         throw createError || new Error('Failed to create game');
@@ -116,9 +116,9 @@ export default function HostGamePage() {
       // Solo practice: Auto-join and start immediately
       if (sessionType === 'solo') {
         // Join as the only player
-        const { player } = await gameService.joinGame({
+        await gameService.joinGame({
           gameCode: session.game_code,
-          displayName: user.display_name || 'Teacher',
+          displayName: (user as any).display_name || 'Teacher',
           userId: user.id,
         });
 

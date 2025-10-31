@@ -350,7 +350,7 @@ export const gameService = {
         const { error: updateError } = await supabase.rpc('update_player_placement', {
           p_player_id: players[i].id,
           p_placement: i + 1,
-        });
+        } as any);
 
         if (updateError) {
           console.error(`Error updating placement for player ${players[i].id}:`, updateError);
@@ -447,7 +447,7 @@ export const gameService = {
           p_player_id: player.id,
           p_tokens_earned: tokensEarned,
           p_pathkeys_earned: pathkeysEarned,
-        });
+        } as any);
 
         if (rewardError) {
           console.error(`Error awarding rewards to player ${player.id}:`, rewardError);
@@ -498,11 +498,11 @@ export const gameService = {
         p_question_id: params.questionId,
         p_selected_option_index: params.selectedOptionIndex,
         p_time_taken_ms: params.timeTakenMs,
-      });
+      } as any);
 
       if (error) throw error;
 
-      const result = data?.[0];
+      const result = (data as any)?.[0];
       if (!result) throw new Error('No result returned from answer submission');
 
       return {
@@ -646,11 +646,13 @@ export const gameService = {
         .limit(1)
         .single();
 
+      const careerSetData = careerSet as any;
+
       let questionSetId: string;
 
-      if (careerSet && !careerSetError) {
+      if (careerSetData && !careerSetError) {
         // Found career-specific career quest question set
-        questionSetId = careerSet.id;
+        questionSetId = careerSetData.id;
       } else {
         // PRIORITY 2: Fall back to sector-based Career Quest question set
         const { data: sectorSets, error: sectorError } = await supabase
@@ -660,8 +662,10 @@ export const gameService = {
           .eq('career_sector', params.careerSector)
           .limit(1);
 
-        if (sectorSets && sectorSets.length > 0 && !sectorError) {
-          questionSetId = sectorSets[0].id;
+        const sectorSetsData = sectorSets as any[];
+
+        if (sectorSetsData && sectorSetsData.length > 0 && !sectorError) {
+          questionSetId = sectorSetsData[0].id;
         } else {
           // PRIORITY 3: Fall back to any public question set
           const { data: anySet, error: anySetError } = await supabase
@@ -671,11 +675,13 @@ export const gameService = {
             .limit(1)
             .single();
 
-          if (anySetError || !anySet) {
+          const anySetData = anySet as any;
+
+          if (anySetError || !anySetData) {
             throw new Error('No question sets available. Please contact your teacher to create some.');
           }
 
-          questionSetId = anySet.id;
+          questionSetId = anySetData.id;
         }
       }
 
@@ -691,7 +697,7 @@ export const gameService = {
         settings: {
           progressionControl: 'auto', // Solo games always auto-advance
         },
-      });
+      } as any);
 
       if (sessionError || !session) {
         throw sessionError || new Error('Failed to create career quest');

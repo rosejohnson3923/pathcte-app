@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, Transition } from '@headlessui/react';
-import { Key, User, LogOut, Settings, Home, BookOpen, Trophy } from 'lucide-react';
+import { User, LogOut, Settings, Home, BookOpen, Trophy, Gamepad2 } from 'lucide-react';
 import { useAuthStore } from '@pathcte/shared';
 import { Button, ThemeToggle } from '../common';
 import clsx from 'clsx';
@@ -27,8 +27,12 @@ export const Header: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-            <Key className="h-8 w-8 text-purple-600" />
-            <span className="text-2xl font-display font-bold text-text-primary">Pathcte</span>
+            <img
+              src="/pathCTE_wNoText_Light.svg"
+              alt="PathCTE"
+              className="h-12 w-12"
+            />
+            <span className="text-2xl font-display font-bold text-text-primary">PathCTE</span>
           </Link>
 
           {/* Navigation */}
@@ -57,6 +61,14 @@ export const Header: React.FC = () => {
               >
                 <Trophy size={20} />
                 <span className="text-sm font-medium">Pathkeys</span>
+              </Link>
+
+              <Link
+                to="/how-to-play"
+                className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              >
+                <Gamepad2 size={20} />
+                <span className="text-sm font-medium">How to Play</span>
               </Link>
 
               {/* XP Balance */}

@@ -4,9 +4,12 @@ import { useAuthStore, useUIStore } from '@pathcte/shared';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import ContactPage from './pages/ContactPage';
+import PrivacyPage from './pages/PrivacyPage';
 import DashboardPage from './pages/DashboardPage';
 import CollectionPage from './pages/CollectionPage';
 import CareersPage from './pages/CareersPage';
+import HowToPlayPage from './pages/HowToPlayPage';
 import JoinGamePage from './pages/JoinGamePage';
 import HostGamePage from './pages/HostGamePage';
 import GamePage from './pages/GamePage';
@@ -39,6 +42,8 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route
           path="/dashboard"
           element={
@@ -60,6 +65,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CareersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/how-to-play"
+          element={
+            <ProtectedRoute>
+              <HowToPlayPage />
             </ProtectedRoute>
           }
         />

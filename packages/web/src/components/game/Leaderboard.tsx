@@ -5,7 +5,7 @@
  */
 
 import { Card, Badge } from '../common';
-import { Trophy, Medal, Award } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import type { GamePlayer } from '@pathcte/shared';
 
 export interface LeaderboardProps {
@@ -27,13 +27,6 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
     if (b.correct_answers !== a.correct_answers) return b.correct_answers - a.correct_answers;
     return new Date(a.joined_at).getTime() - new Date(b.joined_at).getTime();
   });
-
-  const getPlacementIcon = (index: number) => {
-    if (index === 0) return <Trophy className="text-amber-500" size={24} />;
-    if (index === 1) return <Medal className="text-gray-400" size={24} />;
-    if (index === 2) return <Award className="text-amber-700" size={24} />;
-    return null;
-  };
 
   const getPlacementColor = (index: number) => {
     if (index === 0) return 'from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 border-amber-300 dark:border-amber-500';

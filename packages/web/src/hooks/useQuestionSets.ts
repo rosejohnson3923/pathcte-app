@@ -126,10 +126,10 @@ export const useFilteredQuestionSets = (filters: {
     if (filters.exploration_type && filters.exploration_type !== 'all') {
       if (filters.exploration_type === 'industry') {
         // Industry: career_id IS NULL
-        if (set.career_id !== null) return false;
+        if ((set as any).career_id !== null) return false;
       } else if (filters.exploration_type === 'career') {
         // Career: career_id IS NOT NULL
-        if (set.career_id === null) return false;
+        if ((set as any).career_id === null) return false;
       } else if (filters.exploration_type === 'subject') {
         // Subject filter handled below
         // Allow both career_id NULL and NOT NULL, just filter by subject

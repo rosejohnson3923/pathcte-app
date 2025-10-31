@@ -6,7 +6,7 @@
 
 import { useState, useMemo } from 'react';
 import { DashboardLayout } from '../components/layout';
-import { Card, Button, Spinner, Input, Badge } from '../components/common';
+import { Card, Button, Spinner, Input } from '../components/common';
 import { Users, Search, Trophy, Gamepad2, Target, TrendingUp } from 'lucide-react';
 import { useStudentStats } from '../hooks';
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Key, Mail, Lock, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 import { useAuthStore, toast } from '@pathcte/shared';
 import { Button, Input } from '../components/common';
 
@@ -68,24 +68,51 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('[SignUpPage] Form submitted');
 
     if (!validateForm()) {
+      console.log('[SignUpPage] Validation failed');
       return;
     }
 
     const fullName = `${firstName.trim()} ${lastName.trim()}`;
-    const result = await signUp({
+    const signUpData = {
       email,
       password,
       fullName,
       role: role as 'student' | 'teacher' | 'parent',
+    };
+
+    console.log('[SignUpPage] Attempting signup with:', {
+      email: signUpData.email,
+      fullName: signUpData.fullName,
+      role: signUpData.role,
+      passwordLength: signUpData.password.length,
     });
 
-    if (result.success) {
-      toast.success('Account created! Welcome to Pathcte!');
-      navigate('/dashboard');
-    } else {
-      toast.error(result.error || 'Failed to create account');
+    try {
+      const result = await signUp(signUpData);
+      console.log('[SignUpPage] Signup result:', { success: result.success, error: result.error });
+
+      if (result.success) {
+        // Check if email confirmation is required
+        if (result.error && result.error.includes('email')) {
+          toast.success('Account created! Please check your email to confirm your account.');
+          console.log('[SignUpPage] Email confirmation required, redirecting to login');
+          navigate('/login');
+        } else {
+          toast.success('Account created! Welcome to Pathcte!');
+          console.log('[SignUpPage] Navigating to dashboard');
+          navigate('/dashboard');
+        }
+      } else {
+        const errorMessage = result.error || 'Failed to create account';
+        console.error('[SignUpPage] Signup failed:', errorMessage);
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error('[SignUpPage] Unexpected error during signup:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     }
   };
 
@@ -94,9 +121,13 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2">
-            <Key className="h-10 w-10 text-white" />
-            <span className="text-3xl font-display font-bold text-white">Pathcte</span>
+          <Link to="/" className="inline-flex items-center space-x-3">
+            <img
+              src="/pathCTE_wNoText_Light.svg"
+              alt="PathCTE"
+              className="h-16 w-16"
+            />
+            <span className="text-3xl font-display font-bold text-white">PathCTE</span>
           </Link>
         </div>
 
@@ -238,6 +269,10 @@ export default function SignUpPage() {
             <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium">
               Sign in
             </Link>
+          </p>
+
+          <p className="mt-4 text-center text-xs text-gray-500">
+            PathCTE (pronounced <span className="font-semibold text-gray-700">"Path-SET"</span>)
           </p>
         </div>
       </div>
