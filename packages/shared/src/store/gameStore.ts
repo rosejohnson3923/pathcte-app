@@ -93,10 +93,17 @@ export const useGameStore = create<GameState>((set) => ({
   })),
 
   // Question actions
-  setQuestions: (questions) => set({
-    questions,
-    currentQuestionIndex: questions.length > 0 ? 0 : -1,
-    currentQuestion: questions.length > 0 ? questions[0] : null,
+  setQuestions: (questions) => set((state) => {
+    // Only reset question index if it's uninitialized (-1) or out of bounds
+    // This prevents resetting progress when questions are reloaded
+    const shouldResetIndex = state.currentQuestionIndex === -1 || state.currentQuestionIndex >= questions.length;
+    const newIndex = shouldResetIndex ? (questions.length > 0 ? 0 : -1) : state.currentQuestionIndex;
+
+    return {
+      questions,
+      currentQuestionIndex: newIndex,
+      currentQuestion: questions[newIndex] || null,
+    };
   }),
 
   setCurrentQuestionIndex: (index) => set((state) => ({
