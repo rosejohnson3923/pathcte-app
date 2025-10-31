@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathcte/shared';
+import { getPlaceholderImageUrl } from '@pathcte/shared';
 import { ensureAzureUrlHasSasToken } from '../../config/azure';
 import { Trophy, Lock, Star } from 'lucide-react';
 import clsx from 'clsx';

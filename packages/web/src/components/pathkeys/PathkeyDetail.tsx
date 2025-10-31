@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 import { Modal, Badge, Button } from '../common';
-import { getPathkeyImageUrl, getPlaceholderImageUrl } from '@pathcte/shared';
+import { getPlaceholderImageUrl } from '@pathcte/shared';
 import { ensureAzureUrlHasSasToken } from '../../config/azure';
 import { Trophy, Calendar, Hash, Star } from 'lucide-react';
 import type { Pathkey, UserPathkey } from '@pathcte/shared';

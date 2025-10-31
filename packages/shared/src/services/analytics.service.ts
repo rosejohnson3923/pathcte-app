@@ -5,7 +5,6 @@
  */
 
 import { supabase } from '../config/supabase';
-import type { GameSession, GamePlayer } from '../types';
 
 export interface StudentStats {
   user_id: string;
@@ -66,7 +65,7 @@ class AnalyticsService {
 
       if (gamesError) throw gamesError;
 
-      const gameIds = games?.map((g) => g.id) || [];
+      const gameIds = (games as any)?.map((g: any) => g.id) || [];
 
       if (gameIds.length === 0) {
         return {
@@ -88,23 +87,25 @@ class AnalyticsService {
 
       if (playersError) throw playersError;
 
+      const playersData = players as any[];
+
       // Calculate unique students
-      const uniqueStudents = new Set(players?.map((p) => p.user_id) || []);
+      const uniqueStudents = new Set(playersData?.map((p: any) => p.user_id) || []);
 
       // Calculate active students (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const activeStudents = new Set(
-        players?.filter((p) => new Date(p.joined_at) > thirtyDaysAgo).map((p) => p.user_id) || []
+        playersData?.filter((p: any) => new Date(p.joined_at) > thirtyDaysAgo).map((p: any) => p.user_id) || []
       );
 
       // Calculate total questions answered
-      const totalQuestionsAnswered = players?.reduce((sum, p) => sum + (p.total_answers || 0), 0) || 0;
+      const totalQuestionsAnswered = playersData?.reduce((sum: number, p: any) => sum + (p.total_answers || 0), 0) || 0;
 
       // Calculate average score
-      const validScores = players?.filter((p) => p.score !== null && p.score !== undefined) || [];
+      const validScores = playersData?.filter((p: any) => p.score !== null && p.score !== undefined) || [];
       const averageScore = validScores.length > 0
-        ? validScores.reduce((sum, p) => sum + p.score, 0) / validScores.length
+        ? validScores.reduce((sum: number, p: any) => sum + p.score, 0) / validScores.length
         : 0;
 
       // Get pathkeys awarded (count user_pathkeys for students who played teacher's games)
@@ -140,7 +141,7 @@ class AnalyticsService {
 
       if (gamesError) throw gamesError;
 
-      const gameIds = games?.map((g) => g.id) || [];
+      const gameIds = (games as any)?.map((g: any) => g.id) || [];
 
       if (gameIds.length === 0) {
         return [];
@@ -155,6 +156,8 @@ class AnalyticsService {
 
       if (playersError) throw playersError;
 
+      const playersData = players as any[];
+
       // Group by user_id
       const userStatsMap = new Map<string, {
         display_name: string;
@@ -165,7 +168,7 @@ class AnalyticsService {
         lastActive: string;
       }>();
 
-      players?.forEach((player) => {
+      playersData?.forEach((player: any) => {
         const existing = userStatsMap.get(player.user_id);
         if (existing) {
           existing.games += 1;
@@ -200,14 +203,17 @@ class AnalyticsService {
         .select('id, tokens, email')
         .in('id', userIds);
 
+      const pathkeysData = pathkeys as any[];
+      const profilesData = profiles as any[];
+
       const pathkeysMap = new Map<string, number>();
-      pathkeys?.forEach((p) => {
+      pathkeysData?.forEach((p: any) => {
         pathkeysMap.set(p.user_id, (pathkeysMap.get(p.user_id) || 0) + 1);
       });
 
       const tokensMap = new Map<string, number>();
       const emailMap = new Map<string, string>();
-      profiles?.forEach((p) => {
+      profilesData?.forEach((p: any) => {
         tokensMap.set(p.id, p.tokens || 0);
         emailMap.set(p.id, p.email);
       });
@@ -274,12 +280,14 @@ class AnalyticsService {
 
       if (error) throw error;
 
-      if (!sessions || sessions.length === 0) {
+      const sessionsData = sessions as any[];
+
+      if (!sessionsData || sessionsData.length === 0) {
         return [];
       }
 
       // Get player stats for each session
-      const sessionIds = sessions.map((s) => s.id);
+      const sessionIds = sessionsData.map((s: any) => s.id);
       const { data: players, error: playersError } = await supabase
         .from('game_players')
         .select('game_session_id, score, placement')
@@ -287,9 +295,11 @@ class AnalyticsService {
 
       if (playersError) throw playersError;
 
+      const playersData = players as any[];
+
       // Group players by session
-      const playersMap = new Map<string, typeof players>();
-      players?.forEach((player) => {
+      const playersMap = new Map<string, any[]>();
+      playersData?.forEach((player: any) => {
         if (!playersMap.has(player.game_session_id)) {
           playersMap.set(player.game_session_id, []);
         }
@@ -297,20 +307,20 @@ class AnalyticsService {
       });
 
       // Build game stats
-      return sessions.map((session) => {
+      return sessionsData.map((session: any) => {
         const sessionPlayers = playersMap.get(session.id) || [];
         const totalPlayers = sessionPlayers.length;
-        const completedPlayers = sessionPlayers.filter((p) => p.placement !== null);
-        const validScores = sessionPlayers.filter((p) => p.score !== null && p.score !== undefined);
+        const completedPlayers = sessionPlayers.filter((p: any) => p.placement !== null);
+        const validScores = sessionPlayers.filter((p: any) => p.score !== null && p.score !== undefined);
         const averageScore = validScores.length > 0
-          ? validScores.reduce((sum, p) => sum + p.score, 0) / validScores.length
+          ? validScores.reduce((sum: number, p: any) => sum + p.score, 0) / validScores.length
           : 0;
         const completionRate = totalPlayers > 0 ? (completedPlayers.length / totalPlayers) * 100 : 0;
 
         return {
           session_id: session.id,
           game_code: session.game_code,
-          question_set_title: (session as any).question_sets?.title || 'Unknown',
+          question_set_title: session.question_sets?.title || 'Unknown',
           game_mode: session.game_mode,
           created_at: session.created_at,
           ended_at: session.ended_at,
@@ -338,7 +348,9 @@ class AnalyticsService {
 
       if (setsError) throw setsError;
 
-      return (questionSets || []).map((set) => ({
+      const questionSetsData = questionSets as any[];
+
+      return (questionSetsData || []).map((set: any) => ({
         question_set_id: set.id,
         title: set.title,
         times_played: set.times_played || 0,
@@ -387,13 +399,15 @@ class AnalyticsService {
 
       if (playersError) throw playersError;
 
+      const playersData = players as any[];
+
       return {
         session,
-        players: players || [],
-        totalPlayers: players?.length || 0,
-        completedPlayers: players?.filter((p) => p.placement !== null).length || 0,
-        averageScore: players && players.length > 0
-          ? players.reduce((sum, p) => sum + (p.score || 0), 0) / players.length
+        players: playersData || [],
+        totalPlayers: playersData?.length || 0,
+        completedPlayers: playersData?.filter((p: any) => p.placement !== null).length || 0,
+        averageScore: playersData && playersData.length > 0
+          ? playersData.reduce((sum: number, p: any) => sum + (p.score || 0), 0) / playersData.length
           : 0,
       };
     } catch (error) {

@@ -7,7 +7,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, Button, Badge } from '../common';
 import { Clock, CheckCircle, XCircle } from 'lucide-react';
-import { shuffleQuestionOptions, type ShuffledOption } from '@pathcte/shared';
+import { shuffleQuestionOptions } from '@pathcte/shared';
 import type { Question } from '@pathcte/shared';
 
 export interface QuestionDisplayProps {
