@@ -482,7 +482,11 @@ export default function GamePage() {
                   questionSetTitle={questionSetTitle}
                   players={players}
                   onNextQuestion={handleNextQuestion}
-                  progressionControl={(session as any)?.settings?.progressionControl || 'manual'}
+                  progressionControl={(() => {
+                    const control = (session as any)?.settings?.progressionControl || 'manual';
+                    console.log('[GamePage] ProgressionControl for HostView:', control, 'Session settings:', (session as any)?.settings);
+                    return control;
+                  })()}
                   onTimerExpired={handleTimerExpired}
                 />
               ) : (

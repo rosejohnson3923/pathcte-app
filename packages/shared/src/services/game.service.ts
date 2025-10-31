@@ -64,6 +64,7 @@ export const gameService = {
           max_players: params.maxPlayers || 50,
           is_public: params.isPublic ?? true,
           allow_late_join: params.allowLateJoin ?? false,
+          settings: params.settings || {},
           metadata: {},
         } as any)
         .select()
