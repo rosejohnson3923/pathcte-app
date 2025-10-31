@@ -23,6 +23,10 @@ export interface CreateGameParams {
   maxPlayers?: number;
   isPublic?: boolean;
   allowLateJoin?: boolean;
+  settings?: {
+    progressionControl?: 'auto' | 'manual';
+    [key: string]: any;
+  };
 }
 
 export interface JoinGameParams {
