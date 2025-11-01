@@ -15,6 +15,11 @@ import type {
   Question
 } from '../types/database.types';
 
+// Development/Testing Configuration
+// Set to true to enable pathkey awards for any number of players (useful for testing)
+// Set to false for production (requires 3+ players for competitive gameplay)
+const ALLOW_SINGLE_PLAYER_PATHKEY_AWARDS = process.env.NODE_ENV !== 'production';
+
 export interface CreateGameParams {
   hostId: string;
   questionSetId: string;
@@ -402,9 +407,11 @@ export const gameService = {
 
         let pathkeysEarned: string[] | null = null;
 
-        // Award pathkeys for top 3 finishers in competitive games (3+ players)
-        // Requires meaningful competition - at least 3 players competing
-        if (player.user_id && player.placement && player.placement <= 3 && totalPlayers >= 3) {
+        // Award pathkeys for top 3 finishers
+        // In production: Requires 3+ players for meaningful competition
+        // In development: Allows testing with any number of players
+        const minimumPlayers = ALLOW_SINGLE_PLAYER_PATHKEY_AWARDS ? 1 : 3;
+        if (player.user_id && player.placement && player.placement <= 3 && totalPlayers >= minimumPlayers) {
           console.log(`Player ${player.display_name} (user_id: ${player.user_id}) finished in place ${player.placement}, awarding pathkey...`);
 
           // Get a random pathkey to award (simplified - could be based on career/topic)
@@ -439,7 +446,7 @@ export const gameService = {
             console.warn('No pathkeys available to award');
           }
         } else {
-          console.log(`Skipping pathkey award for ${player.display_name}: user_id=${player.user_id}, placement=${player.placement}, totalPlayers=${totalPlayers}`);
+          console.log(`Skipping pathkey award for ${player.display_name}: user_id=${player.user_id}, placement=${player.placement}, totalPlayers=${totalPlayers}, minimumRequired=${minimumPlayers}`);
         }
 
         // Update player's rewards using secure function
