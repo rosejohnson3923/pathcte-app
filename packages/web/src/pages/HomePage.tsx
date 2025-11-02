@@ -148,67 +148,71 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6 sm:p-8 md:p-12 border border-white/40 shadow-2xl">
+            <div className="bg-white/30 backdrop-blur-xl rounded-2xl p-6 sm:p-8 md:p-12 border-2 border-white/50 shadow-2xl">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center">
                 {/* PathCTE Side */}
-                <div className="bg-teal-600/30 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-teal-400/30">
-                  <div className="inline-block bg-teal-400/40 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4 border border-teal-300/50">
-                    <span className="text-white font-bold text-xs sm:text-sm drop-shadow">START HERE: PathCTE</span>
+                <div className="bg-gradient-to-br from-teal-600/60 to-teal-500/60 backdrop-blur-md rounded-xl p-5 sm:p-6 border-2 border-teal-300/60 shadow-xl">
+                  <div className="inline-block bg-gradient-to-r from-teal-500 to-teal-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4 border-2 border-white/40 shadow-lg">
+                    <span className="text-white font-bold text-xs sm:text-sm drop-shadow-lg">START HERE: PathCTE</span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 drop-shadow">Discover Your Future</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">Discover Your Future</h3>
                   <ul className="space-y-2 sm:space-y-3 text-white text-sm sm:text-base">
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-teal-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow">Play career exploration games</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg">Play career exploration games</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-teal-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow">Collect career Pathkeys</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg">Collect career Pathkeys</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-teal-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow">Discover what excites you</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg">Discover what excites you</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-teal-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow">100% free, always</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg">100% free, always</span>
                     </li>
                   </ul>
                 </div>
 
                 {/* Arrow & Pathfinity Side */}
-                <div className="bg-purple-600/30 backdrop-blur-sm rounded-xl p-5 sm:p-6 border border-purple-400/30">
+                <div className="bg-gradient-to-br from-purple-600/60 to-purple-500/60 backdrop-blur-md rounded-xl p-5 sm:p-6 border-2 border-purple-300/60 shadow-xl">
                   <div className="text-center mb-4 sm:mb-6 md:mb-8">
-                    <div className="text-white text-3xl sm:text-4xl font-bold drop-shadow">→</div>
-                    <div className="text-white text-xs sm:text-sm mt-2 font-medium drop-shadow">Then unlock</div>
+                    <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-full border-2 border-white/40 shadow-lg mb-2">
+                      <div className="text-white text-2xl sm:text-3xl font-bold drop-shadow-lg">→</div>
+                    </div>
+                    <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full inline-block border border-white/40">
+                      <span className="text-white text-xs sm:text-sm font-bold drop-shadow-lg">Then unlock</span>
+                    </div>
                   </div>
-                  <div className="inline-block bg-purple-400/40 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4 border border-purple-300/50">
-                    <span className="text-white font-bold text-xs sm:text-sm drop-shadow">LEVEL UP: Pathfinity.ai</span>
+                  <div className="inline-block bg-gradient-to-r from-purple-500 to-purple-400 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-3 sm:mb-4 border-2 border-white/40 shadow-lg">
+                    <span className="text-white font-bold text-xs sm:text-sm drop-shadow-lg">LEVEL UP: Pathfinity.ai</span>
                   </div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 drop-shadow">Transform Your Education</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg">Transform Your Education</h3>
                   <ul className="space-y-2 sm:space-y-3 text-white text-sm sm:text-base">
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow"><strong>BE a professional</strong> every day (K-12)</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg"><strong>BE a professional</strong> every day (K-12)</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow"><strong>PathIQ AI</strong> personalizes your learning</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg"><strong>PathIQ AI</strong> personalizes your learning</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow"><strong>6 Finn AI agents</strong> guide you 24/7</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg"><strong>6 Finn AI agents</strong> guide you 24/7</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-purple-200 flex-shrink-0 mt-0.5 drop-shadow" />
-                      <span className="font-medium drop-shadow">Full Career-First education revolution</span>
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-white flex-shrink-0 mt-0.5 drop-shadow-lg" />
+                      <span className="font-semibold drop-shadow-lg">Full Career-First education revolution</span>
                     </li>
                   </ul>
                   <a
                     href="https://pathfinity.ai"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block mt-4 sm:mt-6 px-4 sm:px-6 py-2 sm:py-3 bg-white text-purple-600 hover:bg-gray-100 rounded-lg font-bold transition-all shadow-lg text-sm sm:text-base w-full sm:w-auto text-center"
+                    className="inline-block mt-4 sm:mt-6 px-4 sm:px-6 py-2 sm:py-3 bg-white text-purple-600 hover:bg-gray-100 rounded-lg font-bold transition-all shadow-lg hover:shadow-xl hover:scale-105 text-sm sm:text-base w-full sm:w-auto text-center"
                   >
                     Learn About Pathfinity.ai →
                   </a>
