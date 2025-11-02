@@ -1,0 +1,6 @@
+# Netlify Redirects Configuration
+# This enables client-side routing for React Router
+
+# SPA Fallback: Redirect all routes to index.html
+# This allows React Router to handle routing client-side
+/*    /index.html   200
