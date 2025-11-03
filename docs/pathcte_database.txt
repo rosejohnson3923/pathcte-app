@@ -1,0 +1,88 @@
+| table_schema | table_name    | table_type |
+| ------------ | ------------- | ---------- |
+| public       | game_answers  | BASE TABLE |
+| public       | game_players  | BASE TABLE |
+| public       | game_sessions | BASE TABLE |
+
+| column_name            | data_type                | is_nullable | column_default              | character_maximum_length |
+| ---------------------- | ------------------------ | ----------- | --------------------------- | ------------------------ |
+| id                     | uuid                     | NO          | gen_random_uuid()           | null                     |
+| game_code              | text                     | NO          | null                        | null                     |
+| host_id                | uuid                     | NO          | null                        | null                     |
+| question_set_id        | uuid                     | NO          | null                        | null                     |
+| game_mode              | text                     | NO          | null                        | null                     |
+| status                 | text                     | NO          | null                        | null                     |
+| settings               | jsonb                    | YES         | '{}'::jsonb                 | null                     |
+| max_players            | integer                  | YES         | 60                          | null                     |
+| started_at             | timestamp with time zone | YES         | null                        | null                     |
+| ended_at               | timestamp with time zone | YES         | null                        | null                     |
+| total_players          | integer                  | YES         | 0                           | null                     |
+| created_at             | timestamp with time zone | YES         | now()                       | null                     |
+| updated_at             | timestamp with time zone | YES         | now()                       | null                     |
+| allow_late_join        | boolean                  | NO          | false                       | null                     |
+| is_public              | boolean                  | NO          | true                        | null                     |
+| metadata               | jsonb                    | YES         | '{}'::jsonb                 | null                     |
+| session_type           | USER-DEFINED             | NO          | 'multiplayer'::session_type | null                     |
+| current_question_index | integer                  | NO          | 0                           | null                     |
+
+| column_name     | data_type                | is_nullable | column_default    | character_maximum_length |
+| --------------- | ------------------------ | ----------- | ----------------- | ------------------------ |
+| id              | uuid                     | NO          | gen_random_uuid() | null                     |
+| game_session_id | uuid                     | NO          | null              | null                     |
+| user_id         | uuid                     | YES         | null              | null                     |
+| display_name    | text                     | NO          | null              | null                     |
+| score           | integer                  | YES         | 0                 | null                     |
+| correct_answers | integer                  | YES         | 0                 | null                     |
+| total_answers   | integer                  | YES         | 0                 | null                     |
+| is_connected    | boolean                  | YES         | true              | null                     |
+| placement       | integer                  | YES         | null              | null                     |
+| tokens_earned   | integer                  | YES         | 0                 | null                     |
+| pathkeys_earned | ARRAY                    | YES         | null              | null                     |
+| joined_at       | timestamp with time zone | YES         | now()             | null                     |
+| left_at         | timestamp with time zone | YES         | null              | null                     |
+
+
+| column_name           | data_type                | is_nullable | column_default    | character_maximum_length |
+| --------------------- | ------------------------ | ----------- | ----------------- | ------------------------ |
+| id                    | uuid                     | NO          | gen_random_uuid() | null                     |
+| player_id             | uuid                     | NO          | null              | null                     |
+| game_session_id       | uuid                     | NO          | null              | null                     |
+| question_id           | uuid                     | NO          | null              | null                     |
+| selected_option_index | integer                  | NO          | null              | null                     |
+| is_correct            | boolean                  | NO          | null              | null                     |
+| time_taken_ms         | integer                  | NO          | null              | null                     |
+| answered_at           | timestamp with time zone | YES         | now()             | null                     |
+| points_earned         | integer                  | NO          | 0                 | null                     |
+
+-- 5. Get all columns for game_answers (if exists as table or view)
+SELECT
+  column_name,
+  data_type,
+  is_nullable,
+  column_default,
+  character_maximum_length
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'game_answers'
+ORDER BY ordinal_position;
+
+| column_name           | data_type                | is_nullable | column_default    | character_maximum_length |
+| --------------------- | ------------------------ | ----------- | ----------------- | ------------------------ |
+| id                    | uuid                     | NO          | gen_random_uuid() | null                     |
+| player_id             | uuid                     | NO          | null              | null                     |
+| game_session_id       | uuid                     | NO          | null              | null                     |
+| question_id           | uuid                     | NO          | null              | null                     |
+| selected_option_index | integer                  | NO          | null              | null                     |
+| is_correct            | boolean                  | NO          | null              | null                     |
+| time_taken_ms         | integer                  | NO          | null              | null                     |
+| answered_at           | timestamp with time zone | YES         | now()             | null                     |
+| points_earned         | integer                  | NO          | 0                 | null                     |
+
+
+| column_name | has_current_question_index | has_current_question_started_at | has_current_question_time_limit |
+| ----------- | -------------------------- | ------------------------------- | ------------------------------- |
+| id          | true                       | false                           | false                           |
+
+| column_name | has_connection_status | has_last_seen_at | has_is_connected |
+| ----------- | --------------------- | ---------------- | ---------------- |
+| id          | false                 | false            | true             |

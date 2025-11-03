@@ -8,14 +8,14 @@ import { useEffect, useState } from 'react';
 import { Card, Badge, Button, Spinner } from '../common';
 import { Users, Copy, Check, Crown, Wifi, WifiOff, Gamepad2 } from 'lucide-react';
 import { useGameStore } from '@pathcte/shared';
-import { realtimeService, gameService } from '@pathcte/shared';
-import type { GamePlayer } from '@pathcte/shared';
+import { gameService } from '@pathcte/shared';
 
 export interface GameLobbyProps {
   sessionId: string;
   isHost: boolean;
   onStartGame?: () => void;
   onLeaveGame?: () => void;
+  isStartingGame?: boolean;
 }
 
 export const GameLobby: React.FC<GameLobbyProps> = ({
@@ -23,8 +23,9 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
   isHost,
   onStartGame,
   onLeaveGame,
+  isStartingGame = false,
 }) => {
-  const { session, players, setPlayers, addPlayer, updatePlayer } = useGameStore();
+  const { session, players, setPlayers } = useGameStore();
   const [copied, setCopied] = useState(false);
   const [isLoadingPlayers, setIsLoadingPlayers] = useState(true);
 
@@ -42,24 +43,8 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
     loadPlayers();
   }, [sessionId, setPlayers]);
 
-  // Subscribe to real-time updates
-  useEffect(() => {
-    realtimeService.subscribeToGame(sessionId, {
-      onPlayerJoined: (player: GamePlayer) => {
-        addPlayer(player);
-      },
-      onPlayerUpdate: (player: GamePlayer) => {
-        updatePlayer(player.id, player);
-      },
-      onPlayerLeft: (player: GamePlayer) => {
-        updatePlayer(player.id, { is_connected: false });
-      },
-    });
-
-    return () => {
-      realtimeService.unsubscribeFromGame(sessionId);
-    };
-  }, [sessionId, addPlayer, updatePlayer]);
+  // NOTE: GamePage handles all realtime subscriptions
+  // We don't subscribe here to avoid conflicts
 
   const handleCopyCode = async () => {
     if (session?.game_code) {
@@ -207,12 +192,13 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
             <Button
               variant="primary"
               onClick={onStartGame}
-              disabled={!canStartGame}
+              disabled={!canStartGame || isStartingGame}
+              loading={isStartingGame}
               className="flex-1"
             >
-              Start Game
+              {isStartingGame ? 'Starting Game...' : 'Start Game'}
             </Button>
-            <Button variant="outline" onClick={onLeaveGame}>
+            <Button variant="outline" onClick={onLeaveGame} disabled={isStartingGame}>
               Cancel
             </Button>
           </>

@@ -1,0 +1,37 @@
+{
+  "version": "2.0",
+  "extensionBundle": {
+    "id": "Microsoft.Azure.Functions.ExtensionBundle",
+    "version": "[4.*, 5.0.0)"
+  },
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true,
+        "maxTelemetryItemsPerSecond": 20
+      }
+    },
+    "logLevel": {
+      "default": "Information",
+      "Host": "Warning",
+      "Function": "Information",
+      "DurableTask.AzureStorage": "Warning",
+      "DurableTask.Core": "Warning"
+    }
+  },
+  "extensions": {
+    "durableTask": {
+      "hubName": "PathCTEGameHub",
+      "storageProvider": {
+        "type": "azureStorage",
+        "connectionStringName": "AzureWebJobsStorage"
+      },
+      "maxConcurrentActivityFunctions": 100,
+      "maxConcurrentOrchestratorFunctions": 50
+    },
+    "http": {
+      "routePrefix": "api"
+    }
+  },
+  "functionTimeout": "00:10:00"
+}

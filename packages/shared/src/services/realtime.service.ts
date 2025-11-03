@@ -66,8 +66,25 @@ export const realtimeService = {
         filter: `id=eq.${sessionId}`,
       },
       (payload) => {
+        console.log('[realtimeService] ✅ Received postgres_changes UPDATE for game_sessions:', {
+          sessionId,
+          status: (payload.new as any)?.status,
+          currentQuestionIndex: (payload.new as any)?.current_question_index,
+        });
+        console.log('[realtimeService] Callback check:', {
+          hasCallback: !!callbacks.onGameUpdate,
+          callbackType: typeof callbacks.onGameUpdate,
+        });
         if (callbacks.onGameUpdate) {
-          callbacks.onGameUpdate(payload.new as GameSession);
+          console.log('[realtimeService] 🚀 Invoking onGameUpdate callback...');
+          try {
+            callbacks.onGameUpdate(payload.new as GameSession);
+            console.log('[realtimeService] ✅ onGameUpdate callback completed');
+          } catch (error) {
+            console.error('[realtimeService] ❌ Error in onGameUpdate callback:', error);
+          }
+        } else {
+          console.warn('[realtimeService] ⚠️ No onGameUpdate callback defined!');
         }
       }
     );
@@ -121,13 +138,15 @@ export const realtimeService = {
     // Subscribe to the channel
     channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        console.log(`Subscribed to game ${sessionId}`);
+        console.log(`✅ [realtimeService] Successfully SUBSCRIBED to game ${sessionId}`);
+        console.log(`✅ [realtimeService] Channel state:`, channel.state);
+        console.log(`✅ [realtimeService] Listening for postgres_changes on game_sessions table`);
       } else if (status === 'CHANNEL_ERROR') {
-        console.error(`Error subscribing to game ${sessionId}`);
+        console.error(`❌ [realtimeService] CHANNEL_ERROR subscribing to game ${sessionId}`);
       } else if (status === 'TIMED_OUT') {
-        console.error(`Timed out subscribing to game ${sessionId}`);
+        console.error(`❌ [realtimeService] TIMED_OUT subscribing to game ${sessionId}`);
       } else if (status === 'CLOSED') {
-        console.log(`Channel closed for game ${sessionId}`);
+        console.log(`🔴 [realtimeService] Channel CLOSED for game ${sessionId}`);
       }
     });
 

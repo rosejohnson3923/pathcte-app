@@ -236,6 +236,10 @@ export interface GameSession {
   started_at: string | null;
   ended_at: string | null;
 
+  // Timer tracking (for Durable Functions)
+  current_question_started_at: string | null;
+  current_question_time_limit: number;
+
   // Metadata
   metadata: Record<string, any>;
 
@@ -257,6 +261,10 @@ export interface GamePlayer {
   // Status
   is_connected: boolean;
   placement: number | null;
+
+  // Connection tracking (for Durable Functions)
+  connection_status: 'active' | 'disconnected';
+  last_seen_at: string;
 
   // Rewards
   tokens_earned: number;

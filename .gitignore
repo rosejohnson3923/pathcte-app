@@ -70,3 +70,4 @@ assets/
 !public/**/*.gif
 .vs/
 *.pdf
+database/supabase-schema-festwdkldwnpmqxrkiso.svg

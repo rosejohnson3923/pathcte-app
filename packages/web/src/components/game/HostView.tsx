@@ -79,13 +79,25 @@ export const HostView: React.FC<HostViewProps> = ({
   // Track which players have answered by monitoring their total_answers count
   // When a player's total_answers increases, they've answered the current question
   useEffect(() => {
+    console.log('[HostView] Tracking answers for question', questionNumber);
+    console.log('[HostView] Players:', players.map(p => ({
+      id: p.id,
+      name: p.display_name,
+      total_answers: p.total_answers
+    })));
+
     const newAnswered = new Set<string>();
     players.forEach(player => {
       // If player has answered at least questionNumber questions, they've answered this one
       if (player.total_answers >= questionNumber) {
+        console.log('[HostView] Player', player.display_name, 'has answered (total_answers:', player.total_answers, '>=', questionNumber, ')');
         newAnswered.add(player.id);
+      } else {
+        console.log('[HostView] Player', player.display_name, 'has NOT answered yet (total_answers:', player.total_answers, '<', questionNumber, ')');
       }
     });
+
+    console.log('[HostView] Answer count:', newAnswered.size, '/', players.length);
     setPlayersAnswered(newAnswered);
   }, [players, questionNumber]);
 

@@ -1,0 +1,57 @@
+bin
+obj
+csx
+.vs
+edge
+Publish
+
+*.user
+*.suo
+*.cscfg
+*.Cache
+project.lock.json
+
+/packages
+/TestResults
+
+/tools/NuGet.exe
+/App_Data
+/secrets
+/data
+.secrets
+appsettings.json
+local.settings.json
+
+node_modules
+dist
+
+# Azure Functions localsettings file
+local.settings.json
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+
+# Azurite
+__blobstorage__
+__queuestorage__
+__azurite_db*__.json

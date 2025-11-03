@@ -4,7 +4,7 @@
  * Main game container orchestrating the entire game flow
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { GameLobby, QuestionDisplay, HostView, Leaderboard, GameResults } from '../components/game';
@@ -13,6 +13,9 @@ import { useAuth } from '../hooks';
 import { useGameStore, gameService, realtimeService, toast, supabase } from '@pathcte/shared';
 import { ArrowLeft } from 'lucide-react';
 import type { GamePlayer } from '@pathcte/shared';
+
+// Azure Functions endpoint for game operations
+const AZURE_FUNCTIONS_URL = import.meta.env.VITE_AZURE_FUNCTIONS_URL || 'http://localhost:7071';
 
 export default function GamePage() {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -33,17 +36,30 @@ export default function GamePage() {
     setQuestions,
     setCurrentQuestionIndex,
     setIsHost,
-    nextQuestion,
     addPlayer,
     updatePlayer,
     resetGame,
   } = useGameStore();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isStartingGame, setIsStartingGame] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasAnswered, setHasAnswered] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean; selectedIndex: number } | null>(null);
   const [questionSetTitle, setQuestionSetTitle] = useState<string>('');
+
+  // Use refs to keep latest values without triggering effect dependency
+  const currentQuestionIndexRef = useRef(currentQuestionIndex);
+  const questionsRef = useRef(questions);
+
+  // Update refs when values change
+  useEffect(() => {
+    currentQuestionIndexRef.current = currentQuestionIndex;
+  }, [currentQuestionIndex]);
+
+  useEffect(() => {
+    questionsRef.current = questions;
+  }, [questions]);
 
   // Track component lifecycle
   useEffect(() => {
@@ -172,21 +188,35 @@ export default function GamePage() {
 
     realtimeService.subscribeToGame(sessionId, {
       onGameUpdate: (updatedSession: any) => {
+        console.log('[GamePage] 🎯 onGameUpdate callback INVOKED!');
         console.log('[GamePage] Realtime game update received:', {
           status: updatedSession.status,
           currentQuestionIndex: updatedSession.current_question_index,
+          fullSession: updatedSession,
         });
+
+        console.log('[GamePage] Calling setSession with updatedSession...');
         setSession(updatedSession);
 
         // Sync current question index from database (fallback for missed broadcasts)
-        if (updatedSession.current_question_index !== undefined && updatedSession.current_question_index !== currentQuestionIndex) {
-          console.log('[GamePage] Syncing question index from realtime:', updatedSession.current_question_index);
+        // Use ref to access current value without triggering effect dependency
+        const currentIndex = currentQuestionIndexRef.current;
+        if (updatedSession.current_question_index !== undefined && updatedSession.current_question_index !== currentIndex) {
+          console.log('[GamePage] Syncing question index from realtime:', {
+            from: currentIndex,
+            to: updatedSession.current_question_index,
+          });
           setCurrentQuestionIndex(updatedSession.current_question_index);
-          // Note: hasAnswered/lastAnswer reset handled by separate useEffect above
+        } else {
+          console.log('[GamePage] Not syncing question index:', {
+            updatedIndex: updatedSession.current_question_index,
+            currentIndex,
+            willSync: false,
+          });
         }
 
-        // If game just started, load questions
-        if (updatedSession.status === 'in_progress' && questions.length === 0) {
+        // If game just started, load questions (check using ref)
+        if (updatedSession.status === 'in_progress' && questionsRef.current.length === 0) {
           console.log('[GamePage] Game started, loading questions');
           const businessDriver = (updatedSession.settings as any)?.businessDriver;
           gameService.getGameQuestions(updatedSession.question_set_id, isHost, businessDriver).then(({ questions: gameQuestions }: any) => {
@@ -196,6 +226,32 @@ export default function GamePage() {
             }
           });
         }
+
+        // If game just completed, reload player data to get rewards (pathkeys, tokens)
+        // This ensures students see their earned pathkeys on the results screen
+        if (updatedSession.status === 'completed' && currentPlayer) {
+          console.log('[GamePage] Game completed, reloading player data for rewards...');
+          gameService.getGamePlayers(sessionId!).then(({ players: updatedPlayers }) => {
+            if (updatedPlayers) {
+              console.log('[GamePage] Reloaded players with updated rewards:', updatedPlayers.length);
+              setPlayers(updatedPlayers);
+
+              // Update current player with their rewards
+              const updated = updatedPlayers.find((p: GamePlayer) => p.id === currentPlayer.id);
+              if (updated) {
+                console.log('[GamePage] Updated current player with rewards:', {
+                  id: updated.id,
+                  name: updated.display_name,
+                  pathkeys_earned: updated.pathkeys_earned,
+                  tokens_earned: updated.tokens_earned,
+                });
+                setCurrentPlayer(updated);
+              }
+            }
+          });
+        }
+
+        console.log('[GamePage] ✅ onGameUpdate callback completed');
       },
       onPlayerJoined: (player: GamePlayer) => {
         console.log('[GamePage] Player joined:', (player as any).name);
@@ -213,7 +269,8 @@ export default function GamePage() {
 
     // Subscribe to broadcast events for question changes
     realtimeService.subscribeToBroadcast(sessionId, 'question_changed', (payload: any) => {
-      console.log('[GamePage] Question changed broadcast received:', payload.question_index);
+      console.log('[GamePage] 📡 Question changed broadcast received:', payload.question_index);
+      console.log('[GamePage] 📡 Broadcast payload:', payload);
       setCurrentQuestionIndex(payload.question_index);
       // Note: hasAnswered/lastAnswer reset handled by separate useEffect above
     });
@@ -222,23 +279,22 @@ export default function GamePage() {
       console.log('[GamePage] Cleaning up realtime subscriptions');
       realtimeService.unsubscribeFromGame(sessionId);
     };
-  }, [sessionId, questions.length]);
+  }, [sessionId]); // Removed questions.length to prevent race condition during question load
 
   // Game flow handlers
   const handleStartGame = async () => {
     if (!sessionId) return;
 
+    setIsStartingGame(true);
     try {
+      // 1. Update game status to 'in_progress'
       const { session: updatedSession, error } = await gameService.startGame(sessionId);
 
       if (error || !updatedSession) {
         throw error || new Error('Failed to start game');
       }
 
-      // Notify all players
-      await realtimeService.notifyGameStarting(sessionId);
-
-      // Load questions (with answers since we're the host)
+      // 2. Load questions (with answers since we're the host)
       // Apply business_driver filter from session settings if specified
       const businessDriver = (updatedSession as any).settings?.businessDriver;
       const { questions: gameQuestions } = await gameService.getGameQuestions(
@@ -246,37 +302,121 @@ export default function GamePage() {
         true,
         businessDriver
       );
-      if (gameQuestions) {
-        setQuestions(gameQuestions as any);
+      if (!gameQuestions || gameQuestions.length === 0) {
+        throw new Error('No questions loaded');
+      }
+      setQuestions(gameQuestions as any);
+
+      // 3. Get players for initialization
+      const { data: playersData, error: playersError } = await supabase
+        .from('game_players')
+        .select('id, user_id, display_name')
+        .eq('game_session_id', sessionId);
+
+      if (playersError || !playersData || playersData.length === 0) {
+        throw new Error('Failed to load players');
+      }
+
+      // 4. Initialize HostEntity via Azure Functions
+      const initResponse = await fetch(`${AZURE_FUNCTIONS_URL}/api/game/initialize`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          questionSetId: updatedSession.question_set_id,
+          questions: gameQuestions,
+          progressionControl: (updatedSession as any).settings?.progressionControl || 'manual',
+          allowLateJoin: (updatedSession as any).settings?.allowLateJoin || false,
+          players: playersData.map((p: any) => ({
+            id: p.id,
+            userId: p.user_id,
+            displayName: p.display_name,
+          })),
+        }),
+      });
+
+      if (!initResponse.ok) {
+        const initError = await initResponse.json();
+        throw new Error(`Failed to initialize game: ${initError.error || initResponse.statusText}`);
+      }
+
+      const initResult = await initResponse.json();
+      console.log('[GamePage] Game initialized via Azure Functions:', initResult);
+
+      // 5. Start first question via Azure Functions (this broadcasts to all players)
+      const response = await fetch(`${AZURE_FUNCTIONS_URL}/api/game/startQuestion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          questionIndex: 0,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('[GamePage] Failed to start first question via Azure Functions');
+        // Don't throw - game is started, we can continue even if broadcast fails
+      } else {
+        const result = await response.json();
+        console.log('[GamePage] First question started via Azure Functions:', result);
       }
     } catch (err) {
       console.error('Error starting game:', err);
       setError('Failed to start game');
+    } finally {
+      setIsStartingGame(false);
     }
   };
 
   const handleNextQuestion = async () => {
+    // DEBUGGING: Track what called this function
+    console.log('[GamePage] ⚠️ handleNextQuestion CALLED!');
+    console.trace('[GamePage] Call stack for handleNextQuestion:');
+
     if (!sessionId) return;
 
     const nextIndex = currentQuestionIndex + 1;
 
     if (nextIndex < questions.length) {
-      // Persist to database FIRST so it survives page refreshes
-      const { error: updateError } = await (supabase
-        .from('game_sessions') as any)
-        .update({ current_question_index: nextIndex })
-        .eq('id', sessionId);
+      try {
+        // Call Azure Functions to advance question
+        // This will:
+        // 1. Update Host Entity state
+        // 2. Broadcast to all players via Realtime
+        // 3. Update database
+        const response = await fetch(`${AZURE_FUNCTIONS_URL}/api/game/advanceQuestion`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            sessionId,
+          }),
+        });
 
-      if (updateError) {
-        console.error('[GamePage] Failed to update question index:', updateError);
+        if (!response.ok) {
+          throw new Error(`Failed to advance question: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to advance question');
+        }
+
+        console.log('[GamePage] Question advanced via Azure Functions:', result);
+
+        // Note: Local state will be updated via Realtime subscription when database changes
+        // No need to manually call nextQuestion() - that would cause double increment!
+      } catch (error) {
+        console.error('[GamePage] Failed to advance question:', error);
+        toast.error('Failed to advance to next question');
         return;
       }
-
-      // Update local state after database succeeds (useEffect will reset hasAnswered/lastAnswer automatically)
-      nextQuestion();
-
-      // Notify all players
-      await realtimeService.notifyQuestionChanged(sessionId, nextIndex, questions[nextIndex].id);
     } else {
       // End game
       await handleEndGame();
@@ -288,6 +428,14 @@ export default function GamePage() {
     const progressionControl = (session as any)?.settings?.progressionControl || 'manual';
     const isSoloSession = session?.session_type === 'solo';
 
+    // DEBUGGING: Log timer expiration details
+    console.log('[GamePage] ⏰ Timer expired!', {
+      progressionControl,
+      isSoloSession,
+      isHost,
+      willAutoAdvance: !isSoloSession && progressionControl === 'auto' && isHost,
+    });
+
     // Solo Mode: Timer is just for tracking, student controls pace with "Next Question" button
     // Multiplayer Auto Mode: Timer triggers auto-advance (teacher view only)
     //   - Teacher advances via handleNextQuestion
@@ -295,7 +443,10 @@ export default function GamePage() {
     //   - Students who haven't answered lose the opportunity (like Blooket)
     // Multiplayer Manual Mode: Teacher manually clicks "Next Question" when ready
     if (!isSoloSession && progressionControl === 'auto' && isHost) {
+      console.log('[GamePage] ⚠️ AUTO-ADVANCING due to timer expiration');
       await handleNextQuestion();
+    } else {
+      console.log('[GamePage] ✓ NOT auto-advancing (manual mode or not host)');
     }
   };
 
@@ -465,6 +616,7 @@ export default function GamePage() {
             isHost={isHost}
             onStartGame={handleStartGame}
             onLeaveGame={handleLeaveGame}
+            isStartingGame={isStartingGame}
           />
         )}
 
@@ -481,7 +633,10 @@ export default function GamePage() {
                   totalQuestions={questions.length}
                   questionSetTitle={questionSetTitle}
                   players={players}
-                  onNextQuestion={handleNextQuestion}
+                  onNextQuestion={() => {
+                    console.log('[GamePage] 🖱️ HostView "Next Question" button clicked!');
+                    handleNextQuestion();
+                  }}
                   progressionControl={(() => {
                     const control = (session as any)?.settings?.progressionControl || 'manual';
                     console.log('[GamePage] ProgressionControl for HostView:', control, 'Session settings:', (session as any)?.settings);
@@ -530,6 +685,7 @@ export default function GamePage() {
             session={session}
             players={players}
             currentPlayer={currentPlayer || undefined}
+            totalQuestions={questions.length}
             onReturnHome={handleReturnHome}
           />
         )}

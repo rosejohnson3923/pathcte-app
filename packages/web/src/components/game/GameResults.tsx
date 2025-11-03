@@ -14,6 +14,7 @@ export interface GameResultsProps {
   session: GameSession;
   players: GamePlayer[];
   currentPlayer?: GamePlayer;
+  totalQuestions?: number;
   onPlayAgain?: () => void;
   onReturnHome?: () => void;
 }
@@ -21,6 +22,7 @@ export interface GameResultsProps {
 export const GameResults: React.FC<GameResultsProps> = ({
   players,
   currentPlayer,
+  totalQuestions = 0,
   onPlayAgain,
   onReturnHome,
 }) => {
@@ -44,8 +46,14 @@ export const GameResults: React.FC<GameResultsProps> = ({
     navigate('/collection');
   };
 
-  const currentPlayerPathkeys = currentPlayer?.pathkeys_earned || [];
+  // Extract pathkeys with robust null handling
+  const currentPlayerPathkeys = currentPlayer?.pathkeys_earned?.filter(Boolean) || [];
   const earnedPathkeys = currentPlayerPathkeys.length > 0;
+
+  // Debug logging to help troubleshoot pathkey display issues
+  console.log('[GameResults] Current player:', currentPlayer);
+  console.log('[GameResults] Pathkeys earned:', currentPlayerPathkeys);
+  console.log('[GameResults] Will show pathkeys section?', earnedPathkeys);
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -105,7 +113,7 @@ export const GameResults: React.FC<GameResultsProps> = ({
             <div className="bg-bg-primary hover:bg-bg-secondary rounded-xl p-6 text-center shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
               <Zap className="mx-auto mb-3 text-blue-600 dark:text-blue-400" size={32} />
               <div className="text-4xl font-extrabold text-text-primary mb-1">
-                {currentPlayer.correct_answers}/{currentPlayer.total_answers}
+                {currentPlayer.correct_answers}/{totalQuestions || currentPlayer.total_answers}
               </div>
               <p className="text-xs text-text-secondary uppercase font-semibold tracking-wide">Questions Answered</p>
             </div>
