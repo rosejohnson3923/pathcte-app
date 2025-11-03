@@ -34,7 +34,7 @@ export async function startQuestion(
 
     const client = df.getClient(context);
 
-    // Start orchestrator to start question and broadcast
+    // Start orchestrator to start question and broadcast (fire-and-forget)
     const instanceId = await client.startNew('startQuestionOrchestrator', {
       input: {
         sessionId: body.sessionId,
@@ -42,16 +42,19 @@ export async function startQuestion(
       },
     });
 
-    // Wait for completion (10 seconds = 10000ms)
-    const result = await client.waitForCompletionOrCreateCheckStatusResponse(
-      request,
-      instanceId,
-      { timeoutInMilliseconds: 10000 }
-    );
+    context.log(`[startQuestion] Orchestrator started: ${instanceId}`);
 
-    context.log(`[startQuestion] Result:`, result);
-
-    return result;
+    // Return immediately - orchestration runs in background
+    // Clients will be notified via Supabase Realtime when database updates
+    return {
+      status: 202,
+      jsonBody: {
+        success: true,
+        message: 'Question start in progress',
+        questionIndex: body.questionIndex,
+        instanceId,
+      },
+    };
   } catch (error: any) {
     context.error('[startQuestion] Error:', error);
 

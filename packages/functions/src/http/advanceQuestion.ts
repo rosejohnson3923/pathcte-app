@@ -33,23 +33,25 @@ export async function advanceQuestion(
 
     const client = df.getClient(context);
 
-    // Start orchestrator to advance question and broadcast
+    // Start orchestrator to advance question and broadcast (fire-and-forget)
     const instanceId = await client.startNew('advanceQuestionOrchestrator', {
       input: {
         sessionId: body.sessionId,
       },
     });
 
-    // Wait for completion (10 seconds = 10000ms)
-    const result = await client.waitForCompletionOrCreateCheckStatusResponse(
-      request,
-      instanceId,
-      { timeoutInMilliseconds: 10000 }
-    );
+    context.log(`[advanceQuestion] Orchestrator started: ${instanceId}`);
 
-    context.log(`[advanceQuestion] Result:`, result);
-
-    return result;
+    // Return immediately - orchestration runs in background
+    // Clients will be notified via Supabase Realtime when database updates
+    return {
+      status: 202,
+      jsonBody: {
+        success: true,
+        message: 'Question advance in progress',
+        instanceId,
+      },
+    };
   } catch (error: any) {
     context.error('[advanceQuestion] Error:', error);
 

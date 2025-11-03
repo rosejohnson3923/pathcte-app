@@ -52,22 +52,24 @@ export async function initializeGame(
 
     const client = df.getClient(context);
 
-    // Start orchestrator to initialize entities
+    // Start orchestrator to initialize entities (fire-and-forget)
     const instanceId = await client.startNew('initializeGameOrchestrator', {
       input: body,
     });
 
-    context.log(`[initializeGame] Started orchestrator ${instanceId}`);
+    context.log(`[initializeGame] Orchestrator started: ${instanceId}`);
 
-    // Wait for orchestrator to complete (30 seconds = 30000ms)
-    const result = await client.waitForCompletionOrCreateCheckStatusResponse(
-      request,
-      instanceId,
-      { timeoutInMilliseconds: 30000 }
-    );
-
-    // Return the orchestrator result (either completed data or status check URLs)
-    return result;
+    // Return immediately - orchestration runs in background
+    // Clients will be notified via Supabase Realtime when database updates
+    return {
+      status: 202,
+      jsonBody: {
+        success: true,
+        message: 'Game initialization in progress',
+        sessionId: body.sessionId,
+        instanceId,
+      },
+    };
   } catch (error: any) {
     context.error('[initializeGame] Error:', error);
 
