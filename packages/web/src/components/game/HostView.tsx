@@ -71,10 +71,11 @@ export const HostView: React.FC<HostViewProps> = ({
   }, [question.id, progressionControl]);
 
   // Reset timer and answered tracking when question changes
+  // Only depend on question.id - don't reset on time_limit change for same question
   useEffect(() => {
     setTimeRemaining(question.time_limit_seconds);
     setPlayersAnswered(new Set());
-  }, [question.id, question.time_limit_seconds]);
+  }, [question.id]);
 
   // Track which players have answered by monitoring their total_answers count
   // When a player's total_answers increases, they've answered the current question
