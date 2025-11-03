@@ -15,7 +15,8 @@ export type GameMode =
   | 'career_clash'
   | 'mystery_path'
   | 'speed_run'
-  | 'team_challenge';
+  | 'team_challenge'
+  | 'tournament';
 export type GameStatus = 'waiting' | 'in_progress' | 'completed' | 'cancelled';
 export type SessionType = 'solo' | 'multiplayer';
 
@@ -214,6 +215,68 @@ export interface QuestionOption {
 }
 
 // ============================================================================
+// TOURNAMENTS
+// ============================================================================
+
+export type TournamentStatus = 'setup' | 'waiting' | 'in_progress' | 'completed' | 'cancelled';
+export type TournamentStartMode = 'independent' | 'coordinated';
+export type ProgressionMode = 'auto' | 'manual';
+
+export interface Tournament {
+  id: string;
+  tournament_code: string;
+  coordinator_id: string;
+  title: string;
+  description: string | null;
+  question_set_id: string;
+  status: TournamentStatus;
+  max_classrooms: number;
+  max_players_per_classroom: number;
+  start_mode: TournamentStartMode;
+  progression_mode: ProgressionMode;
+  allow_late_join: boolean;
+  settings: Record<string, any>;
+  scheduled_start_at: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  school_name: string | null;
+  grade_levels: number[] | null;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TournamentPlayerAggregate {
+  tournament_id: string;
+  user_id: string | null;
+  display_name: string;
+  classroom_name: string;
+  game_session_id: string;
+  player_id: string;
+  total_score: number;
+  total_correct: number;
+  total_answers: number;
+  tokens_earned: number;
+  pathkeys_earned: string[] | null;
+  classroom_placement: number | null;
+  joined_at: string;
+  is_connected: boolean;
+}
+
+export interface TournamentLeaderboardEntry extends TournamentPlayerAggregate {
+  rank: number;
+}
+
+export interface ClassroomRanking {
+  classroom_name: string;
+  game_session_id: string;
+  player_count: number;
+  total_score: number;
+  avg_score: number;
+  rank: number;
+}
+
+// ============================================================================
 // GAME SESSIONS
 // ============================================================================
 
@@ -226,6 +289,10 @@ export interface GameSession {
   status: GameStatus;
   session_type: SessionType;
   current_question_index: number;
+
+  // Tournament fields
+  tournament_id: string | null;
+  classroom_name: string | null;
 
   // Settings
   max_players: number;
@@ -379,6 +446,11 @@ export interface Database {
         Row: Question;
         Insert: Omit<Question, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Question, 'id' | 'created_at'>>;
+      };
+      tournaments: {
+        Row: Tournament;
+        Insert: Omit<Tournament, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<Tournament, 'id' | 'created_at'>>;
       };
       game_sessions: {
         Row: GameSession;
