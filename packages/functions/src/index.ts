@@ -1,8 +1,16 @@
 /**
  * PathCTE Azure Durable Functions Entry Point
  *
- * Exports all entities, activities, and HTTP triggers
+ * Imports all HTTP triggers to register them with the Functions runtime
+ * The app.http() calls at the bottom of each file will execute on module load
  */
+
+// Import HTTP triggers to register them (app.http() executes as side effect)
+import './http/submitAnswer';
+import './http/startQuestion';
+import './http/advanceQuestion';
+import './http/getTimerState';
+import './http/initializeGame';
 
 // Entities
 export { default as HostEntity } from './entities/HostEntity';
@@ -24,10 +32,3 @@ export { recordAnswer } from './activities/recordAnswer';
 export { updatePlayerScore } from './activities/updatePlayerScore';
 export { updatePlayerStatus } from './activities/updatePlayerStatus';
 export { broadcastGameEnded } from './activities/broadcastGameEnded';
-
-// HTTP Triggers
-export { submitAnswer } from './http/submitAnswer';
-export { startQuestion } from './http/startQuestion';
-export { advanceQuestion } from './http/advanceQuestion';
-export { getTimerState } from './http/getTimerState';
-export { initializeGame } from './http/initializeGame';
