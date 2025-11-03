@@ -71,3 +71,5 @@ assets/
 .vs/
 *.pdf
 database/supabase-schema-festwdkldwnpmqxrkiso.svg
+# Settings backups (contain secrets - keep local only)
+docs/*settings-backup*.json
