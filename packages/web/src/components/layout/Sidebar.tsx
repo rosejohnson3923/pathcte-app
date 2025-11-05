@@ -38,6 +38,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const isTeacher = profile?.user_type === 'teacher';
   const isStudent = profile?.user_type === 'student';
 
+  // Debug logging
+  console.log('[Sidebar] Profile loaded:', {
+    id: profile?.id,
+    email: profile?.email,
+    user_type: profile?.user_type,
+    isTeacher,
+    isStudent,
+  });
+
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
     clsx(
       'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 group',
@@ -122,6 +131,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <Gamepad2 size={20} />
               <span>Host Game</span>
+            </NavLink>
+
+            <NavLink
+              to="/tournaments/create"
+              className={navLinkClasses}
+              onClick={() => onMobileClose()}
+            >
+              <Trophy size={20} />
+              <span>Create Tournament</span>
+            </NavLink>
+
+            <NavLink
+              to="/tournaments/join"
+              className={navLinkClasses}
+              onClick={() => onMobileClose()}
+            >
+              <Trophy size={20} />
+              <span>Join Tournament</span>
             </NavLink>
 
             <NavLink

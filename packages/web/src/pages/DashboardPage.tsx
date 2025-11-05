@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../components/layout';
-import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames } from '../hooks';
+import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames, useActiveUserTournaments } from '../hooks';
 import { Card, Spinner, Badge } from '../components/common';
 import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Zap } from 'lucide-react';
 import { getPlaceholderImageUrl } from '@pathcte/shared';
@@ -18,6 +18,7 @@ export default function DashboardPage() {
   // const { data: recentGames, isLoading: gamesLoading } = useUserGamePlayers(5);
   const { data: activeHostedGames, isLoading: activeHostedLoading } = useActiveHostedGames();
   const { data: activeJoinedGames, isLoading: activeJoinedLoading } = useActiveJoinedGames();
+  const { data: activeTournaments, isLoading: tournamentsLoading } = useActiveUserTournaments();
 
   // Create lookup map for pathkey details
   const pathkeysMap = useMemo(() => {
@@ -119,14 +120,85 @@ export default function DashboardPage() {
 
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Active Games for Teachers, Recent Games for Students */}
+          {/* My Tournaments (Teachers Only) */}
+          {isTeacher && (
+            <Card className="overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-6">
+                <Card.Title className="text-white mb-1">My Tournaments</Card.Title>
+                <Card.Description className="text-amber-50">
+                  Your active tournament events
+                </Card.Description>
+              </div>
+              <Card.Content className="p-6">
+                {tournamentsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner />
+                  </div>
+                ) : activeTournaments && activeTournaments.length > 0 ? (
+                  <div className="space-y-3">
+                    {activeTournaments.map((tournament) => (
+                      <div
+                        key={tournament.id}
+                        onClick={() => navigate(`/tournament/${tournament.id}`)}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl hover:shadow-md transition-all duration-200 border border-amber-100 dark:border-amber-800 cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                            <Trophy className="text-white" size={22} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-text-primary dark:text-gray-100 truncate">
+                              {tournament.title}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs text-text-tertiary dark:text-gray-400 font-medium">
+                                Code: <span className="font-mono font-bold">{tournament.tournament_code}</span>
+                              </p>
+                              {tournament.coordinator_id === profile?.id && (
+                                <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-xs font-semibold">
+                                  Coordinator
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={
+                            tournament.status === 'setup' ? 'info' :
+                            tournament.status === 'waiting' ? 'warning' :
+                            tournament.status === 'in_progress' ? 'success' :
+                            tournament.status === 'completed' ? 'default' : 'default'
+                          }>
+                            {tournament.status === 'setup' ? 'Ready' :
+                             tournament.status === 'waiting' ? 'Waiting' :
+                             tournament.status === 'in_progress' ? 'In Progress' :
+                             tournament.status === 'completed' ? 'Completed' :
+                             tournament.status}
+                          </Badge>
+                          <Play size={16} className="text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-text-secondary dark:text-gray-400">
+                    <Trophy size={48} className="mx-auto mb-2 opacity-50" />
+                    <p>No active tournaments</p>
+                    <p className="text-sm">Create or join a tournament to get started!</p>
+                  </div>
+                )}
+              </Card.Content>
+            </Card>
+          )}
+
+          {/* My Classroom Games (Teachers) / Recent Games (Students) */}
           <Card className="overflow-hidden">
             <div className="bg-gradient-to-r from-teal-500 to-cyan-600 p-6">
               <Card.Title className="text-white mb-1">
-                {isTeacher ? 'Active Games' : 'Recent Games'}
+                {isTeacher ? 'My Classroom Games' : 'Recent Games'}
               </Card.Title>
               <Card.Description className="text-teal-50">
-                {isTeacher ? 'Your hosted game sessions' : 'Your latest game sessions'}
+                {isTeacher ? 'Your standalone classroom game sessions' : 'Your latest game sessions'}
               </Card.Description>
             </div>
             <Card.Content className="p-6">
@@ -197,8 +269,13 @@ export default function DashboardPage() {
               ) : (
                 <div className="text-center py-8 text-text-secondary dark:text-gray-400">
                   <Gamepad2 size={48} className="mx-auto mb-2 opacity-50" />
-                  <p>{isTeacher ? 'No active games' : 'No active games'}</p>
-                  <p className="text-sm">{isTeacher ? 'Host a game to get started!' : 'Join a game to get started!'}</p>
+                  <p>{isTeacher ? 'No active classroom games' : 'No active games'}</p>
+                  <p className="text-sm">{isTeacher ? 'Use "Host Game" to create a classroom game!' : 'Join a game to get started!'}</p>
+                  {isTeacher && (
+                    <p className="text-xs mt-2 text-text-tertiary">
+                      Tournament games are managed in the "My Tournaments" section above
+                    </p>
+                  )}
                 </div>
               )}
             </Card.Content>

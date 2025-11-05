@@ -82,8 +82,8 @@ export const useGameSession = (sessionId: string | undefined) => {
 };
 
 /**
- * Fetch active games hosted by the current user
- * (games with status='waiting' or 'in_progress')
+ * Fetch active standalone games hosted by the current user
+ * (games with status='waiting' or 'in_progress' and NOT part of a tournament)
  */
 export const useActiveHostedGames = () => {
   const { user } = useAuth();
@@ -101,14 +101,49 @@ export const useActiveHostedGames = () => {
     }
   );
 
-  // Filter to only active games (waiting or in_progress)
+  // Filter to only active standalone games (not tournament games)
   const activeGames = query.data?.filter(
-    (game) => game.status === 'waiting' || game.status === 'in_progress'
+    (game) =>
+      (game.status === 'waiting' || game.status === 'in_progress') &&
+      game.tournament_id === null
   ) || [];
 
   return {
     ...query,
     data: activeGames,
+  };
+};
+
+/**
+ * Fetch active tournament games hosted by the current user
+ * (games that are part of a tournament)
+ */
+export const useActiveTournamentGames = () => {
+  const { user } = useAuth();
+
+  const query = useFetchMany<GameSession>(
+    'game_sessions',
+    user ? {
+      filters: {
+        host_id: user.id,
+      },
+      order: { column: 'created_at', ascending: false },
+    } : undefined,
+    {
+      enabled: !!user,
+    }
+  );
+
+  // Filter to only tournament games
+  const tournamentGames = query.data?.filter(
+    (game) =>
+      (game.status === 'waiting' || game.status === 'in_progress') &&
+      game.tournament_id !== null
+  ) || [];
+
+  return {
+    ...query,
+    data: tournamentGames,
   };
 };
 

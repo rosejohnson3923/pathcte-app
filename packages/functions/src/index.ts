@@ -11,6 +11,8 @@ import './http/startQuestion';
 import './http/advanceQuestion';
 import './http/getTimerState';
 import './http/initializeGame';
+import './http/getTournamentCoordinatorData';
+import './http/testIncrementalDeploy';
 
 // Entities
 export { default as HostEntity } from './entities/HostEntity';

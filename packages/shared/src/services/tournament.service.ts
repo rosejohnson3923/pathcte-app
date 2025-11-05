@@ -15,6 +15,20 @@ import type {
   ClassroomRanking,
 } from '../types/database.types';
 
+// Azure Functions URL for coordinator operations
+// Uses service role to bypass RLS for tournament coordinators
+const AZURE_FUNCTIONS_URL =
+  typeof import.meta !== 'undefined' && import.meta.env
+    ? import.meta.env.VITE_AZURE_FUNCTIONS_URL || 'http://localhost:7071'
+    : 'http://localhost:7071';
+
+export interface TournamentCoordinatorData {
+  tournament: Tournament;
+  classrooms: GameSession[];
+  tournamentLeaderboard: TournamentLeaderboardEntry[];
+  classroomRankings: ClassroomRanking[];
+}
+
 export interface CreateTournamentParams {
   coordinatorId: string;
   title: string;
@@ -45,7 +59,9 @@ export const tournamentService = {
    * Create a new tournament
    */
   async createTournament(params: CreateTournamentParams): Promise<Tournament> {
-    const { data, error } = await supabase.rpc('create_tournament', {
+    console.log('[createTournament] Starting tournament creation with params:', params);
+
+    const rpcParams = {
       p_coordinator_id: params.coordinatorId,
       p_title: params.title,
       p_description: params.description || null,
@@ -57,13 +73,31 @@ export const tournamentService = {
       p_max_players_per_classroom: params.maxPlayersPerClassroom || 60,
       p_school_name: params.schoolName || null,
       p_settings: params.settings || {},
-    });
+    };
+
+    console.log('[createTournament] Calling RPC with params:', rpcParams);
+
+    const { data, error } = await supabase.rpc('create_tournament', rpcParams as any);
+
+    console.log('[createTournament] RPC response - data:', data, 'error:', error);
 
     if (error) {
-      console.error('Error creating tournament:', error);
+      console.error('[createTournament] Error creating tournament:', error);
+      console.error('[createTournament] Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
       throw new Error(`Failed to create tournament: ${error.message}`);
     }
 
+    if (!data) {
+      console.error('[createTournament] No data returned from create_tournament RPC');
+      throw new Error('Failed to create tournament: No data returned');
+    }
+
+    console.log('[createTournament] Tournament created successfully:', data);
     return data as Tournament;
   },
 
@@ -119,7 +153,7 @@ export const tournamentService = {
       p_tournament_code: params.tournamentCode.toUpperCase(),
       p_host_id: params.hostId,
       p_classroom_name: params.classroomName,
-    });
+    } as any);
 
     if (error) {
       console.error('Error joining tournament:', error);
@@ -137,7 +171,7 @@ export const tournamentService = {
     const { data, error } = await supabase.rpc('start_tournament', {
       p_tournament_id: tournamentId,
       p_coordinator_id: coordinatorId,
-    });
+    } as any);
 
     if (error) {
       console.error('Error starting tournament:', error);
@@ -157,7 +191,7 @@ export const tournamentService = {
     const { data, error } = await supabase.rpc('get_tournament_leaderboard', {
       p_tournament_id: tournamentId,
       p_limit: limit,
-    });
+    } as any);
 
     if (error) {
       console.error('Error fetching tournament leaderboard:', error);
@@ -173,7 +207,7 @@ export const tournamentService = {
   async getClassroomRankings(tournamentId: string): Promise<ClassroomRanking[]> {
     const { data, error } = await supabase.rpc('get_tournament_classroom_rankings', {
       p_tournament_id: tournamentId,
-    });
+    } as any);
 
     if (error) {
       console.error('Error fetching classroom rankings:', error);
@@ -202,18 +236,79 @@ export const tournamentService = {
   },
 
   /**
+   * Get tournament coordinator data via Azure Functions
+   * Uses service role to bypass RLS and fetch all tournament data
+   * This is the primary method for tournament coordinators to view their tournaments
+   */
+  async getTournamentCoordinatorData(tournamentId: string): Promise<TournamentCoordinatorData> {
+    try {
+      // Get current session to extract JWT
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      const url = `${AZURE_FUNCTIONS_URL}/api/tournament/${tournamentId}/coordinator`;
+      console.log('[getTournamentCoordinatorData] Fetching from:', url);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      console.log('[getTournamentCoordinatorData] Response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[getTournamentCoordinatorData] Error response:', errorText);
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+        }
+
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch tournament data');
+      }
+
+      return {
+        tournament: result.tournament,
+        classrooms: result.classrooms || [],
+        tournamentLeaderboard: result.tournamentLeaderboard || [],
+        classroomRankings: result.classroomRankings || [],
+      };
+    } catch (error: any) {
+      console.error('[getTournamentCoordinatorData] Error:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Update tournament status
    */
   async updateTournamentStatus(
     tournamentId: string,
     status: TournamentStatus
   ): Promise<Tournament> {
-    const { data, error } = await supabase
-      .from('tournaments')
+    const { data, error } = (await (supabase
+      .from('tournaments') as any)
       .update({ status })
       .eq('id', tournamentId)
       .select()
-      .single();
+      .single()) as { data: Tournament | null; error: any };
 
     if (error) {
       console.error('Error updating tournament status:', error);
@@ -304,7 +399,7 @@ export const tournamentService = {
               .eq('id', (payload.new as any).game_session_id)
               .single();
 
-            if (session?.tournament_id === tournamentId) {
+            if ((session as any)?.tournament_id === tournamentId) {
               // Refetch leaderboard
               const leaderboard = await this.getTournamentLeaderboard(tournamentId);
               callback(leaderboard);
@@ -317,5 +412,50 @@ export const tournamentService = {
     return () => {
       supabase.removeChannel(channel);
     };
+  },
+
+  /**
+   * Get tournaments where user is coordinator or participant
+   */
+  async getUserTournaments(userId: string): Promise<Tournament[]> {
+    // Get tournaments where user is coordinator
+    const { data: coordinatorTournaments, error: coordError } = await supabase
+      .from('tournaments')
+      .select('*')
+      .eq('coordinator_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (coordError) {
+      console.error('[getUserTournaments] Error fetching coordinator tournaments:', coordError);
+      throw new Error(`Failed to fetch coordinator tournaments: ${coordError.message}`);
+    }
+
+    // Get tournaments where user is a participant (has a game session in the tournament)
+    // Use an inner join to ensure we only get tournaments that actually exist
+    const { data: participantTournaments, error: partError } = await supabase
+      .from('game_sessions')
+      .select('tournaments(*)')
+      .eq('host_id', userId)
+      .not('tournament_id', 'is', null);
+
+    if (partError) {
+      console.error('[getUserTournaments] Error fetching participant tournaments:', partError);
+      throw new Error(`Failed to fetch participant tournaments: ${partError.message}`);
+    }
+
+    // Extract tournaments from the join result and filter out nulls (orphaned references)
+    const participantTournamentsList = (participantTournaments || [])
+      .map((session: any) => session.tournaments)
+      .filter((tournament: Tournament | null) => tournament !== null) as Tournament[];
+
+    // Combine and deduplicate (in case user is both coordinator and participant)
+    const allTournaments = [...(coordinatorTournaments || []), ...participantTournamentsList];
+    const uniqueTournaments = Array.from(
+      new Map(allTournaments.map((t: Tournament) => [t.id, t])).values()
+    );
+
+    return uniqueTournaments.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   },
 };

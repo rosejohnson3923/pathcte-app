@@ -21,6 +21,7 @@ export * from './services/supabase.service';
 export * from './services/game.service';
 export * from './services/realtime.service';
 export * from './services/analytics.service';
+export * from './services/tournament.service';
 
 // Hooks (will be added)
 // export * from './hooks';

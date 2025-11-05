@@ -606,7 +606,7 @@ export default function GamePage() {
         {/* Back Button */}
         <Button variant="outline" onClick={handleLeaveGame} className="mb-4" size="sm">
           <ArrowLeft size={16} className="mr-2" />
-          Leave Game
+          {session.status === 'waiting' ? 'Return to Dashboard' : 'Leave Game'}
         </Button>
 
         {/* Game Status: Lobby */}

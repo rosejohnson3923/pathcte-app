@@ -19,6 +19,9 @@ import StudentsPage from './pages/StudentsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
+import CreateTournamentPage from './pages/CreateTournamentPage';
+import JoinTournamentPage from './pages/JoinTournamentPage';
+import TournamentCoordinatorPage from './pages/TournamentCoordinatorPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastContainer } from './components/common';
@@ -129,6 +132,30 @@ function App() {
           element={
             <ProtectedRoute>
               <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tournaments/create"
+          element={
+            <ProtectedRoute>
+              <CreateTournamentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tournaments/join"
+          element={
+            <ProtectedRoute>
+              <JoinTournamentPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tournament/:tournamentId"
+          element={
+            <ProtectedRoute>
+              <TournamentCoordinatorPage />
             </ProtectedRoute>
           }
         />
