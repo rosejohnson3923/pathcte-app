@@ -52,7 +52,8 @@ export const HostView: React.FC<HostViewProps> = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeRemaining((prev) => {
-        if (prev <= 1) {
+        // Only fire when transitioning from 1 to 0 (not when already at 0)
+        if (prev === 1) {
           // Time's up - only auto-advance in auto mode
           // In manual mode, timer is just for display
           if (progressionControl === 'auto' && onTimerExpiredRef.current) {
@@ -63,7 +64,8 @@ export const HostView: React.FC<HostViewProps> = ({
           }
           return 0;
         }
-        return prev - 1;
+        // Keep decrementing if > 1, stay at 0 if already there
+        return prev > 0 ? prev - 1 : 0;
       });
     }, 1000);
 

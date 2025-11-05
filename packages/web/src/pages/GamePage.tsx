@@ -51,6 +51,7 @@ export default function GamePage() {
   // Use refs to keep latest values without triggering effect dependency
   const currentQuestionIndexRef = useRef(currentQuestionIndex);
   const questionsRef = useRef(questions);
+  const isAdvancingRef = useRef(false); // Prevent concurrent question advances
 
   // Update refs when values change
   useEffect(() => {
@@ -61,13 +62,20 @@ export default function GamePage() {
     questionsRef.current = questions;
   }, [questions]);
 
-  // Track component lifecycle
+  // Track component lifecycle and reset game state on mount/unmount
   useEffect(() => {
     console.log('[GamePage] Component mounted, sessionId:', sessionId);
+
+    // Reset game state when mounting with a new session
+    // This prevents stale state from previous games
+    resetGame();
+
     return () => {
       console.log('[GamePage] Component unmounting, sessionId:', sessionId);
+      // Reset game state when unmounting to prevent state leakage
+      resetGame();
     };
-  }, [sessionId]);
+  }, [sessionId, resetGame]);
 
   // Track session status changes
   useEffect(() => {
@@ -373,11 +381,20 @@ export default function GamePage() {
   };
 
   const handleNextQuestion = async () => {
-    // DEBUGGING: Track what called this function
+    // Prevent concurrent calls (e.g., from double timer expiration)
+    if (isAdvancingRef.current) {
+      console.log('[GamePage] 🚫 BLOCKED concurrent handleNextQuestion call');
+      return;
+    }
+
+    isAdvancingRef.current = true;
     console.log('[GamePage] ⚠️ handleNextQuestion CALLED!');
     console.trace('[GamePage] Call stack for handleNextQuestion:');
 
-    if (!sessionId) return;
+    if (!sessionId) {
+      isAdvancingRef.current = false;
+      return;
+    }
 
     const nextIndex = currentQuestionIndex + 1;
 
@@ -415,11 +432,14 @@ export default function GamePage() {
       } catch (error) {
         console.error('[GamePage] Failed to advance question:', error);
         toast.error('Failed to advance to next question');
-        return;
+      } finally {
+        // Reset flag after operation completes (success or failure)
+        isAdvancingRef.current = false;
       }
     } else {
       // End game
       await handleEndGame();
+      isAdvancingRef.current = false;
     }
   };
 

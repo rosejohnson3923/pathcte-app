@@ -501,6 +501,14 @@ export const gameService = {
    */
   async submitAnswer(params: SubmitAnswerParams) {
     try {
+      console.log('[submitAnswer] Submitting with params:', {
+        playerId: params.playerId,
+        sessionId: params.sessionId,
+        questionId: params.questionId,
+        selectedOptionIndex: params.selectedOptionIndex,
+        timeTakenMs: params.timeTakenMs,
+      });
+
       // Call secure database function
       // This function validates timing, prevents duplicates, and updates scores
       // It runs with SECURITY DEFINER, bypassing RLS while maintaining security
@@ -523,8 +531,14 @@ export const gameService = {
         pointsAwarded: result.points_earned,
         error: null,
       };
-    } catch (error) {
-      console.error('Error submitting answer:', error);
+    } catch (error: any) {
+      console.error('[submitAnswer] Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint,
+        fullError: error,
+      });
       return { answer: null, isCorrect: false, pointsAwarded: 0, error };
     }
   },
