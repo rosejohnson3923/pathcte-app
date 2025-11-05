@@ -191,28 +191,40 @@ WEBSITE_MOUNT_ENABLED=1
 
 ## Known Issues & Solutions
 
-### Issue 1: Functions Return 404 After Deployment
+### Issue 1: ⚠️ WEBSITE_RUN_FROM_PACKAGE Automatically Created (CRITICAL)
 
 **Symptoms**:
-- `func azure functionapp list-functions` shows all functions
-- All HTTP requests return 404
+- Functions discovered but all HTTP requests return 404
 - No requests appear in logs
+- Function runtime cannot load functions from wwwroot
 
-**Root Cause**: `WEBSITE_RUN_FROM_PACKAGE` setting puts app in read-only mode
+**Root Cause**: `WEBSITE_RUN_FROM_PACKAGE` setting puts app in read-only package mode, pointing to blob storage instead of wwwroot
 
-**Solution**:
+**CRITICAL**: This setting is **automatically created after EVERY deployment** with a new blob storage URL
+
+**Pattern Observed** (Confirmed 2025-11-04):
+- First deployment: Creates WEBSITE_RUN_FROM_PACKAGE with blob URL 1
+- Delete setting and restart → Functions load successfully
+- Second deployment: Creates NEW WEBSITE_RUN_FROM_PACKAGE with blob URL 2
+- Pattern repeats for every deployment
+
+**Solution**: **ALWAYS delete this setting after EVERY deployment**
+
+**DO NOT use Azure CLI** (see Issue 6 - CLI has deletion bug)
+
+**CORRECT METHOD - Delete in Azure Portal**:
+1. Go to Azure Portal → Function App → Configuration
+2. Find `WEBSITE_RUN_FROM_PACKAGE`
+3. Click trash icon to delete
+4. Click "Save"
+5. Restart function app:
 ```bash
-az functionapp config appsettings delete \
-  --resource-group Pathfinity \
-  --name pathcte-functions-premium \
-  --setting-names WEBSITE_RUN_FROM_PACKAGE
-
 az functionapp restart \
   --resource-group Pathfinity \
   --name pathcte-functions-premium
 ```
 
-**Prevention**: Use `deploy-premium.sh` script which handles this automatically
+**This is a required step in EVERY deployment** - no exceptions!
 
 ### Issue 2: "0 Functions Found" After Deployment
 
@@ -307,28 +319,75 @@ az storage table list \
 # - PathCTEGameHubPremiumPartitions
 ```
 
-### Issue 5: Remote Build Fails or Files Missing
+### Issue 5: ❌ Remote Build Does NOT Work (CRITICAL)
 
 **Symptoms**:
-- Deployment succeeds but files not in wwwroot
-- Only host.json present
-- Build errors during remote build
+- Deployment with `--build remote` uploads ~39-56 KB (only source files)
+- Oryx build compiles successfully on Azure (npm install + tsc runs)
+- But compiled artifacts never deploy to wwwroot
+- Only host.json ends up in wwwroot
+- Function count shows 0 after deployment
 
-**Solution**: Use local build + ZIP deployment instead:
+**Root Cause**: Remote build process compiles code but fails to deploy build output (dist/, node_modules/) to wwwroot
+
+**TEST RESULTS** (Confirmed 2025-11-04):
+- Remote build: npm installed 126 packages, tsc compiled successfully
+- Deployment log showed "Remote build succeeded!"
+- But wwwroot only contained host.json
+- Functions did not load
+
+**Solution**: **ALWAYS use local build**:
 ```bash
 # Build locally first
+npm install
 npm run build
 
-# Deploy without remote build
-func azure functionapp publish <app-name>
-# (no --build remote flag)
+# Deploy without --build remote flag
+func azure functionapp publish pathcte-functions-premium
+
+# Expected upload size: ~400-450 KB (not 39-56 KB)
 ```
 
-### Issue 6: Application Settings Accidentally Deleted
+**CRITICAL .funcignore Configuration**:
+For local builds, `.funcignore` must allow dist/ and node_modules/ to upload:
+```
+# Correct .funcignore for LOCAL builds:
+.git/
+.vscode/
+.vs/
+test/
+.env
+.env.*
+local.settings.json
+*.log
+.DS_Store
+
+# DO NOT exclude dist/ or node_modules/
+```
+
+### Issue 6: ⚠️ Azure CLI Settings Deletion Bug (CRITICAL)
 
 **Symptoms**:
-- Functions stop working after configuration change
-- Missing environment variables
+- Attempted to delete single setting with Azure CLI
+- **ALL settings got deleted** instead of just one
+- Functions stopped working immediately
+- Function count went from 18 to 0
+
+**Root Cause**: Azure CLI bug in `az functionapp config appsettings delete` command
+
+**TEST RESULTS** (Confirmed 2025-11-04):
+- Ran: `az functionapp config appsettings delete --setting-names WEBSITE_RUN_FROM_PACKAGE`
+- Expected: Delete only WEBSITE_RUN_FROM_PACKAGE
+- Actual: Deleted ALL 18 settings
+- Happened 3 times during deployment troubleshooting
+
+**Solution**: **NEVER use Azure CLI to delete settings**
+
+**CORRECT METHOD - Delete in Azure Portal**:
+1. Go to Azure Portal → Function App → Configuration
+2. Find the setting to delete
+3. Click the trash icon
+4. Click "Save"
 
 **Prevention**: Always backup settings before changes:
 ```bash
@@ -338,14 +397,42 @@ az functionapp config appsettings list \
   > backup-settings-$(date +%Y%m%d-%H%M%S).json
 ```
 
-**Recovery**: Use consumption-settings.json or backup to restore:
+**Recovery**: Restore from backup or local.settings.json:
 ```bash
-# Restore all settings (adjust values as needed)
-az functionapp config appsettings set \
-  --resource-group Pathfinity \
-  --name <app-name> \
-  --settings @backup-settings.json
+# Manually restore each setting in Azure Portal
+# Or use local.settings.json as reference
 ```
+
+### Issue 7: ❌ Incremental Deployment Does NOT Work
+
+**Symptoms**:
+- Added new function to source code
+- Compiled successfully (new .js file in dist/)
+- Deployed with increased package size (443KB → 447KB)
+- Deleted WEBSITE_RUN_FROM_PACKAGE and restarted
+- Function count remained unchanged, new function did NOT appear
+
+**Root Cause**: Azure Functions runtime does not properly register new functions from incremental uploads. All function metadata must be synchronized together.
+
+**TEST RESULTS** (Confirmed 2025-11-04):
+- Created test function `testIncrementalDeploy`
+- Added import to `src/index.ts`
+- Ran `npm run build` - compiled successfully
+- Deployed - package grew from 443KB to 447KB
+- After restart: Function count stayed at 19 (test function missing)
+
+**Conclusion**: You CANNOT add individual functions incrementally
+
+**Required Process When Adding New Functions**:
+1. Add new function source file
+2. Add import to `src/index.ts`
+3. Run full build: `npm install && npm run build`
+4. Deploy entire package: `func azure functionapp publish pathcte-functions-premium`
+5. Delete `WEBSITE_RUN_FROM_PACKAGE` in Azure Portal
+6. Restart function app
+7. All 19 existing functions + new function should appear
+
+**Note**: Even though dist/ and node_modules/ are already deployed, adding a new function requires redeploying everything for the runtime to properly register it.
 
 ---
 
@@ -478,25 +565,33 @@ curl https://pathcte-functions-premium.azurewebsites.net/api/game/initialize
 # List all functions
 func azure functionapp list-functions <app-name>
 
-# Should show 18 functions:
-# - advanceQuestion (HTTP)
-# - getTimerState (HTTP)
-# - initializeGame (HTTP)
-# - startQuestion (HTTP)
-# - submitAnswer (HTTP)
-# - advanceQuestionOrchestrator (Orchestration)
-# - initializeGameOrchestrator (Orchestration)
-# - callHostEntity (Orchestration)
-# - callPlayerEntity (Orchestration)
-# - HostEntity (Entity)
-# - PlayerEntity (Entity)
-# - broadcastGameEnded (Activity)
-# - broadcastQuestionStarted (Activity)
-# - generatePlayerNotifications (Activity)
-# - notifyPlayerResponse (Activity)
-# - notifyPlayerResponseError (Activity)
-# - processPlayerAnswer (Activity)
-# - updateQuestionDeadline (Activity)
+# Should show 19 functions (as of 2025-11-04):
+# HTTP Triggers (6):
+# - advanceQuestion
+# - getTimerState
+# - initializeGame
+# - startQuestion
+# - submitAnswer
+# - tournamentCoordinator (NEW - bypasses RLS for tournament data)
+#
+# Orchestrators (4):
+# - advanceQuestionOrchestrator
+# - initializeGameOrchestrator
+# - callHostEntity
+# - callPlayerEntity
+#
+# Entities (2):
+# - HostEntity
+# - PlayerEntity
+#
+# Activities (7):
+# - broadcastGameEnded
+# - broadcastQuestionStarted
+# - generatePlayerNotifications
+# - notifyPlayerResponse
+# - notifyPlayerResponseError
+# - processPlayerAnswer
+# - updateQuestionDeadline
 ```
 
 ### Test HTTP Endpoints
@@ -720,6 +815,13 @@ az functionapp config appsettings list --resource-group Pathfinity --name <app-n
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-11-03
+**Document Version**: 2.0
+**Last Updated**: 2025-11-04
+**Major Updates**:
+- Added Issue 5: Remote Build Does NOT Work (CRITICAL)
+- Added Issue 6: Azure CLI Settings Deletion Bug (CRITICAL)
+- Added Issue 7: Incremental Deployment Does NOT Work
+- Updated Issue 1: WEBSITE_RUN_FROM_PACKAGE appears after EVERY deployment
+- Updated function count: 18 → 19 (added tournamentCoordinator)
+- All test results confirmed and documented
 **Maintained By**: Development Team

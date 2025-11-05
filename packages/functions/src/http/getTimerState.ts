@@ -1,8 +1,6 @@
 /**
  * HTTP Trigger: Get Timer State
  * GET /api/game/timerState/{sessionId}
- *
- * Gets current timer state for synchronization (late joins, reconnects)
  */
 
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
@@ -68,3 +66,4 @@ app.http('getTimerState', {
   extraInputs: [df.input.durableClient()],
   handler: getTimerState,
 });
+
