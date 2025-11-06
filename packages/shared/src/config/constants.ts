@@ -19,6 +19,48 @@ export const GAME_MODES = {
 export const GAME_CODE_LENGTH = 6;
 export const GAME_CODE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
+// Scoring and timing configuration per game mode
+// Set penalty to 0 to disable it for a specific mode
+// time_multiplier: 1.0 = normal, 0.5 = half time, 2.0 = double time
+export const GAME_MODE_SCORING = {
+  career_quest: {
+    correct_points: 25,
+    incorrect_penalty: -10,
+    no_answer_penalty: -10,
+    time_multiplier: 1.0,
+  },
+  path_defense: {
+    correct_points: 25,
+    incorrect_penalty: -10,
+    no_answer_penalty: -10,
+    time_multiplier: 1.0,
+  },
+  career_clash: {
+    correct_points: 25,
+    incorrect_penalty: -10,
+    no_answer_penalty: -10,
+    time_multiplier: 1.0,
+  },
+  mystery_path: {
+    correct_points: 25,
+    incorrect_penalty: -10,
+    no_answer_penalty: -10,
+    time_multiplier: 1.0,
+  },
+  speed_run: {
+    correct_points: 25,
+    incorrect_penalty: -10,
+    no_answer_penalty: -10,
+    time_multiplier: 0.5, // Lightning! Path runs at half time
+  },
+  team_challenge: {
+    correct_points: 25,
+    incorrect_penalty: -10,
+    no_answer_penalty: -10,
+    time_multiplier: 1.0,
+  },
+} as const;
+
 export const DEFAULT_GAME_SETTINGS = {
   MAX_PLAYERS: 50,
   DEFAULT_TIME_LIMIT: 30, // seconds

@@ -10,7 +10,7 @@ import { DashboardLayout } from '../components/layout';
 import { GameLobby, QuestionDisplay, HostView, Leaderboard, GameResults } from '../components/game';
 import { Button, Spinner, Card } from '../components/common';
 import { useAuth } from '../hooks';
-import { useGameStore, gameService, realtimeService, toast, supabase } from '@pathcte/shared';
+import { useGameStore, gameService, realtimeService, toast, supabase, GAME_MODE_SCORING } from '@pathcte/shared';
 import { ArrowLeft } from 'lucide-react';
 import type { GamePlayer } from '@pathcte/shared';
 
@@ -153,18 +153,27 @@ export default function GamePage() {
 
         // Load questions if game is in progress or completed
         if (gameSession.status !== 'waiting') {
-          const businessDriver = (gameSession as any).settings?.businessDriver;
-          const { questions: gameQuestions, error: questionsError } = await gameService.getGameQuestions(
+          const selectedQuestionIds = gameSession.metadata?.selected_question_ids;
+          const { questions: gameQuestions, error: questionsError} = await gameService.getGameQuestions(
             gameSession.question_set_id,
             userIsHost,  // Hosts get answers, students don't
-            businessDriver
+            selectedQuestionIds  // Pass selected question IDs if available
           );
 
           if (questionsError || !gameQuestions) {
             throw new Error('Failed to load questions');
           }
 
-          setQuestions(gameQuestions as any);
+          // Apply time multiplier based on game mode
+          const gameMode = gameSession.game_mode as keyof typeof GAME_MODE_SCORING;
+          const timeMultiplier = GAME_MODE_SCORING[gameMode]?.time_multiplier ?? 1.0;
+
+          const questionsWithAdjustedTime = gameQuestions.map(q => ({
+            ...q,
+            time_limit_seconds: Math.round(q.time_limit_seconds * timeMultiplier)
+          }));
+
+          setQuestions(questionsWithAdjustedTime as any);
 
           // Load current question index from database
           // This ensures the game state is preserved across page refreshes
@@ -226,11 +235,21 @@ export default function GamePage() {
         // If game just started, load questions (check using ref)
         if (updatedSession.status === 'in_progress' && questionsRef.current.length === 0) {
           console.log('[GamePage] Game started, loading questions');
-          const businessDriver = (updatedSession.settings as any)?.businessDriver;
-          gameService.getGameQuestions(updatedSession.question_set_id, isHost, businessDriver).then(({ questions: gameQuestions }: any) => {
+          const selectedQuestionIds = updatedSession.metadata?.selected_question_ids;
+          gameService.getGameQuestions(updatedSession.question_set_id, isHost, selectedQuestionIds).then(({ questions: gameQuestions }: any) => {
             if (gameQuestions) {
               console.log('[GamePage] Questions loaded:', gameQuestions.length);
-              setQuestions(gameQuestions);
+
+              // Apply time multiplier based on game mode
+              const gameMode = updatedSession.game_mode as keyof typeof GAME_MODE_SCORING;
+              const timeMultiplier = GAME_MODE_SCORING[gameMode]?.time_multiplier ?? 1.0;
+
+              const questionsWithAdjustedTime = gameQuestions.map(q => ({
+                ...q,
+                time_limit_seconds: Math.round(q.time_limit_seconds * timeMultiplier)
+              }));
+
+              setQuestions(questionsWithAdjustedTime);
             }
           });
         }
@@ -303,17 +322,26 @@ export default function GamePage() {
       }
 
       // 2. Load questions (with answers since we're the host)
-      // Apply business_driver filter from session settings if specified
-      const businessDriver = (updatedSession as any).settings?.businessDriver;
+      const selectedQuestionIds = updatedSession.metadata?.selected_question_ids;
       const { questions: gameQuestions } = await gameService.getGameQuestions(
         updatedSession.question_set_id,
         true,
-        businessDriver
+        selectedQuestionIds
       );
       if (!gameQuestions || gameQuestions.length === 0) {
         throw new Error('No questions loaded');
       }
-      setQuestions(gameQuestions as any);
+
+      // Apply time multiplier based on game mode
+      const gameMode = updatedSession.game_mode as keyof typeof GAME_MODE_SCORING;
+      const timeMultiplier = GAME_MODE_SCORING[gameMode]?.time_multiplier ?? 1.0;
+
+      const questionsWithAdjustedTime = gameQuestions.map(q => ({
+        ...q,
+        time_limit_seconds: Math.round(q.time_limit_seconds * timeMultiplier)
+      }));
+
+      setQuestions(questionsWithAdjustedTime as any);
 
       // 3. Get players for initialization
       const { data: playersData, error: playersError } = await supabase
@@ -334,7 +362,7 @@ export default function GamePage() {
         body: JSON.stringify({
           sessionId,
           questionSetId: updatedSession.question_set_id,
-          questions: gameQuestions,
+          questions: questionsWithAdjustedTime,
           progressionControl: (updatedSession as any).settings?.progressionControl || 'manual',
           allowLateJoin: (updatedSession as any).settings?.allowLateJoin || false,
           players: playersData.map((p: any) => ({

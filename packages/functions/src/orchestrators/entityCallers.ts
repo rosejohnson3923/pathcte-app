@@ -135,12 +135,25 @@ const advanceQuestionOrchestrator: OrchestrationHandler = function* (context: Or
     sessionId: string;
   } = context.df.getInput();
 
-  // 1. Advance question on Host Entity
   const hostEntityId = new EntityId('HostEntity', input.sessionId);
 
+  // 1. Get current state to know which question we're leaving
+  const currentState = yield context.df.callEntity(hostEntityId, 'getState');
+
+  // 2. Apply no-answer penalty for the current question (if there is one)
+  if (currentState.currentQuestionIndex >= 0) {
+    const currentQuestion = currentState.questions[currentState.currentQuestionIndex];
+
+    yield context.df.callActivity('applyNoAnswerPenalty', {
+      sessionId: input.sessionId,
+      questionId: currentQuestion.id,
+    });
+  }
+
+  // 3. Advance to next question on Host Entity
   const result = yield context.df.callEntity(hostEntityId, 'advanceQuestion');
 
-  // 2. Broadcast to players (if there's a next question)
+  // 4. Broadcast to players (if there's a next question)
   if (result.success && result.hasMore) {
     yield context.df.callActivity('broadcastQuestionStarted', {
       sessionId: input.sessionId,

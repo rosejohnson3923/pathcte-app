@@ -34,3 +34,4 @@ export { recordAnswer } from './activities/recordAnswer';
 export { updatePlayerScore } from './activities/updatePlayerScore';
 export { updatePlayerStatus } from './activities/updatePlayerStatus';
 export { broadcastGameEnded } from './activities/broadcastGameEnded';
+export { applyNoAnswerPenalty } from './activities/applyNoAnswerPenalty';

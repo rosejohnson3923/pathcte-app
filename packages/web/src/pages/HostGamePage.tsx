@@ -17,17 +17,12 @@ const GAME_MODES: { value: GameMode; label: string; description: string }[] = [
   {
     value: 'career_quest',
     label: 'Career Quest',
-    description: 'Classic quiz mode with career-themed questions',
+    description: 'Classic quiz mode: +25 points correct, -10 incorrect/no answer',
   },
   {
     value: 'speed_run',
-    label: 'Speed Run',
-    description: 'Fast-paced questions with time pressure',
-  },
-  {
-    value: 'team_challenge',
-    label: 'Team Challenge',
-    description: 'Collaborative team-based gameplay',
+    label: 'Lightning! Path',
+    description: 'Auto-only speed mode: +25 points correct, -10 incorrect/no answer',
   },
 ];
 
@@ -37,17 +32,13 @@ export default function HostGamePage() {
   const { setSession, setIsHost } = useGameStore();
 
   // Filter state
-  const [gradeFilter, setGradeFilter] = useState<number | undefined>(undefined);
-  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'industry' | 'career' | 'subject' | ''>('');
-  const [subjectFilter, setSubjectFilter] = useState<string>('');
-  const [businessDriverFilter, setBusinessDriverFilter] = useState<string>('all');
+  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'industry' | 'career' | 'cluster' | ''>('');
+  const [difficultyFilter, setDifficultyFilter] = useState<string>('');
 
   // Fetch question sets with filtering
-  // Note: business_driver is NOT used here - it's passed to game settings and filters QUESTIONS during gameplay
   const { data: questionSets, isLoading: loadingQuestionSets } = useFilteredQuestionSets({
-    grade_level: gradeFilter,
     exploration_type: explorationTypeFilter || undefined,
-    subject: explorationTypeFilter === 'subject' ? subjectFilter : undefined,
+    difficulty: difficultyFilter || undefined,
   });
 
   const [selectedQuestionSet, setSelectedQuestionSet] = useState<string>('');
@@ -57,6 +48,7 @@ export default function HostGamePage() {
   const [isPublic, setIsPublic] = useState(true);
   const [allowLateJoin, setAllowLateJoin] = useState(false);
   const [progressionControl, setProgressionControl] = useState<'auto' | 'manual'>('manual');
+  const [questionCount, setQuestionCount] = useState<number>(30);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,13 +60,14 @@ export default function HostGamePage() {
   // Get selected question set details
   const selectedSet = questionSets?.find((set) => set.id === selectedQuestionSet);
 
-  // Get unique subjects from ALL question sets (not filtered) for the Subject dropdown
-  const { data: allQuestionSets } = useFilteredQuestionSets({});
-  const uniqueSubjects = React.useMemo(() => {
-    if (!allQuestionSets) return [];
-    const subjects = new Set(allQuestionSets.map((set) => set.subject).filter(Boolean));
-    return Array.from(subjects).sort();
-  }, [allQuestionSets]);
+  // Auto-adjust question count when question set changes
+  React.useEffect(() => {
+    if (selectedSet && questionCount > selectedSet.total_questions) {
+      // Find the highest available tier
+      const availableTiers = [10, 15, 20, 25, 30].filter(t => t <= selectedSet.total_questions);
+      setQuestionCount(availableTiers[availableTiers.length - 1] || selectedSet.total_questions);
+    }
+  }, [selectedSet, questionCount]);
 
   const handleCreateGame = async () => {
     if (!user) {
@@ -100,8 +93,9 @@ export default function HostGamePage() {
         isPublic: sessionType === 'solo' ? false : isPublic,
         allowLateJoin: sessionType === 'solo' ? false : allowLateJoin,
         settings: {
-          progressionControl: sessionType === 'solo' ? 'auto' : progressionControl,
-          businessDriver: businessDriverFilter !== 'all' ? businessDriverFilter : undefined,
+          progressionControl: sessionType === 'solo' || selectedMode === 'speed_run' ? 'auto' : progressionControl,
+          questionCount: questionCount,
+          difficulty: difficultyFilter || undefined,
         },
       } as any);
 
@@ -133,7 +127,15 @@ export default function HostGamePage() {
       }
     } catch (err: any) {
       console.error('Error creating game:', err);
-      setError(err.message || 'Failed to create game. Please try again.');
+
+      // Provide helpful error messages for common issues
+      let errorMessage = err.message || 'Failed to create game. Please try again.';
+
+      if (errorMessage.includes('No questions found')) {
+        errorMessage += '\n\nTip: Try selecting "All Difficulty Levels" or choose a different difficulty.';
+      }
+
+      setError(errorMessage);
     } finally {
       setIsCreating(false);
     }
@@ -171,40 +173,6 @@ export default function HostGamePage() {
               </div>
             </div>
 
-            {/* Grade Level Filter */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-text-secondary mb-2">
-                <div className="flex items-center gap-2">
-                  <Filter size={16} />
-                  Filter by Grade Level
-                </div>
-              </label>
-              <div className="relative">
-                <select
-                  value={gradeFilter || ''}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setGradeFilter(value ? parseInt(value) : undefined);
-                    setSelectedQuestionSet(''); // Reset selection when filter changes
-                  }}
-                  className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
-                >
-                  <option value="">All Grades</option>
-                  <option value="6">6th Grade</option>
-                  <option value="7">7th Grade</option>
-                  <option value="8">8th Grade</option>
-                  <option value="9">9th Grade</option>
-                  <option value="10">10th Grade</option>
-                  <option value="11">11th Grade</option>
-                  <option value="12">12th Grade</option>
-                </select>
-                <ChevronDown
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                  size={20}
-                />
-              </div>
-            </div>
-
             {/* Exploration Type Filter (Required Parent Filter) */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-text-secondary mb-2">
@@ -217,10 +185,9 @@ export default function HostGamePage() {
                 <select
                   value={explorationTypeFilter}
                   onChange={(e) => {
-                    const value = e.target.value as 'industry' | 'career' | 'subject' | '';
+                    const value = e.target.value as 'industry' | 'career' | 'cluster' | '';
                     setExplorationTypeFilter(value);
-                    // Reset child filters and selection
-                    setSubjectFilter('');
+                    // Reset selection when filter changes
                     setSelectedQuestionSet('');
                   }}
                   className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
@@ -228,7 +195,7 @@ export default function HostGamePage() {
                   <option value="">Select Exploration Type...</option>
                   <option value="industry">Industry</option>
                   <option value="career">Career</option>
-                  <option value="subject">Subject</option>
+                  <option value="cluster">Cluster</option>
                 </select>
                 <ChevronDown
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
@@ -237,38 +204,34 @@ export default function HostGamePage() {
               </div>
             </div>
 
-            {/* Child Filter: Subject (when exploration type is 'subject') */}
-            {explorationTypeFilter === 'subject' && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  <div className="flex items-center gap-2">
-                    <Filter size={16} />
-                    Subject
-                  </div>
-                </label>
-                <div className="relative">
-                  <select
-                    value={subjectFilter}
-                    onChange={(e) => {
-                      setSubjectFilter(e.target.value);
-                      setSelectedQuestionSet(''); // Reset selection when filter changes
-                    }}
-                    className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
-                  >
-                    <option value="">All Subjects</option>
-                    {uniqueSubjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                    size={20}
-                  />
+            {/* Difficulty Filter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-text-secondary mb-2">
+                <div className="flex items-center gap-2">
+                  <Filter size={16} />
+                  Difficulty Level
                 </div>
+              </label>
+              <div className="relative">
+                <select
+                  value={difficultyFilter}
+                  onChange={(e) => {
+                    setDifficultyFilter(e.target.value);
+                    setSelectedQuestionSet(''); // Reset selection when filter changes
+                  }}
+                  className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
+                >
+                  <option value="">All Difficulty Levels</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
+                  size={20}
+                />
               </div>
-            )}
+            </div>
 
 
             {/* Question Set Selection - Only shown after Exploration Type is selected */}
@@ -294,7 +257,7 @@ export default function HostGamePage() {
                     >
                       {questionSets.map((set) => (
                         <option key={set.id} value={set.id}>
-                          {set.title} ({set.total_questions} questions)
+                          {set.title}
                         </option>
                       ))}
                     </select>
@@ -343,46 +306,38 @@ export default function HostGamePage() {
                               {selectedSet.description}
                             </p>
                           )}
-                          {selectedSet.grade_level && selectedSet.grade_level.length > 0 && (
-                            <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
-                              Grades {Math.min(...selectedSet.grade_level)}-
-                              {Math.max(...selectedSet.grade_level)}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Business Driver Filter - Filters QUESTIONS within the selected set */}
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-text-secondary mb-2">
-                        <div className="flex items-center gap-2">
-                          <Filter size={16} />
-                          Business Driver (6 P's)
-                          <span className="text-xs text-text-tertiary">(Optional - filters questions during game)</span>
-                        </div>
+                    {/* Question Count Selection */}
+                    <div className="mt-4 pt-4 border-t-2 border-gray-200 dark:border-gray-700">
+                      <label className="block text-sm font-medium text-text-secondary mb-3">
+                        Number of Questions
                       </label>
-                      <div className="relative">
-                        <select
-                          value={businessDriverFilter}
-                          onChange={(e) => setBusinessDriverFilter(e.target.value)}
-                          className="w-full px-4 py-2.5 pr-10 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none cursor-pointer"
-                        >
-                          <option value="all">All Drivers (Use All Questions)</option>
-                          <option value="people">People</option>
-                          <option value="product">Product</option>
-                          <option value="pricing">Pricing</option>
-                          <option value="process">Process</option>
-                          <option value="proceeds">Proceeds</option>
-                          <option value="profits">Profits</option>
-                        </select>
-                        <ChevronDown
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"
-                          size={20}
-                        />
+                      <div className="grid grid-cols-5 gap-2">
+                        {[10, 15, 20, 25, 30].map((count) => {
+                          const isAvailable = count <= selectedSet.total_questions;
+                          return (
+                            <button
+                              key={count}
+                              onClick={() => isAvailable && setQuestionCount(count)}
+                              disabled={!isAvailable}
+                              className={`px-4 py-3 rounded-lg border-2 font-semibold transition-all ${
+                                questionCount === count && isAvailable
+                                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                                  : isAvailable
+                                  ? 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-900 dark:text-gray-100'
+                                  : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                              }`}
+                            >
+                              {count}
+                            </button>
+                          );
+                        })}
                       </div>
-                      <p className="text-xs text-text-tertiary mt-1">
-                        Selecting a business driver will only use questions tagged with that driver during the game
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                        Questions will be randomly selected from the pool of {selectedSet.total_questions} available
                       </p>
                     </div>
                   </>
@@ -578,52 +533,65 @@ export default function HostGamePage() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Question Progression
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <label className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    progressionControl === 'manual'
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="progressionControl"
-                      value="manual"
-                      checked={progressionControl === 'manual'}
-                      onChange={(e) => setProgressionControl(e.target.value as 'manual')}
-                      className="sr-only"
-                    />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Manual
-                    </span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      You control when to advance to the next question
-                    </span>
-                  </label>
+                {selectedMode === 'speed_run' ? (
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-200 dark:border-yellow-700 rounded-lg">
+                    <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
+                      ⚡ Lightning! Path Mode: Auto Only
+                    </p>
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                      This fast-paced mode automatically advances questions when the timer expires
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        progressionControl === 'manual'
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="progressionControl"
+                          value="manual"
+                          checked={progressionControl === 'manual'}
+                          onChange={(e) => setProgressionControl(e.target.value as 'manual')}
+                          className="sr-only"
+                        />
+                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                          Manual
+                        </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          You control when to advance to the next question
+                        </span>
+                      </label>
 
-                  <label className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    progressionControl === 'auto'
-                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="progressionControl"
-                      value="auto"
-                      checked={progressionControl === 'auto'}
-                      onChange={(e) => setProgressionControl(e.target.value as 'auto')}
-                      className="sr-only"
-                    />
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Auto
-                    </span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      Automatically advance when timer expires
-                    </span>
-                  </label>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Choose how questions progress during gameplay
-                </p>
+                      <label className={`flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        progressionControl === 'auto'
+                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}>
+                        <input
+                          type="radio"
+                          name="progressionControl"
+                          value="auto"
+                          checked={progressionControl === 'auto'}
+                          onChange={(e) => setProgressionControl(e.target.value as 'auto')}
+                          className="sr-only"
+                        />
+                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                          Auto
+                        </span>
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                          Automatically advance when timer expires
+                        </span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      Choose how questions progress during gameplay
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </Card>
