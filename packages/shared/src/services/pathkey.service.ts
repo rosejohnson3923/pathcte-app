@@ -604,4 +604,140 @@ export const pathkeyService = {
       return { pathkeys: null, error };
     }
   },
+
+  /**
+   * Get business driver progress for a student's career
+   */
+  async getBusinessDriverProgress(userId: string, careerId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('student_business_driver_progress')
+        .select('business_driver, current_progress, mastery_achieved')
+        .eq('student_id', userId)
+        .eq('career_id', careerId);
+
+      if (error) {
+        console.error('Error fetching business driver progress:', error);
+        return { drivers: null, error };
+      }
+
+      return { drivers: data, error: null };
+    } catch (error) {
+      console.error('Error in getBusinessDriverProgress:', error);
+      return { drivers: null, error };
+    }
+  },
+
+  /**
+   * Get student pathkey progress for all careers
+   * Returns enriched data ready for CareerPathkeyCard component
+   */
+  async getAllCareerPathkeyProgress(userId: string) {
+    try {
+      // Get all careers
+      const { data: careers, error: careersError } = await supabase
+        .from('careers')
+        .select(`
+          id,
+          title,
+          sector,
+          career_cluster,
+          pathkey_career_image,
+          pathkey_lock_image,
+          pathkey_key_image
+        `)
+        .order('title');
+
+      if (careersError) {
+        console.error('Error fetching careers:', careersError);
+        return { pathkeys: null, error: careersError };
+      }
+
+      // Get student's pathkey progress
+      const { data: studentPathkeys, error: pathkeysError } = await supabase
+        .from('student_pathkeys')
+        .select('*')
+        .eq('student_id', userId);
+
+      if (pathkeysError) {
+        console.error('Error fetching student pathkeys:', pathkeysError);
+        return { pathkeys: null, error: pathkeysError };
+      }
+
+      // Get all business driver progress
+      const { data: allDriverProgress, error: driversError } = await supabase
+        .from('student_business_driver_progress')
+        .select('career_id, business_driver, current_chunk_correct, mastery_achieved')
+        .eq('student_id', userId);
+
+      if (driversError) {
+        console.error('Error fetching driver progress:', driversError);
+        // Continue without driver data
+      }
+
+      // Get Section 2 progress (industry/cluster sets)
+      const { data: section2Progress, error: section2Error } = await supabase
+        .from('student_pathkey_progress')
+        .select('career_id, mastery_type, accuracy')
+        .eq('student_id', userId)
+        .gte('accuracy', SECTION_2_ACCURACY_THRESHOLD);
+
+      if (section2Error) {
+        console.error('Error fetching section 2 progress:', section2Error);
+        // Continue without section 2 data
+      }
+
+      // Map careers to pathkey card data
+      const pathkeys = careers?.map((career) => {
+        const studentProgress = studentPathkeys?.find(sp => sp.career_id === career.id);
+        const driverProgress = allDriverProgress?.filter(d => d.career_id === career.id) || [];
+        const sets = section2Progress?.filter(s => s.career_id === career.id) || [];
+
+        return {
+          careerId: career.id,
+          careerTitle: career.title,
+          careerSector: career.sector,
+          careerCluster: career.career_cluster,
+
+          section1: {
+            unlocked: studentProgress?.career_mastery_unlocked || false,
+            unlockedAt: studentProgress?.career_mastery_unlocked_at,
+          },
+
+          section2: {
+            unlocked: studentProgress?.cluster_mastery_unlocked || studentProgress?.industry_mastery_unlocked || false,
+            unlockedAt: studentProgress?.industry_mastery_unlocked_at,
+            via: studentProgress?.industry_mastery_via as 'industry' | 'cluster' | undefined,
+            progress: sets.length,
+            required: SECTION_2_REQUIRED_SETS,
+          },
+
+          section3: {
+            unlocked: studentProgress?.business_driver_mastery_unlocked || false,
+            unlockedAt: studentProgress?.business_driver_mastery_unlocked_at,
+            drivers: SECTION_3_REQUIRED_DRIVERS.map(driver => {
+              const progress = driverProgress.find(d => d.business_driver === driver);
+              return {
+                driver,
+                mastered: progress?.mastery_achieved || false,
+                currentProgress: progress?.current_chunk_correct || 0,
+                required: SECTION_3_CHUNK_SIZE,
+              };
+            }),
+          },
+
+          images: {
+            career: career.pathkey_career_image,
+            lock: career.pathkey_lock_image,
+            key: career.pathkey_key_image,
+          },
+        };
+      }) || [];
+
+      return { pathkeys, error: null };
+    } catch (error) {
+      console.error('Error in getAllCareerPathkeyProgress:', error);
+      return { pathkeys: null, error };
+    }
+  },
 };

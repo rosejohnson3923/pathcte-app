@@ -8,6 +8,7 @@ import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
 import DashboardPage from './pages/DashboardPage';
 import CollectionPage from './pages/CollectionPage';
+import CareerPathkeysPage from './pages/CareerPathkeysPage';
 import CareersPage from './pages/CareersPage';
 import HowToPlayPage from './pages/HowToPlayPage';
 import JoinGamePage from './pages/JoinGamePage';
@@ -20,6 +21,7 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
+import MarketPage from './pages/MarketPage';
 import CreateTournamentPage from './pages/CreateTournamentPage';
 import JoinTournamentPage from './pages/JoinTournamentPage';
 import TournamentCoordinatorPage from './pages/TournamentCoordinatorPage';
@@ -62,6 +64,14 @@ function App() {
           element={
             <ProtectedRoute>
               <CollectionPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career-pathkeys"
+          element={
+            <ProtectedRoute>
+              <CareerPathkeysPage />
             </ProtectedRoute>
           }
         />
@@ -166,6 +176,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TournamentCoordinatorPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/market"
+          element={
+            <ProtectedRoute>
+              <MarketPage />
             </ProtectedRoute>
           }
         />

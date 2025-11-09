@@ -82,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </NavLink>
 
         <NavLink
-          to="/collection"
+          to="/career-pathkeys"
           className={navLinkClasses}
           onClick={() => onMobileClose()}
         >

@@ -7,6 +7,7 @@
 export * from './useAuth';
 export * from './useSupabase';
 export * from './usePathkeys';
+export * from './useCareerPathkeys';
 export * from './useCareers';
 export * from './useTokens';
 export * from './useGameSessions';

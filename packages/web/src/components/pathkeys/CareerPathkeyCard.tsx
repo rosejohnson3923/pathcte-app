@@ -10,7 +10,7 @@
  */
 
 import React, { useState } from 'react';
-import { Lock, Key, Trophy } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import clsx from 'clsx';
 import { ensureAzureUrlHasSasToken } from '../../config/azure';
 
@@ -76,6 +76,7 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
   const hasAnyUnlock = section1.unlocked || section2.unlocked || section3.unlocked;
 
   const handleImageError = (section: 'career' | 'lock' | 'key') => {
+    console.error(`[CareerPathkeyCard] Image error for ${careerTitle} - Section: ${section}`);
     setImageErrors(prev => ({ ...prev, [section]: true }));
   };
 
@@ -85,9 +86,9 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
         'group relative rounded-2xl overflow-hidden transition-all duration-300',
         'bg-white dark:bg-gray-900 border-4',
         isComplete
-          ? 'border-amber-500 shadow-lg shadow-amber-500/30 hover:shadow-2xl hover:shadow-amber-500/50'
+          ? 'border-purple-600 shadow-lg shadow-purple-600/40 hover:shadow-2xl hover:shadow-purple-600/60'
           : hasAnyUnlock
-          ? 'border-blue-500 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40'
+          ? 'border-purple-400 shadow-lg shadow-purple-400/30 hover:shadow-xl hover:shadow-purple-400/50'
           : 'border-gray-700 hover:shadow-lg',
         onClick && 'cursor-pointer hover:scale-[1.02]',
         className
@@ -95,15 +96,15 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
       onClick={onClick}
       style={{ aspectRatio: '3/4' }}
     >
-      {/* Grid Layout: Header (auto) + Career (60%) + Bottom (25%) */}
+      {/* Grid Layout: Header (auto) + Career (80%) + Bottom (20%) */}
       <div className="grid grid-rows-[auto_1fr_auto] h-full">
         {/* Header */}
         <div className={clsx(
           'p-3 bg-gradient-to-br',
           isComplete
-            ? 'from-amber-600 via-amber-500 to-amber-600'
+            ? 'from-purple-700 via-purple-600 to-purple-500'
             : hasAnyUnlock
-            ? 'from-blue-600 via-blue-500 to-blue-600'
+            ? 'from-purple-600 via-purple-500 to-purple-400'
             : 'from-gray-700 via-gray-600 to-gray-700'
         )}>
           <div className="flex items-center justify-between">
@@ -111,7 +112,7 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
               {careerTitle}
             </h3>
             {isComplete && (
-              <Trophy className="text-amber-200 ml-2 flex-shrink-0" size={18} />
+              <Trophy className="text-purple-200 ml-2 flex-shrink-0" size={18} />
             )}
           </div>
           {(careerSector || careerCluster) && (
@@ -127,26 +128,45 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
 
         {/* Section 1: Career Image (Main area) */}
         <div className="relative overflow-hidden border-b-2 border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
-          {section1.unlocked && images.career && !imageErrors.career ? (
+          {images.career && !imageErrors.career ? (
             <>
               <img
                 src={ensureAzureUrlHasSasToken(images.career) || images.career}
                 alt={`${careerTitle} - Career`}
-                className="w-full h-full object-cover dark:opacity-90"
+                className={clsx(
+                  'w-full h-full object-cover',
+                  !section1.unlocked && 'opacity-40 grayscale'
+                )}
                 onError={() => handleImageError('career')}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
 
               {/* Section 1 Badge */}
-              <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow-lg">
-                ✓
-              </div>
+              {section1.unlocked ? (
+                <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow-lg">
+                  ✓
+                </div>
+              ) : (
+                <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 flex items-center justify-center text-xs font-bold">
+                  1
+                </div>
+              )}
+
+              {/* Locked overlay text */}
+              {!section1.unlocked && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
+                  <Trophy size={40} className="text-white mb-2" />
+                  <span className="text-white text-xs font-bold text-center px-2">
+                    Unlock: Top 3
+                  </span>
+                </div>
+              )}
             </>
           ) : (
             <div className="w-full h-full bg-gray-100 dark:bg-gray-800 flex flex-col items-center justify-center">
               <Trophy size={40} className={section1.unlocked ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'} />
               <span className="text-gray-600 dark:text-gray-400 text-xs font-medium mt-2 text-center px-2">
-                {section1.unlocked ? 'Career Image' : 'Unlock: Top 3'}
+                {section1.unlocked ? 'Career Image' : 'No Image'}
               </span>
               <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 flex items-center justify-center text-xs font-bold">
                 1
@@ -156,25 +176,29 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
         </div>
 
         {/* Bottom Row: Lock (left) and Key (right) */}
-        <div className="flex h-24">
-          {/* Section 2: Lock Image (Left - 50% width) */}
-          <div className="relative w-1/2 overflow-hidden border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-center">
-            {section2.unlocked && images.lock && !imageErrors.lock ? (
+        <div className="flex h-20">
+          {/* Section 2: Lock Emoji (Left - 50% width) */}
+          <div className="relative w-1/2 overflow-hidden border-r border-gray-300 dark:border-gray-700 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/30 dark:to-blue-950/30 flex items-center justify-center">
+            {section2.unlocked ? (
               <>
-                <img
-                  src={ensureAzureUrlHasSasToken(images.lock) || images.lock}
-                  alt={`${careerTitle} - Lock`}
-                  className="w-20 h-20 object-contain"
-                  onError={() => handleImageError('lock')}
-                />
+                {/* Glassmorphic background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-blue-500/20 dark:from-purple-500/30 dark:to-blue-600/30 backdrop-blur-sm" />
+                <div className="absolute inset-0 border-2 border-white/30 dark:border-white/10" />
+
+                {/* Unlocked emoji with glow effect */}
+                <div className="relative">
+                  <div className="absolute inset-0 blur-xl bg-purple-500/50 dark:bg-purple-400/40 rounded-full scale-150" />
+                  <span className="text-6xl relative z-10 drop-shadow-lg">🔓</span>
+                </div>
+
                 {/* Section 2 Badge */}
-                <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow-lg">
+                <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow-lg z-20">
                   ✓
                 </div>
               </>
             ) : (
               <div className="relative flex flex-col items-center justify-center">
-                <Lock size={24} className={section1.unlocked && !section2.unlocked ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'} />
+                <span className="text-4xl opacity-40">🔒</span>
                 <span className="text-gray-600 dark:text-gray-400 text-[10px] font-medium mt-1">
                   {!section1.unlocked ? 'Locked' : '3 Sets'}
                 </span>
@@ -185,24 +209,28 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
             )}
           </div>
 
-          {/* Section 3: Key Image (Right - 50% width) */}
-          <div className="relative w-1/2 overflow-hidden bg-white dark:bg-gray-900 flex items-center justify-center">
-            {section3.unlocked && images.key && !imageErrors.key ? (
+          {/* Section 3: Key Emoji (Right - 50% width) */}
+          <div className="relative w-1/2 overflow-hidden bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 flex items-center justify-center">
+            {section3.unlocked ? (
               <>
-                <img
-                  src={ensureAzureUrlHasSasToken(images.key) || images.key}
-                  alt={`${careerTitle} - Key`}
-                  className="w-20 h-20 object-contain rotate-90"
-                  onError={() => handleImageError('key')}
-                />
+                {/* Glassmorphic background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400/20 to-yellow-500/20 dark:from-amber-500/30 dark:to-yellow-600/30 backdrop-blur-sm" />
+                <div className="absolute inset-0 border-2 border-white/30 dark:border-white/10" />
+
+                {/* Key emoji with glow effect */}
+                <div className="relative">
+                  <div className="absolute inset-0 blur-xl bg-amber-500/50 dark:bg-amber-400/40 rounded-full scale-150" />
+                  <span className="text-6xl relative z-10 drop-shadow-lg">🔑</span>
+                </div>
+
                 {/* Section 3 Badge */}
-                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow-lg">
+                <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold shadow-lg z-20">
                   ✓
                 </div>
               </>
             ) : (
               <div className="relative flex flex-col items-center justify-center">
-                <Key size={24} className={clsx('rotate-90', section1.unlocked && !section3.unlocked ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500')} />
+                <span className="text-4xl opacity-40">🔑</span>
                 <span className="text-gray-600 dark:text-gray-400 text-[10px] font-medium mt-1">
                   {!section1.unlocked ? 'Locked' : '6 Drivers'}
                 </span>
@@ -217,7 +245,7 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
 
       {/* Complete Badge */}
       {isComplete && (
-        <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-amber-500 text-white text-xs font-bold shadow-lg animate-pulse">
+        <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-purple-500 text-white text-xs font-bold shadow-lg animate-pulse">
           ✨ COMPLETE
         </div>
       )}
