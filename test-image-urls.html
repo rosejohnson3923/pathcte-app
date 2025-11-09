@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image URL Tester</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+        .test { margin: 20px 0; padding: 15px; background: #2a2a2a; border-radius: 8px; }
+        .url { color: #4CAF50; word-break: break-all; margin: 10px 0; }
+        .status { font-weight: bold; }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+    </style>
+</head>
+<body>
+    <h1>Azure Blob Storage URL Tester</h1>
+    <div id="results"></div>
+
+    <script>
+        const STORAGE_URL = 'https://pathctestore.blob.core.windows.net';
+        const SAS_TOKEN = 'sv=2024-11-04&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2027-11-01T05:00:00Z&st=2025-11-01T05:00:00Z&spr=https&sig=USDathlTZTiflOYmy2fsnpnpE45NG1vkSsy1U43qdNE%3D';
+        
+        const images = [
+            { name: 'Career Image', blob: 'pathkeys/pr-specialist.png' },
+            { name: 'Lock Image', blob: 'pathkeys/Lock_gold_1.png' },
+            { name: 'Key Image', blob: 'pathkeys/Comm_key.png' }
+        ];
+
+        async function testImage(name, blob) {
+            const url = `${STORAGE_URL}/${blob}?${SAS_TOKEN}`;
+            const div = document.createElement('div');
+            div.className = 'test';
+            
+            try {
+                const response = await fetch(url, { method: 'HEAD' });
+                const status = response.ok ? 'success' : 'error';
+                
+                div.innerHTML = `
+                    <h3>${name}</h3>
+                    <div class="url">${url}</div>
+                    <div class="status ${status}">
+                        Status: ${response.status} ${response.statusText}
+                    </div>
+                    <div>Content-Type: ${response.headers.get('content-type') || 'N/A'}</div>
+                    <div>Content-Length: ${response.headers.get('content-length') || 'N/A'} bytes</div>
+                `;
+                
+                if (response.ok) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.maxWidth = '200px';
+                    img.style.marginTop = '10px';
+                    div.appendChild(img);
+                }
+            } catch (error) {
+                div.innerHTML = `
+                    <h3>${name}</h3>
+                    <div class="url">${url}</div>
+                    <div class="status error">Error: ${error.message}</div>
+                `;
+            }
+            
+            document.getElementById('results').appendChild(div);
+        }
+
+        images.forEach(img => testImage(img.name, img.blob));
+    </script>
+</body>
+</html>

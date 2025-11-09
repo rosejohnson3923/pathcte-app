@@ -14,6 +14,7 @@ import type {
   SessionType,
   Question
 } from '../types/database.types';
+import { pathkeyService } from './pathkey.service';
 
 // Development/Testing Configuration
 // Set to true to enable pathkey awards for any number of players (useful for testing)
@@ -61,6 +62,41 @@ export const gameService = {
       // Generate unique 6-character game code
       const gameCode = await this.generateGameCode();
 
+      // If questionCount is specified, randomly select questions
+      let selectedQuestionIds: string[] | undefined;
+      if (params.settings?.questionCount) {
+        const { questions, error: questionsError } = await this.getGameQuestions(
+          params.questionSetId,
+          true, // includeAnswers for host
+          undefined, // selectedQuestionIds
+          params.settings?.difficulty // Filter by difficulty if specified
+        );
+
+        if (questionsError) {
+          console.error('Error loading questions:', questionsError);
+          throw new Error(`Failed to load questions: ${(questionsError as any)?.message || questionsError}`);
+        }
+
+        if (!questions || questions.length === 0) {
+          console.error('No questions found for questionSetId:', params.questionSetId, 'difficulty:', params.settings?.difficulty);
+          throw new Error(`No questions found for the selected question set${params.settings?.difficulty ? ` with difficulty '${params.settings.difficulty}'` : ''}`);
+        }
+
+        // Randomly select the specified number of questions
+        const availableCount = questions.length;
+        const count = Math.min(params.settings.questionCount, availableCount);
+
+        // Log warning if fewer questions available than requested (graceful degradation)
+        if (availableCount < params.settings.questionCount) {
+          console.warn(
+            `Only ${availableCount} questions available with difficulty "${params.settings.difficulty || 'any'}", requested ${params.settings.questionCount}. Using ${count} questions.`
+          );
+        }
+
+        const shuffled = [...questions].sort(() => Math.random() - 0.5);
+        selectedQuestionIds = shuffled.slice(0, count).map(q => q.id);
+      }
+
       const { data: session, error } = (await supabase
         .from('game_sessions')
         .insert({
@@ -74,7 +110,7 @@ export const gameService = {
           is_public: params.isPublic ?? true,
           allow_late_join: params.allowLateJoin ?? false,
           settings: params.settings || {},
-          metadata: {},
+          metadata: selectedQuestionIds ? { selected_question_ids: selectedQuestionIds } : {},
         } as any)
         .select()
         .single()) as { data: GameSession | null; error: any };
@@ -312,6 +348,15 @@ export const gameService = {
       }
       console.log('Rewards awarded successfully');
 
+      console.log('Step 2.5: Processing pathkey awards...');
+      const pathkeyResult = await pathkeyService.processGameEndPathkeys(sessionId);
+      if (!pathkeyResult.success) {
+        console.error('Warning: Failed to process pathkey awards:', pathkeyResult.error);
+        // Don't throw - pathkey awards are non-critical, game should still end
+      } else {
+        console.log('Pathkey awards processed successfully');
+      }
+
       console.log('Step 3: Updating session status...');
       // Update session status
       const { data: session, error } = (await (supabase
@@ -525,6 +570,49 @@ export const gameService = {
       const result = (data as any)?.[0];
       if (!result) throw new Error('No result returned from answer submission');
 
+      // Process business driver tracking (Section 3 of pathkey system)
+      // Only for career-specific questions with business_driver populated
+      try {
+        const { data: questionData } = await supabase
+          .from('questions')
+          .select(`
+            business_driver,
+            question_set_id,
+            question_sets!inner (
+              career_id
+            )
+          `)
+          .eq('id', params.questionId)
+          .single();
+
+        const question = questionData as any;
+
+        // Check if this is a career question with business driver
+        if (question?.business_driver && question?.question_sets?.career_id) {
+          const { data: player } = await supabase
+            .from('game_players')
+            .select('user_id')
+            .eq('id', params.playerId)
+            .single();
+
+          if (player?.user_id) {
+            // Track business driver progress asynchronously (don't block answer submission)
+            pathkeyService.processBusinessDriverProgress(
+              player.user_id,
+              question.question_sets.career_id,
+              question.business_driver,
+              result.is_correct
+            ).catch(error => {
+              console.error('Error processing business driver progress:', error);
+              // Non-critical, continue
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error checking business driver:', error);
+        // Non-critical, continue with answer submission
+      }
+
       return {
         answer: { id: result.answer_id } as GameAnswer,
         isCorrect: result.is_correct,
@@ -593,27 +681,40 @@ export const gameService = {
    * Get questions for a game session
    * SECURITY: Answer keys (is_correct) are removed from client response
    */
-  async getGameQuestions(questionSetId: string, includeAnswers: boolean = false, businessDriver?: string) {
+  async getGameQuestions(questionSetId: string, includeAnswers: boolean = false, selectedQuestionIds?: string[], difficulty?: string) {
     try {
+      // Query directly from questions table (question_set_membership table was deprecated)
       let query = supabase
         .from('questions')
         .select('*')
-        .eq('question_set_id', questionSetId);
+        .eq('question_set_id', questionSetId)
+        .order('order_index', { ascending: true });
 
-      // Filter by business_driver if specified (not 'all')
-      if (businessDriver && businessDriver !== 'all') {
-        query = query.eq('business_driver', businessDriver);
+      // Filter by difficulty if specified
+      if (difficulty) {
+        query = query.eq('difficulty', difficulty);
       }
 
-      const { data: questions, error } = (await query
-        .order('order_index', { ascending: true })) as { data: Question[] | null; error: any };
+      const { data: questions, error } = await query as { data: Question[] | null; error: any };
 
       if (error) throw error;
+
+      // Filter to selected questions if provided (for limited question count games)
+      let filteredQuestions: Question[] | null = questions;
+      if (selectedQuestionIds && selectedQuestionIds.length > 0 && questions) {
+        // Create a map for efficient lookup and preserve order
+        const idSet = new Set(selectedQuestionIds);
+        const idOrder = new Map(selectedQuestionIds.map((id, index) => [id, index]));
+
+        filteredQuestions = questions
+          .filter(q => idSet.has(q.id))
+          .sort((a, b) => (idOrder.get(a.id) || 0) - (idOrder.get(b.id) || 0));
+      }
 
       // SECURITY FIX: Remove is_correct flag from options before sending to client
       // This prevents students from viewing answer keys in browser DevTools
       // Exception: Hosts/teachers need to see correct answers, so they pass includeAnswers=true
-      const sanitizedQuestions = questions?.map(q => ({
+      const sanitizedQuestions = filteredQuestions?.map(q => ({
         ...q,
         options: q.options.map(opt =>
           includeAnswers

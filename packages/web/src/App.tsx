@@ -17,12 +17,14 @@ import QuestionSetsPage from './pages/QuestionSetsPage';
 import QuestionSetDetailPage from './pages/QuestionSetDetailPage';
 import StudentsPage from './pages/StudentsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import CreateTournamentPage from './pages/CreateTournamentPage';
 import JoinTournamentPage from './pages/JoinTournamentPage';
 import TournamentCoordinatorPage from './pages/TournamentCoordinatorPage';
 import NotFoundPage from './pages/NotFoundPage';
+import { TestPathkeyCardPage } from './pages/TestPathkeyCardPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { ToastContainer } from './components/common';
 
@@ -136,6 +138,14 @@ function App() {
           }
         />
         <Route
+          path="/admin"
+          element={
+            <ProtectedRoute requireRole="admin">
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/tournaments/create"
           element={
             <ProtectedRoute>
@@ -174,6 +184,10 @@ function App() {
               <ProfilePage />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/test-pathkey-card"
+          element={<TestPathkeyCardPage />}
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

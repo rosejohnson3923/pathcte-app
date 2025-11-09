@@ -37,8 +37,10 @@
    - Read the question and select your answer
    - You have a time limit to answer (shown by a countdown timer)
    - Answer feedback:
-     - ✅ **Correct** - Green highlight, points awarded
+     - ✅ **Correct** - Green highlight, points awarded, business driver badge shown
      - ❌ **Incorrect** - Red highlight, shows correct answer
+   - **Business Driver Badges:** Each question displays which of the 6 P's it represents:
+     - 👥 People, 📦 Product, 💰 Pricing, ⚙️ Process, 📈 Proceeds, 💎 Profits
    - Wait for the next question (teacher controls progression)
 
 5. **View Results**
@@ -51,10 +53,14 @@
 
 ### Collecting Pathkeys
 
-- **What are Pathkeys?** Digital collectibles representing career exploration achievements
-- **How to Earn:** Answer questions correctly in games
-- **Where to View:** Navigate to **"My Pathkeys"** to see your collection
-- **Rarity:** Some pathkeys are rarer than others based on career paths
+- **What are Pathkeys?** Digital awards representing mastery in career exploration
+- **Three Progressive Sections:** Each pathkey has three unlock sections:
+  - 🎯 **Career Image** - Finish Top 3 in Career mode
+  - 🔒 **Lock** - Complete 3 Industry or Cluster question sets with 90% accuracy
+  - 🔑 **Key** - Master all 6 business drivers (5 questions each at 90% accuracy)
+- **How to Earn:** See detailed requirements in [Pathkey Award System](#pathkey-award-system)
+- **Where to View:** Navigate to **"My Pathkeys"** to see your collection and progress
+- **Track Progress:** Each pathkey shows which sections you've unlocked
 
 ---
 
@@ -68,25 +74,46 @@
 
 2. **Configure Your Game**
 
-   **Required Settings:**
-   - **Question Set** - Select from available question sets
-   - **Game Mode** - Choose the type of game:
-     - `standard` - Classic quiz format
-     - `career_exploration` - Career-focused questions
-     - `business_driver` - Filtered by business driver
+   **Step 1: Filter Question Sets**
 
-   **Optional Settings:**
-   - **Session Type** - Solo or Multiplayer
-   - **Max Players** - Limit on number of students (default: 60)
-   - **Allow Late Join** - Let students join after game starts
-   - **Public/Private** - Make game discoverable or code-only
+   *Exploration Type* (Required)
+   - **Industry** - Broad industry overviews (e.g., Healthcare, Technology)
+   - **Career** - Specific careers (e.g., Software Engineer, 3D Artist)
+   - **Cluster** - CTE Career Cluster fundamentals (e.g., STEM, Business)
 
-   **Progression Control:**
+   *Difficulty Level* (Optional)
+   - **Easy** - Introductory questions
+   - **Medium** - Standard difficulty
+   - **Hard** - Advanced questions
+   - **Mixed** - Variety of difficulty levels
+
+   **Step 2: Select Question Set**
+   - Choose from 191 available question sets with 3,000+ questions
+   - Each set has 12-60 questions depending on type
+
+   **Step 3: Choose Question Count**
+   - Select how many questions: **10, 15, 20, 25, or 30**
+   - Questions are randomly selected from the full pool
+   - Ensures fresh content even when replaying the same set
+
+   **Step 4: Game Settings**
+
+   *Session Type*
+   - **Multiplayer** - Multiple students in competitive game
+   - **Solo Practice** - Test questions yourself before using with students
+
+   *Game Mode*
+   - **Career Quest** - Classic quiz mode with career-themed questions
+   - **Lightning! Path** - Fast-paced questions with time pressure
+
+   *Progression Control*
    - **Manual** - You click "Next Question" to advance
    - **Auto** - Questions auto-advance when timer expires
 
-   **Time Settings:**
-   - Set time limit per question (if applicable)
+   *Optional Settings*
+   - **Max Players** - Limit on number of students (default: 30)
+   - **Allow Late Join** - Let students join after game starts
+   - **Public/Private** - Make game discoverable or code-only
 
 3. **Start the Game**
    - Click **"Create Game"**
@@ -371,20 +398,26 @@
 
 ### Game Modes
 
-**Standard**
-- Classic quiz format
-- General career exploration questions
+**Career Quest**
+- Classic quiz mode with career-themed questions
+- Questions cover all aspects of career exploration
+- All questions tagged with business drivers (6 P's framework)
 - Suitable for all students
 
-**Career Exploration**
-- Focused on specific career paths
-- Deep-dive into occupations
-- Pathkey rewards match career types
+**Lightning! Path**
+- Fast-paced questions with time pressure
+- Shorter time limits create exciting competition
+- Same career content, faster gameplay
+- Great for energizing the classroom
 
-**Business Driver** (Advanced)
-- Questions filtered by business driver category
-- Examples: Technology, Healthcare, Finance
-- Targeted learning outcomes
+**Business Driver Framework (6 P's)**
+All questions are tagged with one of the six business drivers:
+- **People** - Team management, collaboration, communication
+- **Product** - Services, innovation, quality, tools
+- **Pricing** - Budgeting, financial planning, compensation
+- **Process** - Workflows, procedures, compliance
+- **Proceeds** - Career growth, opportunities, networking
+- **Profits** - Ethics, strategy, sustainability
 
 ### Tournament Modes
 
@@ -435,26 +468,85 @@ Score = Correct Answers × Base Points × Speed Multiplier
 - **Classroom Rankings** - Based on classroom total/average scores
 - Both leaderboards shown to coordinator and participants
 
-### Rewards System
+### Pathkey Award System
 
-**Pathkeys (Collectibles)**
-- Earned for correct answers
-- Tied to career pathways
-- Varying rarity levels
-- Viewable in "My Pathkeys" collection
-- Some pathkeys unlock career information
+**What are Pathkeys?**
+
+Pathkeys are digital awards that represent mastery in career exploration. Each pathkey is tied to a specific career (like Public Relations Specialist, Software Engineer, Nurse, etc.) and has **three progressive sections** that unlock as you demonstrate different types of mastery.
+
+**Three Progressive Sections**
+
+Each pathkey has three unlock sections that must be earned in order:
+
+**Section 1: Career Mastery (Career Image) 🎯**
+- **Requirement:** Finish in the **Top 3** in a Career mode game for that career
+- **Unlocks:** The career image showing the professional in action
+- **Competition:** Requires 3+ total players for competitive integrity
+- **Example:** Play "Public Relations Specialist" career mode, finish 1st, 2nd, or 3rd place
+
+**Section 2: Industry/Cluster Mastery (Lock) 🔒**
+- **Prerequisite:** Must have Section 1 unlocked first
+- **Requirement:** Complete **3 question sets** with **90% accuracy or better**
+- **Two Paths (choose ONE):**
+  - **Industry Path:** Play 3 Industry-level question sets matching the career's sector
+    - Example: For PR Specialist (sector: "Marketing & Community"), play 3 Marketing & Community Industry sets
+  - **Cluster Path:** Play 3 Cluster-level question sets matching the career's cluster
+    - Example: For PR Specialist (cluster: "Marketing"), play 3 Marketing cluster sets
+- **Unlocks:** The lock image
+- **Progress:** Tracked automatically across all games
+
+**Section 3: Business Driver Mastery (Key) 🔑**
+- **Prerequisite:** Must have Section 1 unlocked (Section 2 not required)
+- **Requirement:** Master **all 6 business drivers** by answering questions correctly
+- **How it Works:**
+  - Questions are tracked in **chunks of 5**
+  - Each chunk must achieve **90% accuracy** (4 or 5 correct out of 5)
+  - If a chunk fails, it resets and you try again
+  - Progress accumulates across multiple game sessions
+- **Six Business Drivers (6 P's):**
+  - 👥 **People** - Team management, collaboration, communication
+  - 📦 **Product** - Services, innovation, quality, tools
+  - 💰 **Pricing** - Budgeting, financial planning, compensation
+  - ⚙️ **Process** - Workflows, procedures, compliance
+  - 📈 **Proceeds** - Career growth, opportunities, networking
+  - 💎 **Profits** - Ethics, strategy, sustainability
+- **Unlocks:** The key image
+- **Only in Career Mode:** Business driver tracking only works in Career mode games
+
+**Example: Earning a Complete Pathkey for Public Relations Specialist**
+
+1. **Play Career Mode** → "Public Relations Specialist" question set → Finish in Top 3 → ✅ Career image unlocked
+
+2. **Choose Your Path for the Lock:**
+   - **Option A (Industry):** Play "Marketing & Community" Industry sets, achieve 90%+ in 3 sets → ✅ Lock unlocked
+   - **Option B (Cluster):** Play "Marketing" Cluster sets, achieve 90%+ in 3 sets → ✅ Lock unlocked
+
+3. **Master Business Drivers:**
+   - Play PR Specialist Career games
+   - Answer 5 "People" questions with 90% accuracy (chunk complete!)
+   - Answer 5 "Product" questions with 90% accuracy (chunk complete!)
+   - Continue for all 6 drivers (People, Product, Pricing, Process, Proceeds, Profits)
+   - All 6 complete → ✅ Key unlocked
+
+**Complete Pathkey:** Career image + Lock + Key = Full mastery of Public Relations Specialist pathway!
+
+**Viewing Your Pathkeys**
+- Navigate to **"My Pathkeys"** from the sidebar
+- See all careers you've unlocked (even partial)
+- Track progress toward each section
+- View which business drivers still need mastery
+- See Industry/Cluster progress counters
 
 **Tokens (Experience Points)**
-- Earned for participation and performance
+- Earned for participation and performance in all games
+- Base tokens: 10 per game + score/10
+- Placement bonuses:
+  - 1st place: +50 tokens
+  - 2nd place: +30 tokens
+  - 3rd place: +20 tokens
 - Used for progression tracking
 - Future: May unlock premium features
 - Displayed on dashboard
-
-**Placement Rewards:**
-- Top performers earn bonus pathkeys
-- 1st place: Rare pathkey + bonus tokens
-- 2nd-3rd: Uncommon pathkey + tokens
-- Participation: Common pathkey + tokens
 
 ---
 
@@ -530,10 +622,12 @@ Score = Correct Answers × Base Points × Speed Multiplier
 - Game progress is saved
 - You can rejoin with the same code
 
-**Didn't Get Pathkey:**
-- Pathkeys awarded at game end
-- Check "My Pathkeys" after leaving game
-- Placement affects pathkey rarity
+**Pathkey Questions:**
+- **Didn't unlock Section 1:** Requires Top 3 finish with 3+ players
+- **Section 2 not progressing:** Must unlock Section 1 first, then achieve 90%+ accuracy
+- **Business driver chunk reset:** Accuracy fell below 90% in the chunk of 5
+- **Can't see progress:** Navigate to "My Pathkeys" to view all progress
+- **Only works for registered users:** Guest players don't earn pathkeys
 
 ### For Teachers
 
@@ -589,6 +683,13 @@ Score = Correct Answers × Base Points × Speed Multiplier
    - Celebrate top performers
    - Identify struggling students
    - Use data to inform instruction
+
+4. **Pathkey Strategy:**
+   - **Section 1 (Career Image):** Encourage Career mode games for competition
+   - **Section 2 (Lock):** Mix Industry and Cluster games to give students options
+   - **Section 3 (Key):** Multiple Career games needed for all 6 business drivers
+   - **Explain the System:** Help students understand the progressive unlock structure
+   - **Track Progress:** Remind students to check "My Pathkeys" to see their progress
 
 ### For Tournament Coordinators
 
@@ -670,12 +771,30 @@ Score = Correct Answers × Base Points × Speed Multiplier
 
 ---
 
+## Content Library
+
+PathCTE includes a comprehensive library of career exploration content:
+
+**Question Sets:** 191 total question sets
+- **Industry Sets** (10 sets) - 18 questions each covering broad industry sectors
+- **Career Sets** (50 sets) - 12 questions each for specific careers
+- **Cluster Sets** (11 sets) - 60 questions each for CTE Career Clusters
+
+**Total Questions:** 3,000+ questions
+- All questions tagged with business drivers (6 P's framework)
+- Questions randomly selected to create fresh experiences
+- Multiple difficulty levels available
+
+**Career Coverage:**
+- 50 specific careers from 3D Artist to Videographer
+- 11 CTE Career Clusters (Arts, Business, Education, Finance, Health Science, etc.)
+- 10 major industry sectors
+
 ## Future Features (Coming Soon)
 
 - **Market System** - Trade and purchase pathkeys
 - **Career Profiles** - Unlock detailed career information
 - **Custom Question Sets** - Create your own questions
-- **Team Mode** - Collaborative gameplay
 - **Achievements** - Special badges and challenges
 - **Export Results** - Download data as CSV
 - **Parent Portal** - View student progress
@@ -688,10 +807,23 @@ Score = Correct Answers × Base Points × Speed Multiplier
 - Contact support: support@pathcte.com
 - Report bugs: https://github.com/pathcte/issues
 
-**Version:** 1.1
-**Last Updated:** November 2025
+**Version:** 1.3
+**Last Updated:** January 2025
 **Recent Changes:**
-- Added participant view for tournament dashboard
-- Updated button labels (Return to Dashboard vs Leave Game)
-- Clarified coordinator vs participant roles
-- Improved navigation instructions
+- **NEW: Pathkey Award System** - Three progressive sections (Career Image, Lock, Key)
+  - Section 1: Career Mastery (Top 3 in Career mode)
+  - Section 2: Industry/Cluster Mastery (3 sets at 90% accuracy)
+  - Section 3: Business Driver Mastery (All 6 drivers with chunk-based tracking)
+- Enhanced pathkey collection with progress tracking
+- Added detailed pathkey troubleshooting guide
+- Added pathkey strategy tips for teachers
+- Updated student dashboard to show pathkey progress
+
+**Version 1.2** (November 2025)
+- Added question count selection (10-30 questions from larger pools)
+- Updated exploration types: Industry, Career, Cluster
+- Added difficulty level filter (Easy, Medium, Hard, Mixed)
+- Removed grade level filter (all content suitable for grades 6-12)
+- Updated game modes: Career Quest, Lightning! Path
+- Added business driver badges (6 P's framework)
+- Expanded question library to 3,000+ questions across 191 sets

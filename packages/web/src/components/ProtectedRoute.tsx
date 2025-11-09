@@ -12,7 +12,7 @@ import { FullPageSpinner } from './common';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireRole?: 'student' | 'teacher' | 'parent';
+  requireRole?: 'student' | 'teacher' | 'parent' | 'admin';
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireRole }) => {

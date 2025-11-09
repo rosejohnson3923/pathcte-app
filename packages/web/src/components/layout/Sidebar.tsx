@@ -17,6 +17,7 @@ import {
   FileQuestion,
   Users,
   Settings,
+  Shield,
   X,
 } from 'lucide-react';
 import { useAuthStore } from '@pathcte/shared';
@@ -37,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { profile } = useAuthStore();
   const isTeacher = profile?.user_type === 'teacher';
   const isStudent = profile?.user_type === 'student';
+  const isAdmin = profile?.user_type === 'admin';
 
   // Debug logging
   console.log('[Sidebar] Profile loaded:', {
@@ -176,6 +178,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <BarChart3 size={20} />
               <span>Analytics</span>
+            </NavLink>
+          </>
+        )}
+
+        {/* Admin-specific Links */}
+        {isAdmin && (
+          <>
+            <div className="pt-6 pb-2">
+              <div className="px-4 flex items-center gap-2">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-400/40 dark:via-indigo-500/30 to-transparent"></div>
+                <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                  System Admin
+                </p>
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-indigo-400/40 dark:via-indigo-500/30 to-transparent"></div>
+              </div>
+            </div>
+
+            <NavLink
+              to="/admin"
+              className={navLinkClasses}
+              onClick={() => onMobileClose()}
+            >
+              <Shield size={20} />
+              <span>Admin Dashboard</span>
             </NavLink>
           </>
         )}

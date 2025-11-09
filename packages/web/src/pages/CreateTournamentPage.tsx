@@ -4,7 +4,7 @@
  * Tournament coordinator creates a multi-classroom tournament
  */
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
 import { Button, Input, Card, Spinner, Badge } from '../components/common';
@@ -28,14 +28,11 @@ export default function CreateTournamentPage() {
 
   // Filter state
   const [gradeFilter, setGradeFilter] = useState<number | undefined>(undefined);
-  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'industry' | 'career' | 'subject' | ''>('');
-  const [subjectFilter, setSubjectFilter] = useState<string>('');
+  const [explorationTypeFilter, setExplorationTypeFilter] = useState<'industry' | 'career' | 'cluster' | ''>('');
 
   // Fetch question sets with filtering
   const { data: questionSets, isLoading: loadingQuestionSets } = useFilteredQuestionSets({
-    grade_level: gradeFilter,
     exploration_type: explorationTypeFilter || undefined,
-    subject: explorationTypeFilter === 'subject' ? subjectFilter : undefined,
   });
 
   const [title, setTitle] = useState('');
@@ -57,14 +54,6 @@ export default function CreateTournamentPage() {
 
   // Get selected question set details
   const selectedSet = questionSets?.find((set) => set.id === selectedQuestionSet);
-
-  // Get unique subjects from ALL question sets for the Subject dropdown
-  const { data: allQuestionSets } = useFilteredQuestionSets({});
-  const uniqueSubjects = useMemo(() => {
-    if (!allQuestionSets) return [];
-    const subjects = new Set(allQuestionSets.map((set) => set.subject).filter(Boolean));
-    return Array.from(subjects).sort();
-  }, [allQuestionSets]);
 
   const handleCreateTournament = async () => {
     console.log('[CreateTournamentPage] handleCreateTournament called');
@@ -364,26 +353,9 @@ export default function CreateTournamentPage() {
                       <option value="">All Types</option>
                       <option value="career">Career</option>
                       <option value="industry">Industry</option>
-                      <option value="subject">Subject</option>
+                      <option value="cluster">Cluster</option>
                     </select>
                   </div>
-                  {explorationTypeFilter === 'subject' && (
-                    <div>
-                      <label className="block text-xs text-text-secondary mb-1">Subject</label>
-                      <select
-                        value={subjectFilter}
-                        onChange={(e) => setSubjectFilter(e.target.value)}
-                        className="w-full px-3 py-2 bg-bg-primary border border-border-default rounded-lg text-text-primary focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      >
-                        <option value="">All Subjects</option>
-                        {uniqueSubjects.map((subject) => (
-                          <option key={subject} value={subject}>
-                            {subject}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
                 </div>
 
                 {/* Question Set List */}

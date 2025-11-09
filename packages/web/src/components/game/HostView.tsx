@@ -111,6 +111,28 @@ export const HostView: React.FC<HostViewProps> = ({
     return 'text-red-600';
   };
 
+  const getBusinessDriverBadge = () => {
+    if (!question.business_driver) return null;
+
+    const driverConfig: Record<string, { label: string; variant: 'default' | 'info' | 'success' | 'warning' | 'danger' }> = {
+      people: { label: '👥 People', variant: 'info' },
+      product: { label: '📦 Product', variant: 'success' },
+      pricing: { label: '💰 Pricing', variant: 'warning' },
+      process: { label: '⚙️ Process', variant: 'default' },
+      proceeds: { label: '📈 Proceeds', variant: 'success' },
+      profits: { label: '💵 Profits', variant: 'warning' },
+    };
+
+    const config = driverConfig[question.business_driver];
+    if (!config) return null;
+
+    return (
+      <Badge variant={config.variant}>
+        {config.label}
+      </Badge>
+    );
+  };
+
   // Count how many students have answered
   const answeredCount = playersAnswered.size;
   const totalPlayers = players.length;
@@ -132,6 +154,8 @@ export const HostView: React.FC<HostViewProps> = ({
           <Badge variant="info">
             Question {questionNumber} of {totalQuestions}
           </Badge>
+
+          {getBusinessDriverBadge()}
 
           {/* Student Progress */}
           <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full border border-purple-200 dark:border-purple-800">
@@ -177,7 +201,7 @@ export const HostView: React.FC<HostViewProps> = ({
           {/* Points Display */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30">
             <span className="text-sm font-medium text-amber-500">
-              Worth {question.points} points
+              &lt;{question.points}&gt; XP Points
             </span>
           </div>
         </div>

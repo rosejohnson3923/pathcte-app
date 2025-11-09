@@ -80,16 +80,24 @@ export default function HomePage() {
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-display font-bold text-white mb-2 sm:mb-3 leading-tight px-4">
-              Career Exploration
+              AI Career Exploration
               <br />
               Made <span className="bg-gradient-to-r from-yellow-300 to-orange-400 bg-clip-text text-transparent">Fun</span>
             </h1>
             <p className="text-base sm:text-lg text-white/80 mb-4 sm:mb-6 font-medium">
               PathCTE (pronounced <span className="font-bold text-white">"Path-SET"</span>)
             </p>
-            <p className="text-lg sm:text-xl md:text-2xl text-white/95 font-medium max-w-3xl mx-auto leading-relaxed px-4">
-              Play educational games, discover 1,000+ career and industry gamesets, and unlock your future—all completely free
+            <p className="text-lg sm:text-xl md:text-2xl text-white/95 font-medium max-w-3xl mx-auto leading-relaxed px-4 mb-6">
+              The FREE AI-powered platform delivering personalized and gamified learning for Career & Technical Education
             </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-4 px-4">
+              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
+                <span className="text-white text-xs sm:text-sm font-semibold">🤖 Powered by Azure AI Foundry</span>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full border border-white/30">
+                <span className="text-white text-xs sm:text-sm font-semibold">🛡️ Protected by Azure AI Content Safety</span>
+              </div>
+            </div>
           </div>
 
           {/* CTA Button */}
@@ -100,6 +108,43 @@ export default function HomePage() {
             >
               Get Started Free →
             </Link>
+          </div>
+
+          {/* How to Play */}
+          <div className="mb-12 sm:mb-16 px-2">
+            <div className="bg-white/20 backdrop-blur-lg rounded-2xl p-6 sm:p-8 border-2 border-white/30">
+              <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6 sm:mb-8">
+                How to Play
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+                {/* Step 1 */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 sm:p-6 text-center border border-white/20">
+                  <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🎯</div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Step 1</h3>
+                  <p className="text-white/90 font-medium text-sm sm:text-base">
+                    Select Career, Industry, or CTE Cluster
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 sm:p-6 text-center border border-white/20">
+                  <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🎮</div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Step 2</h3>
+                  <p className="text-white/90 font-medium text-sm sm:text-base">
+                    Join Solo Game or Tournament Play
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-5 sm:p-6 text-center border border-white/20">
+                  <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">🏆</div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Step 3</h3>
+                  <p className="text-white/90 font-medium text-sm sm:text-base">
+                    Earn XP Points & Pathkey Awards
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Two-Column Value Props */}

@@ -3,12 +3,13 @@
  * Auto-generated TypeScript types for Supabase tables
  */
 
-export type UserType = 'student' | 'teacher' | 'parent';
+export type UserType = 'student' | 'teacher' | 'parent' | 'admin';
 export type SubscriptionTier = 'free' | 'plus' | 'flex';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 export type PathkeyType = 'career' | 'skill' | 'industry' | 'milestone' | 'mystery';
 export type QuestionType = 'multiple_choice' | 'true_false';
 export type Difficulty = 'easy' | 'medium' | 'hard';
+export type BusinessDriver = 'people' | 'product' | 'pricing' | 'process' | 'proceeds' | 'profits';
 export type GameMode =
   | 'career_quest'
   | 'path_defense'
@@ -166,6 +167,9 @@ export interface QuestionSet {
   subject: string;
   grade_level: number[] | null;
   career_sector: string | null;
+  career_cluster: string | null; // CTE Career Cluster
+  career_id: string | null; // Specific career UUID, or NULL for overview sets
+  question_set_type: 'career_quest'; // All sets use career_quest type
   tags: string[] | null;
 
   // Status
@@ -185,6 +189,15 @@ export interface QuestionSet {
   updated_at: string;
 }
 
+export interface QuestionSetMembership {
+  id: string;
+  question_set_id: string;
+  question_id: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Question {
   id: string;
   question_set_id: string;
@@ -200,6 +213,9 @@ export interface Question {
 
   // Media
   image_url: string | null;
+
+  // Business Framework (6 P's)
+  business_driver: BusinessDriver | null;
 
   // Metadata
   order_index: number;

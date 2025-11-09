@@ -161,6 +161,28 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
     return null;
   };
 
+  const getBusinessDriverBadge = () => {
+    if (!question.business_driver) return null;
+
+    const driverConfig: Record<string, { label: string; variant: 'default' | 'info' | 'success' | 'warning' | 'danger' }> = {
+      people: { label: '👥 People', variant: 'info' },
+      product: { label: '📦 Product', variant: 'success' },
+      pricing: { label: '💰 Pricing', variant: 'warning' },
+      process: { label: '⚙️ Process', variant: 'default' },
+      proceeds: { label: '📈 Proceeds', variant: 'success' },
+      profits: { label: '💵 Profits', variant: 'warning' },
+    };
+
+    const config = driverConfig[question.business_driver];
+    if (!config) return null;
+
+    return (
+      <Badge variant={config.variant}>
+        {config.label}
+      </Badge>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Question Set Title */}
@@ -174,9 +196,12 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
 
       {/* Question Header */}
       <div className="flex items-center justify-between">
-        <Badge variant="info">
-          Question {questionNumber} of {totalQuestions}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="info">
+            Question {questionNumber} of {totalQuestions}
+          </Badge>
+          {getBusinessDriverBadge()}
+        </div>
 
         {/* Timer */}
         <div className={`flex items-center gap-2 font-mono text-lg font-bold ${getTimerColor()}`}>
@@ -206,7 +231,7 @@ export const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
           {/* Points Display */}
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30">
             <span className="text-sm font-medium text-amber-500">
-              Worth {question.points} points
+              &lt;{question.points}&gt; XP Points
             </span>
           </div>
         </div>

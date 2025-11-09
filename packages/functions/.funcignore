@@ -1,0 +1,13 @@
+# .funcignore - tells func CLI what NOT to upload
+# For LOCAL builds: Upload compiled output and dependencies
+# Exclude: local config, dev files
+
+.git/
+.vscode/
+.vs/
+test/
+.env
+.env.*
+local.settings.json
+*.log
+.DS_Store

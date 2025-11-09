@@ -22,6 +22,8 @@ export * from './services/game.service';
 export * from './services/realtime.service';
 export * from './services/analytics.service';
 export * from './services/tournament.service';
+export * from './services/admin.service';
+export * from './services/pathkey.service';
 
 // Hooks (will be added)
 // export * from './hooks';

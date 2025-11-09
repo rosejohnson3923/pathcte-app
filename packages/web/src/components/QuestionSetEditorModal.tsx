@@ -18,16 +18,18 @@ interface QuestionSetEditorModalProps {
   mode: 'create' | 'edit';
 }
 
+// Standard taxonomy for both subject and career_sector
+// These are now identical to reduce confusion in AI generation
 const SUBJECTS = [
   'Healthcare',
   'Technology',
   'Business',
-  'Arts',
+  'Arts & Entertainment',
   'Science',
   'Education',
   'Public Service',
-  'Environmental Science',
-  'Skilled Trades',
+  'Agriculture',
+  'Construction',
   'Hospitality',
 ];
 

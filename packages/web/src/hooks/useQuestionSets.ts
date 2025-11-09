@@ -113,11 +113,10 @@ export const useDeleteQuestion = () => {
  */
 export const useFilteredQuestionSets = (filters: {
   subject?: string;
-  grade_level?: number;
   career_sector?: string;
   difficulty?: string;
   search?: string;
-  exploration_type?: 'all' | 'industry' | 'career' | 'subject';
+  exploration_type?: 'all' | 'industry' | 'career' | 'cluster';
 }) => {
   const { data, ...rest } = useQuestionSets();
 
@@ -125,30 +124,28 @@ export const useFilteredQuestionSets = (filters: {
     // Exploration Type filter
     if (filters.exploration_type && filters.exploration_type !== 'all') {
       if (filters.exploration_type === 'industry') {
-        // Industry: career_id IS NULL
+        // Industry: career_id IS NULL AND career_cluster IS NULL
         if ((set as any).career_id !== null) return false;
+        if ((set as any).career_cluster !== null && (set as any).career_cluster !== '') return false;
       } else if (filters.exploration_type === 'career') {
         // Career: career_id IS NOT NULL
         if ((set as any).career_id === null) return false;
-      } else if (filters.exploration_type === 'subject') {
-        // Subject filter handled below
-        // Allow both career_id NULL and NOT NULL, just filter by subject
+      } else if (filters.exploration_type === 'cluster') {
+        // Cluster: career_cluster IS NOT NULL (career_id should be NULL)
+        if ((set as any).career_cluster === null || (set as any).career_cluster === '') return false;
       }
     }
 
-    // Subject filter (only applies when exploration_type is 'subject' or not set)
+    // Subject filter
     if (filters.subject && set.subject !== filters.subject) return false;
-
-    // Grade level filter
-    if (filters.grade_level && set.grade_level && !set.grade_level.includes(filters.grade_level)) {
-      return false;
-    }
 
     // Career sector filter
     if (filters.career_sector && set.career_sector !== filters.career_sector) return false;
 
-    // Difficulty filter
-    if (filters.difficulty && set.difficulty_level !== filters.difficulty) return false;
+    // Difficulty filter - all sets contain mixed difficulty questions
+    // Filtering by difficulty happens at question-load time, not at set-selection time
+    // So we show all sets regardless of difficulty filter
+    // (The actual difficulty filtering happens in game.service.ts when loading questions)
 
     // Search filter (title or description)
     if (filters.search) {

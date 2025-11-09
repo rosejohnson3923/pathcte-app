@@ -1,0 +1,49 @@
+| subject               | count |
+| --------------------- | ----- |
+| Arts                  | 2     |
+| Business              | 2     |
+| Career Education      | 2     |
+| Education             | 1     |
+| Entertainment         | 3     |
+| Environmental Science | 2     |
+| Healthcare            | 2     |
+| Hospitality           | 1     |
+| Public Service        | 2     |
+| Science               | 2     |
+| Skilled Trades        | 2     |
+| STEM                  | 1     |
+| Technology            | 6     |
+
+| career_sector        | count |
+| -------------------- | ----- |
+| Agriculture          | 2     |
+| Arts & Entertainment | 2     |
+| Business             | 2     |
+| Construction         | 2     |
+| Education            | 1     |
+| Entertainment        | 3     |
+| Healthcare           | 3     |
+| Hospitality          | 1     |
+| Public Service       | 2     |
+| Science              | 2     |
+| Technology           | 7     |
+
+| total_question_sets | has_subject | has_career_sector | null_subjects | null_career_sectors |
+| ------------------- | ----------- | ----------------- | ------------- | ------------------- |
+| 28                  | 28          | 27                | 0             | 1                   |
+
+| id                                   | title                                  | subject               | career_sector        | subject_update_needed                 |
+| ------------------------------------ | -------------------------------------- | --------------------- | -------------------- | ------------------------------------- |
+| 4d45f1d3-f808-4c37-af61-6f07159eb923 | Creative Careers for Artists           | Arts                  | Arts & Entertainment | Needs update to: Arts & Entertainment |
+| 9945df2d-e0d8-4355-9361-c8306698b021 | Creative Arts & Design                 | Arts                  | Arts & Entertainment | Needs update to: Arts & Entertainment |
+| 0f4e5623-f174-4d5b-8365-125ba75c8760 | Working with Animals & Nature          | Environmental Science | Agriculture          | Needs update to:
+  Agriculture       |
+| 38736569-8489-4a24-978e-35a45d2987d1 | Environmental & Agriculture            | Environmental Science | Agriculture          | Needs update to:
+  Agriculture       |
+| ad528e43-5a1f-4b86-9daf-83d161f4fa4f | Building Things: Construction & Trades | Skilled Trades        | Construction         | Needs update to: Construction         |
+| a74c1996-c6b2-47ea-afe1-2c17d2e79b4b | Skilled Trades & Construction          | Skilled Trades        | Construction         | Needs update to: Construction         |
+
+
+| career_sector |
+| ------------- |
+| Entertainment |
