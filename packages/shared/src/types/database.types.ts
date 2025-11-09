@@ -414,6 +414,61 @@ export interface UserAchievement {
 }
 
 // ============================================================================
+// PATHKEY AWARD SYSTEM
+// ============================================================================
+
+export interface StudentPathkey {
+  id: string;
+  student_id: string;
+  career_id: string;
+
+  // Section 1: Career Mastery
+  career_mastery_unlocked: boolean;
+  career_mastery_unlocked_at: string | null;
+
+  // Section 2: Industry/Cluster Mastery
+  industry_mastery_unlocked: boolean;
+  cluster_mastery_unlocked: boolean;
+  industry_mastery_via: 'industry' | 'cluster' | null;
+  industry_mastery_unlocked_at: string | null;
+
+  // Section 3: Business Driver Mastery
+  business_driver_mastery_unlocked: boolean;
+  business_driver_mastery_unlocked_at: string | null;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StudentBusinessDriverProgress {
+  id: string;
+  student_id: string;
+  career_id: string;
+  business_driver: string;
+
+  // Chunk-based progress tracking
+  current_chunk_questions: number;
+  current_chunk_correct: number;
+
+  // Mastery status
+  mastery_achieved: boolean;
+  mastery_achieved_at: string | null;
+
+  created_at: string;
+  last_updated: string;
+}
+
+export interface StudentPathkeyProgress {
+  id: string;
+  student_id: string;
+  career_id: string;
+  mastery_type: 'industry' | 'cluster';
+  question_set_id: string;
+  accuracy: number;
+  created_at: string;
+}
+
+// ============================================================================
 // UTILITY TYPES
 // ============================================================================
 
@@ -492,6 +547,21 @@ export interface Database {
         Row: UserAchievement;
         Insert: Omit<UserAchievement, 'id' | 'created_at'>;
         Update: Partial<Omit<UserAchievement, 'id' | 'user_id' | 'achievement_id'>>;
+      };
+      student_pathkeys: {
+        Row: StudentPathkey;
+        Insert: Omit<StudentPathkey, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<StudentPathkey, 'id' | 'student_id' | 'career_id'>>;
+      };
+      student_business_driver_progress: {
+        Row: StudentBusinessDriverProgress;
+        Insert: Omit<StudentBusinessDriverProgress, 'id' | 'created_at' | 'last_updated'>;
+        Update: Partial<Omit<StudentBusinessDriverProgress, 'id' | 'student_id' | 'career_id' | 'business_driver'>>;
+      };
+      student_pathkey_progress: {
+        Row: StudentPathkeyProgress;
+        Insert: Omit<StudentPathkeyProgress, 'id' | 'created_at'>;
+        Update: Partial<Omit<StudentPathkeyProgress, 'id'>>;
       };
     };
   };
