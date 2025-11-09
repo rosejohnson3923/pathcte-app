@@ -19,6 +19,7 @@ import {
   Settings,
   Shield,
   X,
+  GraduationCap,
 } from 'lucide-react';
 import { useAuthStore } from '@pathcte/shared';
 import clsx from 'clsx';
@@ -69,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onMobileClose()}
         >
           <Home size={20} />
-          <span>Dashboard</span>
+          <span>Class Dashboard</span>
         </NavLink>
 
         <NavLink
@@ -125,6 +126,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-purple-400/40 dark:via-purple-500/30 to-transparent"></div>
               </div>
             </div>
+
+            <NavLink
+              to="/teacher"
+              className={navLinkClasses}
+              onClick={() => onMobileClose()}
+            >
+              <GraduationCap size={20} />
+              <span>Teacher Dashboard</span>
+            </NavLink>
 
             <NavLink
               to="/host-game"

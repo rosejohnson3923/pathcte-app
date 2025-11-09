@@ -19,6 +19,7 @@ import QuestionSetDetailPage from './pages/QuestionSetDetailPage';
 import StudentsPage from './pages/StudentsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import SettingsPage from './pages/SettingsPage';
 import ProfilePage from './pages/ProfilePage';
 import MarketPage from './pages/MarketPage';
@@ -144,6 +145,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher"
+          element={
+            <ProtectedRoute requireRole="teacher">
+              <TeacherDashboardPage />
             </ProtectedRoute>
           }
         />
