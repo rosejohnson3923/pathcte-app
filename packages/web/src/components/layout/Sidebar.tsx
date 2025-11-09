@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onMobileClose()}
         >
           <Home size={20} />
-          <span>Class Dashboard</span>
+          <span>{isTeacher ? 'Class Dashboard' : 'Dashboard'}</span>
         </NavLink>
 
         <NavLink
