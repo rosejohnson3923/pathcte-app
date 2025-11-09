@@ -54,7 +54,6 @@ export interface CareerPathkeyCardProps {
 }
 
 export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
-  careerId,
   careerTitle,
   careerSector,
   careerCluster,
@@ -64,7 +63,6 @@ export const CareerPathkeyCard: React.FC<CareerPathkeyCardProps> = ({
   images,
   onClick,
   className = '',
-  showProgress = true,
 }) => {
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({
     career: false,

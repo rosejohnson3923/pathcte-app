@@ -244,7 +244,7 @@ export default function GamePage() {
               const gameMode = updatedSession.game_mode as keyof typeof GAME_MODE_SCORING;
               const timeMultiplier = GAME_MODE_SCORING[gameMode]?.time_multiplier ?? 1.0;
 
-              const questionsWithAdjustedTime = gameQuestions.map(q => ({
+              const questionsWithAdjustedTime = gameQuestions.map((q: any) => ({
                 ...q,
                 time_limit_seconds: Math.round(q.time_limit_seconds * timeMultiplier)
               }));

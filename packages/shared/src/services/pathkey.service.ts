@@ -11,7 +11,6 @@
  */
 
 import { supabase } from '../config/supabase';
-import type { GameSession, GamePlayer, GameAnswer } from '../types/database.types';
 
 // Development/Testing Configuration
 // Set to true to enable pathkey awards for any number of players (useful for testing)
@@ -81,11 +80,13 @@ export const pathkeyService = {
         return { success: false, error: playersError };
       }
 
-      const totalPlayers = players.length;
+      const playersData = players as any[];
+      const sessionData = session as any;
+      const totalPlayers = playersData.length;
       const minimumPlayers = ALLOW_SINGLE_PLAYER_PATHKEY_AWARDS ? 1 : 3;
 
       // Process each player
-      for (const player of players) {
+      for (const player of playersData) {
         if (!player.user_id) {
           console.log(`Skipping guest player: ${player.display_name}`);
           continue;
@@ -93,12 +94,12 @@ export const pathkeyService = {
 
         // Section 1: Career Mastery (Top 3 in Career mode)
         if (
-          session.exploration_type === 'career' &&
+          sessionData.exploration_type === 'career' &&
           player.placement &&
           player.placement <= 3 &&
           totalPlayers >= minimumPlayers
         ) {
-          const questionSet = (session as any).question_sets;
+          const questionSet = sessionData.question_sets;
           const careerId = questionSet?.career_id;
 
           if (careerId) {
@@ -117,7 +118,7 @@ export const pathkeyService = {
             : 0;
 
           if (accuracy >= SECTION_2_ACCURACY_THRESHOLD) {
-            const questionSet = (session as any).question_sets;
+            const questionSet = sessionData.question_sets;
 
             // Track for Industry path
             if (questionSet?.career_sector && !questionSet?.career_id) {
@@ -151,7 +152,7 @@ export const pathkeyService = {
   ): Promise<{ success: boolean; masteryAchieved?: boolean; error?: any }> {
     try {
       // Get or create progress record
-      const { data: progress, error: fetchError } = await supabase
+      const { data: progress } = await supabase
         .from('student_business_driver_progress')
         .select('*')
         .eq('student_id', userId)
@@ -159,7 +160,7 @@ export const pathkeyService = {
         .eq('business_driver', businessDriver)
         .single();
 
-      let currentProgress = progress;
+      let currentProgress = progress as any;
 
       // Create if doesn't exist
       if (!currentProgress) {
@@ -172,7 +173,7 @@ export const pathkeyService = {
             current_chunk_questions: 0,
             current_chunk_correct: 0,
             mastery_achieved: false,
-          })
+          } as any)
           .select()
           .single();
 
@@ -181,17 +182,17 @@ export const pathkeyService = {
           return { success: false, error: createError };
         }
 
-        currentProgress = newProgress;
+        currentProgress = newProgress as any;
       }
 
       // If already mastered, no need to continue
-      if (currentProgress.mastery_achieved) {
+      if (currentProgress?.mastery_achieved) {
         return { success: true, masteryAchieved: true };
       }
 
       // Update chunk progress
-      const newQuestionCount = currentProgress.current_chunk_questions + 1;
-      const newCorrectCount = currentProgress.current_chunk_correct + (isCorrect ? 1 : 0);
+      const newQuestionCount = (currentProgress?.current_chunk_questions || 0) + 1;
+      const newCorrectCount = (currentProgress?.current_chunk_correct || 0) + (isCorrect ? 1 : 0);
 
       // Check if chunk is complete
       if (newQuestionCount === SECTION_3_CHUNK_SIZE) {
@@ -206,7 +207,7 @@ export const pathkeyService = {
               mastery_achieved_at: new Date().toISOString(),
               current_chunk_questions: 0,
               current_chunk_correct: 0,
-            })
+            } as any)
             .eq('student_id', userId)
             .eq('career_id', careerId)
             .eq('business_driver', businessDriver);
@@ -229,7 +230,7 @@ export const pathkeyService = {
             .update({
               current_chunk_questions: 0,
               current_chunk_correct: 0,
-            })
+            } as any)
             .eq('student_id', userId)
             .eq('career_id', careerId)
             .eq('business_driver', businessDriver);
@@ -250,7 +251,7 @@ export const pathkeyService = {
             current_chunk_questions: newQuestionCount,
             current_chunk_correct: newCorrectCount,
             last_updated: new Date().toISOString(),
-          })
+          } as any)
           .eq('student_id', userId)
           .eq('career_id', careerId)
           .eq('business_driver', businessDriver);
@@ -281,7 +282,8 @@ export const pathkeyService = {
         .eq('career_id', careerId)
         .single();
 
-      if (existing?.career_mastery_unlocked) {
+      const existingData = existing as any;
+      if (existingData?.career_mastery_unlocked) {
         console.log(`Career mastery already unlocked for user ${userId}, career ${careerId}`);
         return true;
       }
@@ -294,7 +296,7 @@ export const pathkeyService = {
           career_id: careerId,
           career_mastery_unlocked: true,
           career_mastery_unlocked_at: new Date().toISOString(),
-        }, {
+        } as any, {
           onConflict: 'student_id,career_id',
         });
 
@@ -341,7 +343,8 @@ export const pathkeyService = {
 
       // Track progress for each eligible career
       for (const record of eligibleCareers) {
-        const careerId = record.career_id;
+        const recordData = record as any;
+        const careerId = recordData.career_id;
 
         // Insert progress record (will be ignored if duplicate)
         await supabase
@@ -352,7 +355,7 @@ export const pathkeyService = {
             mastery_type: 'industry',
             question_set_id: questionSetId,
             accuracy: accuracy,
-          })
+          } as any)
           .select();
 
         // Check if student now has 3+ completed sets
@@ -372,7 +375,7 @@ export const pathkeyService = {
               industry_mastery_unlocked: true,
               industry_mastery_via: 'industry',
               industry_mastery_unlocked_at: new Date().toISOString(),
-            })
+            } as any)
             .eq('student_id', userId)
             .eq('career_id', careerId);
 
@@ -417,7 +420,8 @@ export const pathkeyService = {
 
       // Track progress for each eligible career
       for (const record of eligibleCareers) {
-        const careerId = record.career_id;
+        const recordData = record as any;
+        const careerId = recordData.career_id;
 
         // Insert progress record (will be ignored if duplicate)
         await supabase
@@ -428,7 +432,7 @@ export const pathkeyService = {
             mastery_type: 'cluster',
             question_set_id: questionSetId,
             accuracy: accuracy,
-          })
+          } as any)
           .select();
 
         // Check if student now has 3+ completed sets
@@ -448,7 +452,7 @@ export const pathkeyService = {
               cluster_mastery_unlocked: true,
               industry_mastery_via: 'cluster',
               industry_mastery_unlocked_at: new Date().toISOString(),
-            })
+            } as any)
             .eq('student_id', userId)
             .eq('career_id', careerId);
 
@@ -481,7 +485,8 @@ export const pathkeyService = {
       }
 
       // Check if all 6 drivers are mastered
-      const completedDrivers = driverProgress
+      const driverData = driverProgress as any[];
+      const completedDrivers = driverData
         .filter(d => d.mastery_achieved)
         .map(d => d.business_driver);
 
@@ -496,7 +501,7 @@ export const pathkeyService = {
           .update({
             business_driver_mastery_unlocked: true,
             business_driver_mastery_unlocked_at: new Date().toISOString(),
-          })
+          } as any)
           .eq('student_id', userId)
           .eq('career_id', careerId);
 
@@ -688,10 +693,15 @@ export const pathkeyService = {
       }
 
       // Map careers to pathkey card data
-      const pathkeys = careers?.map((career) => {
-        const studentProgress = studentPathkeys?.find(sp => sp.career_id === career.id);
-        const driverProgress = allDriverProgress?.filter(d => d.career_id === career.id) || [];
-        const sets = section2Progress?.filter(s => s.career_id === career.id) || [];
+      const careersData = careers as any[];
+      const studentPathkeysData = studentPathkeys as any[];
+      const allDriverProgressData = allDriverProgress as any[];
+      const section2ProgressData = section2Progress as any[];
+
+      const pathkeys = careersData?.map((career) => {
+        const studentProgress = studentPathkeysData?.find(sp => sp.career_id === career.id);
+        const driverProgress = allDriverProgressData?.filter(d => d.career_id === career.id) || [];
+        const sets = section2ProgressData?.filter(s => s.career_id === career.id) || [];
 
         return {
           careerId: career.id,
