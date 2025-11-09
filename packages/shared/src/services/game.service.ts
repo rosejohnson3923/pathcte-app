@@ -595,10 +595,11 @@ export const gameService = {
             .eq('id', params.playerId)
             .single();
 
-          if (player?.user_id) {
+          const playerData = player as any;
+          if (playerData?.user_id) {
             // Track business driver progress asynchronously (don't block answer submission)
             pathkeyService.processBusinessDriverProgress(
-              player.user_id,
+              playerData.user_id,
               question.question_sets.career_id,
               question.business_driver,
               result.is_correct

@@ -200,14 +200,15 @@ export const pathkeyService = {
 
         if (accuracy >= SECTION_3_ACCURACY_THRESHOLD) {
           // Chunk succeeded - mark mastery achieved
+          const updateData: any = {
+            mastery_achieved: true,
+            mastery_achieved_at: new Date().toISOString(),
+            current_chunk_questions: 0,
+            current_chunk_correct: 0,
+          };
           const { error: updateError } = await supabase
             .from('student_business_driver_progress')
-            .update({
-              mastery_achieved: true,
-              mastery_achieved_at: new Date().toISOString(),
-              current_chunk_questions: 0,
-              current_chunk_correct: 0,
-            } as any)
+            .update(updateData)
             .eq('student_id', userId)
             .eq('career_id', careerId)
             .eq('business_driver', businessDriver);
@@ -225,12 +226,13 @@ export const pathkeyService = {
           return { success: true, masteryAchieved: true };
         } else {
           // Chunk failed - reset
+          const resetData: any = {
+            current_chunk_questions: 0,
+            current_chunk_correct: 0,
+          };
           const { error: resetError } = await supabase
             .from('student_business_driver_progress')
-            .update({
-              current_chunk_questions: 0,
-              current_chunk_correct: 0,
-            } as any)
+            .update(resetData)
             .eq('student_id', userId)
             .eq('career_id', careerId)
             .eq('business_driver', businessDriver);
@@ -245,13 +247,14 @@ export const pathkeyService = {
         }
       } else {
         // Update chunk in progress
+        const updateData: any = {
+          current_chunk_questions: newQuestionCount,
+          current_chunk_correct: newCorrectCount,
+          last_updated: new Date().toISOString(),
+        };
         const { error: updateError } = await supabase
           .from('student_business_driver_progress')
-          .update({
-            current_chunk_questions: newQuestionCount,
-            current_chunk_correct: newCorrectCount,
-            last_updated: new Date().toISOString(),
-          } as any)
+          .update(updateData)
           .eq('student_id', userId)
           .eq('career_id', careerId)
           .eq('business_driver', businessDriver);
@@ -289,14 +292,15 @@ export const pathkeyService = {
       }
 
       // Award career mastery
+      const upsertData: any = {
+        student_id: userId,
+        career_id: careerId,
+        career_mastery_unlocked: true,
+        career_mastery_unlocked_at: new Date().toISOString(),
+      };
       const { error } = await supabase
         .from('student_pathkeys')
-        .upsert({
-          student_id: userId,
-          career_id: careerId,
-          career_mastery_unlocked: true,
-          career_mastery_unlocked_at: new Date().toISOString(),
-        } as any, {
+        .upsert(upsertData, {
           onConflict: 'student_id,career_id',
         });
 
@@ -369,13 +373,14 @@ export const pathkeyService = {
 
         if (progressRecords && progressRecords.length >= SECTION_2_REQUIRED_SETS) {
           // Award industry mastery
+          const updateData: any = {
+            industry_mastery_unlocked: true,
+            industry_mastery_via: 'industry',
+            industry_mastery_unlocked_at: new Date().toISOString(),
+          };
           await supabase
             .from('student_pathkeys')
-            .update({
-              industry_mastery_unlocked: true,
-              industry_mastery_via: 'industry',
-              industry_mastery_unlocked_at: new Date().toISOString(),
-            } as any)
+            .update(updateData)
             .eq('student_id', userId)
             .eq('career_id', careerId);
 
@@ -446,13 +451,14 @@ export const pathkeyService = {
 
         if (progressRecords && progressRecords.length >= SECTION_2_REQUIRED_SETS) {
           // Award cluster mastery
+          const updateData: any = {
+            cluster_mastery_unlocked: true,
+            industry_mastery_via: 'cluster',
+            industry_mastery_unlocked_at: new Date().toISOString(),
+          };
           await supabase
             .from('student_pathkeys')
-            .update({
-              cluster_mastery_unlocked: true,
-              industry_mastery_via: 'cluster',
-              industry_mastery_unlocked_at: new Date().toISOString(),
-            } as any)
+            .update(updateData)
             .eq('student_id', userId)
             .eq('career_id', careerId);
 
@@ -496,12 +502,13 @@ export const pathkeyService = {
 
       if (allComplete) {
         // Award business driver mastery (Section 3)
+        const updateData: any = {
+          business_driver_mastery_unlocked: true,
+          business_driver_mastery_unlocked_at: new Date().toISOString(),
+        };
         await supabase
           .from('student_pathkeys')
-          .update({
-            business_driver_mastery_unlocked: true,
-            business_driver_mastery_unlocked_at: new Date().toISOString(),
-          } as any)
+          .update(updateData)
           .eq('student_id', userId)
           .eq('career_id', careerId);
 

@@ -335,7 +335,8 @@ class AdminService {
               .select('email')
               .eq('id', qs.creator_id)
               .single();
-            created_by_email = profile?.email || null;
+            const profileData = profile as any;
+            created_by_email = profileData?.email || null;
           }
 
           // Count questions in set
