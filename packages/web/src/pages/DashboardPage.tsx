@@ -1,8 +1,8 @@
 import { DashboardLayout } from '../components/layout';
-import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames, useActiveUserTournaments } from '../hooks';
+import { useAuth, useCareerPathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames, useActiveUserTournaments } from '../hooks';
 import { Card, Spinner, Badge } from '../components/common';
 import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Zap } from 'lucide-react';
-import { getPlaceholderImageUrl, getCareerImageUrl } from '@pathcte/shared';
+import { getPlaceholderImageUrl } from '@pathcte/shared';
 import { ensureAzureUrlHasSasToken } from '../config/azure';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,23 +12,23 @@ export default function DashboardPage() {
   const navigate = useNavigate();
 
   // Fetch real data
-  const { data: allPathkeys } = usePathkeys();
-  const { data: userPathkeys, isLoading: pathkeysLoading } = useUserPathkeys();
+  const { data: careerPathkeys, isLoading: pathkeysLoading } = useCareerPathkeys();
   const gameCount = useGameCount();
   // const { data: recentGames, isLoading: gamesLoading } = useUserGamePlayers(5);
   const { data: activeHostedGames, isLoading: activeHostedLoading } = useActiveHostedGames();
   const { data: activeJoinedGames, isLoading: activeJoinedLoading } = useActiveJoinedGames();
   const { data: activeTournaments, isLoading: tournamentsLoading } = useActiveUserTournaments();
 
-  // Create lookup map for pathkey details (with career info for images)
-  const pathkeysMap = useMemo(() => {
-    if (!allPathkeys) return new Map();
-    return new Map(allPathkeys.map(p => [p.id, p]));
-  }, [allPathkeys]);
+  // Calculate stats from career pathkeys
+  const pathkeysWithAnyProgress = useMemo(() => {
+    if (!careerPathkeys) return [];
+    return careerPathkeys.filter(cp =>
+      cp.section1.unlocked || cp.section2.unlocked || cp.section3.unlocked
+    );
+  }, [careerPathkeys]);
 
-  // Calculate stats
-  const pathkeyCount = userPathkeys?.length || 0;
-  const uniqueCareersExplored = new Set(userPathkeys?.map(up => up.pathkey_id)).size;
+  const pathkeyCount = pathkeysWithAnyProgress.length;
+  const uniqueCareersExplored = pathkeysWithAnyProgress.length; // Each career pathkey is unique
 
   return (
     <DashboardLayout>
@@ -291,51 +291,43 @@ export default function DashboardPage() {
                 <div className="flex justify-center py-8">
                   <Spinner />
                 </div>
-              ) : userPathkeys && userPathkeys.length > 0 ? (
+              ) : pathkeysWithAnyProgress && pathkeysWithAnyProgress.length > 0 ? (
                 <div className="space-y-3">
-                  {userPathkeys.slice(0, 5).map((userPathkey) => (
-                    <div
-                      key={userPathkey.id}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-xl hover:shadow-md transition-all duration-200 border border-purple-100 group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-purple-200 via-purple-300 to-pink-200 flex-shrink-0 shadow-lg ring-2 ring-purple-100 group-hover:ring-purple-300 transition-all group-hover:scale-105">
-                          <img
-                            src={(() => {
-                              const pathkey = pathkeysMap.get(userPathkey.pathkey_id);
-                              if (!pathkey) return getPlaceholderImageUrl('pathkey');
+                  {pathkeysWithAnyProgress.slice(0, 5).map((careerPathkey) => {
+                    const imageUrl = careerPathkey.images.career
+                      ? ensureAzureUrlHasSasToken(careerPathkey.images.career)
+                      : getPlaceholderImageUrl('pathkey');
 
-                              // Get career title from pathkey name (e.g., "Software Developer Pathkey" -> "Software Developer")
-                              const careerTitle = pathkey.name?.replace(' Pathkey', '').replace(' PathKey', '').trim() || '';
-
-                              // Use career image URL with SAS token
-                              if (!careerTitle) return getPlaceholderImageUrl('pathkey');
-
-                              const imageUrl = ensureAzureUrlHasSasToken(getCareerImageUrl(careerTitle));
-                              return imageUrl || getPlaceholderImageUrl('pathkey');
-                            })()}
-                            alt="Pathkey"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Fallback to placeholder if image fails to load
-                              e.currentTarget.src = getPlaceholderImageUrl('pathkey');
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-text-primary mb-1">Pathkey #{userPathkey.pathkey_id.slice(0, 8)}</p>
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-                              ×{userPathkey.quantity || 1}
-                            </span>
-                            <p className="text-xs text-text-tertiary">
-                              {new Date(userPathkey.acquired_at).toLocaleDateString()}
-                            </p>
+                    return (
+                      <div
+                        key={careerPathkey.careerId}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50/50 to-pink-50/50 rounded-xl hover:shadow-md transition-all duration-200 border border-purple-100 group cursor-pointer"
+                        onClick={() => navigate('/my-pathkeys')}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-purple-200 via-purple-300 to-pink-200 flex-shrink-0 shadow-lg ring-2 ring-purple-100 group-hover:ring-purple-300 transition-all group-hover:scale-105">
+                            <img
+                              src={imageUrl || getPlaceholderImageUrl('pathkey')}
+                              alt={careerPathkey.careerTitle}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to placeholder if image fails to load
+                                e.currentTarget.src = getPlaceholderImageUrl('pathkey');
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-text-primary mb-1">{careerPathkey.careerTitle}</p>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
+                                {[careerPathkey.section1.unlocked, careerPathkey.section2.unlocked, careerPathkey.section3.unlocked].filter(Boolean).length}/3 sections
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-8 text-text-secondary">
