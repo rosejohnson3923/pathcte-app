@@ -178,6 +178,66 @@ export default function GamePage() {
           // Load current question index from database
           // This ensures the game state is preserved across page refreshes
           setCurrentQuestionIndex(gameSession.current_question_index || 0);
+
+          // Initialize HostEntity via Azure Functions for solo games
+          // Solo games skip the lobby and handleStartGame, so we need to initialize here
+          if (gameSession.session_type === 'solo' && gameSession.status === 'in_progress') {
+            console.log('[GamePage] Initializing HostEntity for solo game');
+
+            try {
+              // Initialize HostEntity via Azure Functions
+              const initResponse = await fetch(`${AZURE_FUNCTIONS_URL}/api/game/initialize`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  sessionId: gameSession.id,
+                  questionSetId: gameSession.question_set_id,
+                  questions: questionsWithAdjustedTime,
+                  progressionControl: (gameSession as any).settings?.progressionControl || 'manual',
+                  allowLateJoin: (gameSession as any).settings?.allowLateJoin || false,
+                  players: gamePlayers.map((p: any) => ({
+                    id: p.id,
+                    userId: p.user_id,
+                    displayName: p.display_name,
+                  })),
+                }),
+              });
+
+              if (!initResponse.ok) {
+                const initError = await initResponse.json();
+                console.error('[GamePage] Failed to initialize game:', initError);
+              } else {
+                const initResult = await initResponse.json();
+                console.log('[GamePage] Solo game initialized via Azure Functions:', initResult);
+              }
+
+              // Start first question if at index 0
+              if (gameSession.current_question_index === 0) {
+                const startQuestionResponse = await fetch(`${AZURE_FUNCTIONS_URL}/api/game/startQuestion`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    sessionId: gameSession.id,
+                    questionIndex: 0,
+                  }),
+                });
+
+                if (!startQuestionResponse.ok) {
+                  console.error('[GamePage] Failed to start first question via Azure Functions');
+                } else {
+                  const result = await startQuestionResponse.json();
+                  console.log('[GamePage] First question started via Azure Functions:', result);
+                }
+              }
+            } catch (err) {
+              console.error('[GamePage] Error initializing solo game:', err);
+              // Don't throw - game can still function with local state
+            }
+          }
         }
       } catch (err: any) {
         console.error('Error loading game:', err);

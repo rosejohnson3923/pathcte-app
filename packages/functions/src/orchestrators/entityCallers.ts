@@ -135,26 +135,37 @@ const advanceQuestionOrchestrator: OrchestrationHandler = function* (context: Or
     sessionId: string;
   } = context.df.getInput();
 
+  context.log(`[advanceQuestionOrchestrator] START - SessionId: ${input.sessionId}`);
+
   const hostEntityId = new EntityId('HostEntity', input.sessionId);
 
   // 1. Get current state to know which question we're leaving
+  context.log(`[advanceQuestionOrchestrator] Step 1: Getting current state from HostEntity`);
   const currentState = yield context.df.callEntity(hostEntityId, 'getState');
+  context.log(`[advanceQuestionOrchestrator] Step 1 COMPLETE: Current question index = ${currentState.currentQuestionIndex}`);
 
   // 2. Apply no-answer penalty for the current question (if there is one)
   if (currentState.currentQuestionIndex >= 0) {
     const currentQuestion = currentState.questions[currentState.currentQuestionIndex];
+    context.log(`[advanceQuestionOrchestrator] Step 2: Applying no-answer penalty for question ${currentQuestion.id}`);
 
     yield context.df.callActivity('applyNoAnswerPenalty', {
       sessionId: input.sessionId,
       questionId: currentQuestion.id,
     });
+    context.log(`[advanceQuestionOrchestrator] Step 2 COMPLETE: No-answer penalty applied`);
+  } else {
+    context.log(`[advanceQuestionOrchestrator] Step 2 SKIPPED: No current question (index = ${currentState.currentQuestionIndex})`);
   }
 
   // 3. Advance to next question on Host Entity
+  context.log(`[advanceQuestionOrchestrator] Step 3: Calling advanceQuestion on HostEntity`);
   const result = yield context.df.callEntity(hostEntityId, 'advanceQuestion');
+  context.log(`[advanceQuestionOrchestrator] Step 3 COMPLETE: Result = ${JSON.stringify(result)}`);
 
   // 4. Broadcast to players (if there's a next question)
   if (result.success && result.hasMore) {
+    context.log(`[advanceQuestionOrchestrator] Step 4: Broadcasting question ${result.nextIndex} to players`);
     yield context.df.callActivity('broadcastQuestionStarted', {
       sessionId: input.sessionId,
       questionIndex: result.nextIndex,
@@ -162,8 +173,12 @@ const advanceQuestionOrchestrator: OrchestrationHandler = function* (context: Or
       startedAt: result.startedAt,
       timeLimit: result.timeLimit,
     });
+    context.log(`[advanceQuestionOrchestrator] Step 4 COMPLETE: Broadcast sent`);
+  } else {
+    context.log(`[advanceQuestionOrchestrator] Step 4 SKIPPED: No more questions or failure (success=${result.success}, hasMore=${result.hasMore})`);
   }
 
+  context.log(`[advanceQuestionOrchestrator] FINISHED - Returning result`);
   return result;
 };
 
