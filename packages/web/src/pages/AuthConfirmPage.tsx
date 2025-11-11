@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@pathcte/shared';
-import { MainLayout } from '../components/layout';
 
 export default function AuthConfirmPage() {
   const [searchParams] = useSearchParams();
@@ -63,7 +62,7 @@ export default function AuthConfirmPage() {
   }, [searchParams, navigate]);
 
   return (
-    <MainLayout>
+    <div className="min-h-screen bg-bg-secondary flex items-center justify-center p-4">
       <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
         <div className="bg-bg-primary rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           {status === 'loading' && (
@@ -97,6 +96,6 @@ export default function AuthConfirmPage() {
           )}
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

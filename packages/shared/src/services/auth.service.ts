@@ -56,7 +56,7 @@ class AuthService {
     });
 
     try {
-      const { email, password, fullName, role, schoolId } = data;
+      const { email, password, fullName, role } = data;
 
       console.log('[AuthService] Calling supabase.auth.signUp');
 
