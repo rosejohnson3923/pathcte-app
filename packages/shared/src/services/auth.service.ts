@@ -105,43 +105,8 @@ class AuthService {
         };
       }
 
-      console.log('[AuthService] Auth user created successfully, creating profile in database');
-
-      // Create profile in database
-      // Note: Column names must match the profiles table schema
-      const profileData = {
-        id: authData.user.id,
-        email,
-        display_name: fullName,  // Column is 'display_name' not 'full_name'
-        user_type: role,         // Column is 'user_type' not 'role'
-        school_id: schoolId || null,
-      };
-
-      console.log('[AuthService] Profile data to insert:', {
-        id: profileData.id,
-        email: profileData.email,
-        display_name: profileData.display_name,
-        user_type: profileData.user_type,
-        school_id: profileData.school_id,
-      });
-
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert(profileData as any);
-
-      if (profileError) {
-        console.error('[AuthService] Profile creation error:', {
-          message: profileError.message,
-          code: profileError.code,
-          details: profileError.details,
-          hint: profileError.hint,
-        });
-        // Don't fail the signup if profile creation fails
-        // The profile can be created later via a database trigger or manually
-      } else {
-        console.log('[AuthService] Profile created successfully in database');
-      }
-
+      console.log('[AuthService] Auth user created successfully');
+      console.log('[AuthService] Profile will be created automatically by database trigger after email confirmation');
       console.log('[AuthService] SignUp completed successfully');
       return {
         user: authData.user,

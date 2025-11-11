@@ -64,7 +64,7 @@ export const Header: React.FC = () => {
                 </Link>
 
                 <Link
-                  to="/collection"
+                  to="/career-pathkeys"
                   className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
                 >
                   <Trophy size={20} />
@@ -233,7 +233,7 @@ export const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    to="/collection"
+                    to="/career-pathkeys"
                     className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >

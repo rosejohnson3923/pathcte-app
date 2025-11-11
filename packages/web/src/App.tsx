@@ -4,6 +4,7 @@ import { useAuthStore, useUIStore } from '@pathcte/shared';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import AuthConfirmPage from './pages/AuthConfirmPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
 import DashboardPage from './pages/DashboardPage';
@@ -50,6 +51,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/auth/confirm" element={<AuthConfirmPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route
