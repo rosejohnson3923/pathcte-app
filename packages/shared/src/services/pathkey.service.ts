@@ -250,7 +250,7 @@ export const pathkeyService = {
         const updateData: any = {
           current_chunk_questions: newQuestionCount,
           current_chunk_correct: newCorrectCount,
-          last_updated: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         };
         const { error: updateError } = await (supabase
           .from('student_business_driver_progress') as any)

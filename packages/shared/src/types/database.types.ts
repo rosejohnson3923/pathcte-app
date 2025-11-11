@@ -455,7 +455,7 @@ export interface StudentBusinessDriverProgress {
   mastery_achieved_at: string | null;
 
   created_at: string;
-  last_updated: string;
+  updated_at: string;
 }
 
 export interface StudentPathkeyProgress {
@@ -555,8 +555,8 @@ export interface Database {
       };
       student_business_driver_progress: {
         Row: StudentBusinessDriverProgress;
-        Insert: Omit<StudentBusinessDriverProgress, 'id' | 'created_at' | 'last_updated'>;
-        Update: Partial<Omit<StudentBusinessDriverProgress, 'id' | 'student_id' | 'career_id' | 'business_driver'>>;
+        Insert: Omit<StudentBusinessDriverProgress, 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<StudentBusinessDriverProgress, 'student_id' | 'career_id' | 'business_driver'>>;
       };
       student_pathkey_progress: {
         Row: StudentPathkeyProgress;
