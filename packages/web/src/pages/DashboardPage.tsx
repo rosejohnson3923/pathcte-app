@@ -2,7 +2,7 @@ import { DashboardLayout } from '../components/layout';
 import { useAuth, useUserPathkeys, usePathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames, useActiveUserTournaments } from '../hooks';
 import { Card, Spinner, Badge } from '../components/common';
 import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Zap } from 'lucide-react';
-import { getPlaceholderImageUrl } from '@pathcte/shared';
+import { getPlaceholderImageUrl, getCareerImageUrl } from '@pathcte/shared';
 import { ensureAzureUrlHasSasToken } from '../config/azure';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,7 @@ export default function DashboardPage() {
   const { data: activeJoinedGames, isLoading: activeJoinedLoading } = useActiveJoinedGames();
   const { data: activeTournaments, isLoading: tournamentsLoading } = useActiveUserTournaments();
 
-  // Create lookup map for pathkey details
+  // Create lookup map for pathkey details (with career info for images)
   const pathkeysMap = useMemo(() => {
     if (!allPathkeys) return new Map();
     return new Map(allPathkeys.map(p => [p.id, p]));
@@ -301,7 +301,19 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-4">
                         <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-purple-200 via-purple-300 to-pink-200 flex-shrink-0 shadow-lg ring-2 ring-purple-100 group-hover:ring-purple-300 transition-all group-hover:scale-105">
                           <img
-                            src={ensureAzureUrlHasSasToken(pathkeysMap.get(userPathkey.pathkey_id)?.image_url) || getPlaceholderImageUrl('pathkey')}
+                            src={(() => {
+                              const pathkey = pathkeysMap.get(userPathkey.pathkey_id);
+                              if (!pathkey) return getPlaceholderImageUrl('pathkey');
+
+                              // Get career title from pathkey name (e.g., "Software Developer Pathkey" -> "Software Developer")
+                              const careerTitle = pathkey.name?.replace(' Pathkey', '').replace(' PathKey', '').trim() || '';
+
+                              // Use career image URL with SAS token
+                              if (!careerTitle) return getPlaceholderImageUrl('pathkey');
+
+                              const imageUrl = ensureAzureUrlHasSasToken(getCareerImageUrl(careerTitle));
+                              return imageUrl || getPlaceholderImageUrl('pathkey');
+                            })()}
                             alt="Pathkey"
                             className="w-full h-full object-cover"
                             onError={(e) => {
