@@ -43,7 +43,7 @@ export const GameResults: React.FC<GameResultsProps> = ({
   };
 
   const handleViewCollection = () => {
-    navigate('/collection');
+    navigate('/career-pathkeys');
   };
 
   // Extract pathkeys with robust null handling
@@ -115,7 +115,7 @@ export const GameResults: React.FC<GameResultsProps> = ({
               <div className="text-4xl font-extrabold text-text-primary mb-1">
                 {currentPlayer.correct_answers}/{totalQuestions || currentPlayer.total_answers}
               </div>
-              <p className="text-xs text-text-secondary uppercase font-semibold tracking-wide">Questions Answered</p>
+              <p className="text-xs text-text-secondary uppercase font-semibold tracking-wide">Answered Correctly</p>
             </div>
           </div>
         </Card>
