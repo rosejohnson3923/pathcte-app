@@ -4,11 +4,15 @@
  * Final results screen showing stats, rewards, and leaderboard
  */
 
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Button } from '../common';
+import { Card, Button, Spinner } from '../common';
 import { Leaderboard } from './Leaderboard';
-import { Trophy, Award, Target, Zap, Home, PlayCircle } from 'lucide-react';
+import { QuestionReview } from './QuestionReview';
+import type { QuestionReviewAnswer } from './QuestionReview';
+import { Trophy, Award, Target, Zap, Home, PlayCircle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import type { GamePlayer, GameSession } from '@pathcte/shared';
+import { gameService } from '@pathcte/shared';
 
 export interface GameResultsProps {
   session: GameSession;
@@ -27,6 +31,9 @@ export const GameResults: React.FC<GameResultsProps> = ({
   onReturnHome,
 }) => {
   const navigate = useNavigate();
+  const [showReview, setShowReview] = useState(false);
+  const [reviewAnswers, setReviewAnswers] = useState<QuestionReviewAnswer[] | null>(null);
+  const [loadingReview, setLoadingReview] = useState(false);
 
   const calculateAccuracy = (player: GamePlayer) => {
     if (player.total_answers === 0) return 0;
@@ -44,6 +51,19 @@ export const GameResults: React.FC<GameResultsProps> = ({
 
   const handleViewCollection = () => {
     navigate('/career-pathkeys');
+  };
+
+  // Load review answers when user clicks to expand
+  const handleToggleReview = async () => {
+    if (!showReview && !reviewAnswers && currentPlayer) {
+      setLoadingReview(true);
+      const { answers } = await gameService.getPlayerAnswersWithQuestions(currentPlayer.id);
+      if (answers) {
+        setReviewAnswers(answers as QuestionReviewAnswer[]);
+      }
+      setLoadingReview(false);
+    }
+    setShowReview(!showReview);
   };
 
   // Extract pathkeys with robust null handling
@@ -168,6 +188,49 @@ export const GameResults: React.FC<GameResultsProps> = ({
               </div>
             )}
           </div>
+        </Card>
+      )}
+
+      {/* Question Review Section */}
+      {currentPlayer && (
+        <Card className="overflow-hidden">
+          <button
+            onClick={handleToggleReview}
+            className="w-full flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <FileText className="text-purple-600 dark:text-purple-400" size={24} />
+              <div className="text-left">
+                <h3 className="text-xl font-bold text-text-primary">
+                  Review Your Answers
+                </h3>
+                <p className="text-sm text-text-secondary">
+                  See which questions you got right and learn from the ones you missed
+                </p>
+              </div>
+            </div>
+            {showReview ? (
+              <ChevronUp className="text-text-secondary" size={24} />
+            ) : (
+              <ChevronDown className="text-text-secondary" size={24} />
+            )}
+          </button>
+
+          {showReview && (
+            <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+              {loadingReview ? (
+                <div className="flex justify-center py-12">
+                  <Spinner size="lg" />
+                </div>
+              ) : reviewAnswers ? (
+                <QuestionReview answers={reviewAnswers} />
+              ) : (
+                <p className="text-center text-text-secondary py-8">
+                  Unable to load answers. Please try again.
+                </p>
+              )}
+            </div>
+          )}
         </Card>
       )}
 

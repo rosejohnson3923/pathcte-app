@@ -657,6 +657,41 @@ export const gameService = {
   },
 
   /**
+   * Get all answers for a player with question details (for post-game review)
+   * Returns player's answers with full question data including correct answers and explanations
+   */
+  async getPlayerAnswersWithQuestions(playerId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('game_answers')
+        .select(`
+          id,
+          selected_option_index,
+          is_correct,
+          points_earned,
+          time_taken_ms,
+          answered_at,
+          questions (
+            id,
+            question_text,
+            options,
+            correct_answer_index,
+            explanation
+          )
+        `)
+        .eq('player_id', playerId)
+        .order('answered_at', { ascending: true });
+
+      if (error) throw error;
+
+      return { answers: data, error: null };
+    } catch (error) {
+      console.error('Error fetching player answers with questions:', error);
+      return { answers: null, error };
+    }
+  },
+
+  /**
    * Update player connection status
    */
   async updatePlayerConnection(playerId: string, isConnected: boolean) {

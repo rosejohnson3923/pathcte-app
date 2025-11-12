@@ -10,3 +10,4 @@ export * from './HostView';
 export * from './Leaderboard';
 export * from './GameResults';
 export * from './TournamentLeaderboard';
+export * from './QuestionReview';
