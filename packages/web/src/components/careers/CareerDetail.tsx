@@ -14,7 +14,6 @@ import {
   TrendingDown,
   DollarSign,
   GraduationCap,
-  Users,
   Briefcase,
   Award,
   Calendar,
@@ -173,27 +172,6 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
               {career.salary_min && career.salary_max && (
                 <p className="text-sm text-gray-600">
                   {formatSalary(career.salary_min)} - {formatSalary(career.salary_max)}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Employment */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-blue-700 mb-2">
-              <Users size={20} />
-              <span className="text-sm font-medium">Employment</span>
-            </div>
-            <div className="space-y-1">
-              {career.employment_2023 && (
-                <p className="text-lg font-bold text-gray-900">
-                  {formatNumber(career.employment_2023)}
-                  <span className="text-sm font-normal text-gray-600"> (2023)</span>
-                </p>
-              )}
-              {career.employment_2033_projected && (
-                <p className="text-sm text-gray-600">
-                  {formatNumber(career.employment_2033_projected)} projected (2033)
                 </p>
               )}
             </div>
