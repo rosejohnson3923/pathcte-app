@@ -102,10 +102,19 @@ class AnalyticsService {
       // Calculate total questions answered
       const totalQuestionsAnswered = playersData?.reduce((sum: number, p: any) => sum + (p.total_answers || 0), 0) || 0;
 
-      // Calculate average score
-      const validScores = playersData?.filter((p: any) => p.score !== null && p.score !== undefined) || [];
-      const averageScore = validScores.length > 0
-        ? validScores.reduce((sum: number, p: any) => sum + p.score, 0) / validScores.length
+      // Calculate average accuracy percentage (more meaningful than raw scores)
+      // Only include players who have answered at least one question
+      const playersWithAnswers = playersData?.filter((p: any) =>
+        p.total_answers !== null &&
+        p.total_answers !== undefined &&
+        p.total_answers > 0
+      ) || [];
+
+      const averageAccuracy = playersWithAnswers.length > 0
+        ? playersWithAnswers.reduce((sum: number, p: any) => {
+            const accuracy = (p.correct_answers / p.total_answers) * 100;
+            return sum + accuracy;
+          }, 0) / playersWithAnswers.length
         : 0;
 
       // Get pathkeys awarded (count user_pathkeys for students who played teacher's games)
@@ -118,7 +127,7 @@ class AnalyticsService {
         total_students: uniqueStudents.size,
         total_games: games?.length || 0,
         total_questions_answered: totalQuestionsAnswered,
-        average_class_score: Math.round(averageScore * 10) / 10,
+        average_class_score: Math.round(averageAccuracy * 10) / 10,
         active_students_30d: activeStudents.size,
         pathkeys_awarded: pathkeysCount || 0,
       };
