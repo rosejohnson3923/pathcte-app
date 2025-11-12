@@ -48,6 +48,7 @@ export const useUserGamePlayers = (limit?: number) => {
 
 /**
  * Count total games played by user
+ * Counts unique game sessions, not total player records
  */
 export const useGameCount = () => {
   const { user } = useAuth();
@@ -60,7 +61,13 @@ export const useGameCount = () => {
     }
   );
 
-  return gamePlayers?.length || 0;
+  // Count unique game sessions (not total records)
+  // A user may have multiple records in the same game session if data is duplicated,
+  // but we only want to count each game once
+  if (!gamePlayers) return 0;
+
+  const uniqueSessionIds = new Set(gamePlayers.map(p => p.game_session_id));
+  return uniqueSessionIds.size;
 };
 
 /**
