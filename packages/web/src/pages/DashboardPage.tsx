@@ -95,7 +95,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <p className="text-3xl font-bold text-text-primary mb-1">{gameCount}</p>
-              <p className="text-sm font-medium text-text-secondary">Games Played</p>
+              <p className="text-sm font-medium text-text-secondary">Games Completed</p>
             </div>
           </Card>
 

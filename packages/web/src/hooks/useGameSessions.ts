@@ -47,8 +47,9 @@ export const useUserGamePlayers = (limit?: number) => {
 };
 
 /**
- * Count total games played by user
- * Counts unique game sessions, not total player records
+ * Count total games completed by user
+ * Only counts games where user participated AND the game finished (status = 'completed')
+ * More meaningful than counting games that were started but not finished
  */
 export const useGameCount = () => {
   const { user } = useAuth();
@@ -61,13 +62,16 @@ export const useGameCount = () => {
     }
   );
 
-  // Count unique game sessions (not total records)
-  // A user may have multiple records in the same game session if data is duplicated,
-  // but we only want to count each game once
   if (!gamePlayers) return 0;
 
-  const uniqueSessionIds = new Set(gamePlayers.map(p => p.game_session_id));
-  return uniqueSessionIds.size;
+  // Count only games where user received a placement (game completed and they got ranked)
+  // placement is only set when the game finishes, so this filters out:
+  // - Games that were joined but never started
+  // - Games that were started but not finished
+  // - Games where player left early
+  const completedGames = gamePlayers.filter(p => p.placement !== null && p.placement !== undefined);
+
+  return completedGames.length;
 };
 
 /**
