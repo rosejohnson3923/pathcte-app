@@ -21,10 +21,8 @@ export interface QuestionReviewAnswer {
     question_text: string;
     options: Array<{
       text: string;
-      is_correct?: boolean;
+      is_correct: boolean;
     }>;
-    correct_answer_index: number;
-    explanation?: string | null;
   };
 }
 
@@ -83,7 +81,8 @@ export const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
         {answers.map((answer, index) => {
           const question = answer.questions;
           const selectedOption = question.options[answer.selected_option_index];
-          const correctOption = question.options[question.correct_answer_index];
+          const correctAnswerIndex = question.options.findIndex(opt => opt.is_correct);
+          const correctOption = question.options[correctAnswerIndex];
 
           return (
             <Card key={answer.id} className={`border-l-4 ${
@@ -121,7 +120,7 @@ export const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
               <div className="space-y-2 mb-4">
                 {question.options.map((option, optionIndex) => {
                   const isSelected = optionIndex === answer.selected_option_index;
-                  const isCorrect = optionIndex === question.correct_answer_index;
+                  const isCorrect = option.is_correct;
 
                   let className = 'p-3 rounded-lg border-2 ';
                   if (isSelected && isCorrect) {
@@ -160,17 +159,7 @@ export const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
                 })}
               </div>
 
-              {/* Explanation (if available) */}
-              {question.explanation && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">
-                    💡 Explanation:
-                  </p>
-                  <p className="text-sm text-blue-600 dark:text-blue-400">
-                    {question.explanation}
-                  </p>
-                </div>
-              )}
+              {/* Explanation section removed - not available in database */}
 
               {/* Points Info */}
               <div className="mt-3 flex items-center justify-between text-sm text-text-secondary">

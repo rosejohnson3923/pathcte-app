@@ -105,20 +105,20 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
 
-            <div className="flex items-center justify-between">
-              <label className="flex items-center cursor-pointer">
+            <div className="flex items-center justify-between py-2">
+              <label className="flex items-center cursor-pointer group">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-offset-2 cursor-pointer"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   disabled={isLoading}
                 />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                <span className="ml-3 text-sm text-gray-600 group-hover:text-gray-900 select-none">Remember me</span>
               </label>
               <Link
                 to="/forgot-password"
-                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors"
               >
                 Forgot password?
               </Link>

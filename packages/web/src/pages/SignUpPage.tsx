@@ -236,27 +236,27 @@ export default function SignUpPage() {
             />
 
             {/* Terms Checkbox */}
-            <div>
-              <label className="flex items-start cursor-pointer">
+            <div className="py-2">
+              <label className="flex items-start cursor-pointer group">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-purple-600 focus:ring-purple-500 mt-0.5"
+                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 focus:ring-offset-2 mt-0.5 cursor-pointer flex-shrink-0"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
                   disabled={isLoading}
                 />
-                <span className="ml-2 text-sm text-gray-600">
+                <span className="ml-3 text-sm text-gray-600 leading-relaxed select-none">
                   I agree to the{' '}
-                  <Link to="/terms" className="text-purple-600 hover:text-purple-700 font-medium">
+                  <Link to="/terms" className="text-purple-600 hover:text-purple-700 font-medium underline decoration-purple-200 hover:decoration-purple-400 transition-colors">
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link to="/privacy" className="text-purple-600 hover:text-purple-700 font-medium">
+                  <Link to="/privacy" className="text-purple-600 hover:text-purple-700 font-medium underline decoration-purple-200 hover:decoration-purple-400 transition-colors">
                     Privacy Policy
                   </Link>
                 </span>
               </label>
-              {errors.terms && <p className="mt-1 text-sm text-red-600">{errors.terms}</p>}
+              {errors.terms && <p className="mt-2 text-sm text-red-600">{errors.terms}</p>}
             </div>
 
             <Button type="submit" variant="primary" fullWidth loading={isLoading}>

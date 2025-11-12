@@ -674,9 +674,7 @@ export const gameService = {
           questions (
             id,
             question_text,
-            options,
-            correct_answer_index,
-            explanation
+            options
           )
         `)
         .eq('player_id', playerId)
