@@ -80,9 +80,6 @@ export const QuestionReview: React.FC<QuestionReviewProps> = ({ answers }) => {
       <div className="space-y-4">
         {answers.map((answer, index) => {
           const question = answer.questions;
-          const selectedOption = question.options[answer.selected_option_index];
-          const correctAnswerIndex = question.options.findIndex(opt => opt.is_correct);
-          const correctOption = question.options[correctAnswerIndex];
 
           return (
             <Card key={answer.id} className={`border-l-4 ${

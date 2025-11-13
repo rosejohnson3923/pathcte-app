@@ -70,12 +70,6 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
     }
   };
 
-  // Format numbers
-  const formatNumber = (num: number | null) => {
-    if (!num) return 'N/A';
-    return new Intl.NumberFormat('en-US').format(num);
-  };
-
   const formatSalary = (amount: number | null) => {
     if (!amount) return 'N/A';
     return new Intl.NumberFormat('en-US', {

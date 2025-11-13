@@ -4,7 +4,7 @@
  * Final results screen showing stats, rewards, and leaderboard
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Spinner } from '../common';
 import { Leaderboard } from './Leaderboard';
