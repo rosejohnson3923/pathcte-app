@@ -16,11 +16,6 @@ import type {
 } from '../types/database.types';
 import { pathkeyService } from './pathkey.service';
 
-// Development/Testing Configuration
-// Set to true to enable pathkey awards for any number of players (useful for testing)
-// Set to false for production (requires 3+ players for competitive gameplay)
-const ALLOW_SINGLE_PLAYER_PATHKEY_AWARDS = process.env.NODE_ENV !== 'production';
-
 export interface CreateGameParams {
   hostId: string;
   questionSetId: string;
@@ -31,6 +26,12 @@ export interface CreateGameParams {
   allowLateJoin?: boolean;
   settings?: {
     progressionControl?: 'auto' | 'manual';
+    [key: string]: any;
+  };
+  metadata?: {
+    careerId?: string;
+    careerTitle?: string;
+    careerSector?: string;
     [key: string]: any;
   };
 }
@@ -189,6 +190,15 @@ export const gameService = {
 
       console.log('[GameService] createGame - final metadata being saved:', metadata);
 
+      // Determine exploration_type based on game_mode
+      // Currently only career_quest sets exploration_type='career'
+      // Future: Teachers may host industry/cluster exploration games which would set 'industry'/'cluster'
+      let exploration_type: string | undefined;
+      if (params.gameMode === 'career_quest') {
+        exploration_type = 'career';
+      }
+      // For other game modes, exploration_type remains undefined unless explicitly set by host
+
       const insertPayload = {
         game_code: gameCode,
         host_id: params.hostId,
@@ -201,6 +211,7 @@ export const gameService = {
         allow_late_join: params.allowLateJoin ?? false,
         settings: params.settings || {},
         metadata: metadata,
+        exploration_type: exploration_type,
       } as any;
 
       console.log('[GameService] createGame - full insert payload:', JSON.stringify(insertPayload, null, 2));
@@ -534,9 +545,8 @@ export const gameService = {
       if (error) throw error;
       if (!players) return { success: false, error: 'No players found' };
 
-      const totalPlayers = players.length;
-
       // Award tokens based on score and placement
+      // Note: Pathkey awarding happens in pathkey.service.ts processGameEndPathkeys()
       for (const player of players) {
         console.log(`Processing player: ${player.display_name}, user_id: ${player.user_id}, placement: ${player.placement}`);
 
@@ -549,60 +559,16 @@ export const gameService = {
         else if (player.placement === 2) tokensEarned += 30;
         else if (player.placement === 3) tokensEarned += 20;
 
-        let pathkeysEarned: string[] | null = null;
-
-        // Award pathkeys for top 3 finishers
-        // In production: Requires 3+ players for meaningful competition
-        // In development: Allows testing with any number of players
-        const minimumPlayers = ALLOW_SINGLE_PLAYER_PATHKEY_AWARDS ? 1 : 3;
-        if (player.user_id && player.placement && player.placement <= 3 && totalPlayers >= minimumPlayers) {
-          console.log(`Player ${player.display_name} (user_id: ${player.user_id}) finished in place ${player.placement}, awarding pathkey...`);
-
-          // Get a random pathkey to award (simplified - could be based on career/topic)
-          const { data: pathkeys, error: pathkeyError } = (await supabase
-            .from('pathkeys')
-            .select('id')
-            .eq('is_active', true)
-            .limit(1)) as { data: { id: string }[] | null; error: any };
-
-          if (pathkeyError) {
-            console.error('Error fetching pathkey:', pathkeyError);
-          }
-
-          if (pathkeys && pathkeys.length > 0) {
-            const pathkeyId = pathkeys[0].id;
-            console.log(`Awarding pathkey ${pathkeyId} to user ${player.user_id}`);
-
-            const { data: success, error: awardError } = await (supabase.rpc as any)('award_pathkey', {
-              p_user_id: player.user_id,
-              p_pathkey_id: pathkeyId,
-            });
-
-            if (awardError) {
-              console.error('Error awarding pathkey:', awardError);
-            } else if (success) {
-              console.log('Pathkey awarded successfully to user_pathkeys table');
-              pathkeysEarned = [pathkeyId];
-            } else {
-              console.error('Pathkey award returned false - operation failed silently');
-            }
-          } else {
-            console.warn('No pathkeys available to award');
-          }
-        } else {
-          console.log(`Skipping pathkey award for ${player.display_name}: user_id=${player.user_id}, placement=${player.placement}, totalPlayers=${totalPlayers}, minimumRequired=${minimumPlayers}`);
-        }
-
         // Update player's rewards using secure function
         console.log(`Calling award_player_rewards for player ${player.id} with:`, {
           tokens: tokensEarned,
-          pathkeys: pathkeysEarned,
+          pathkeys: null, // Pathkeys now awarded via pathkey.service.ts processGameEndPathkeys()
         });
 
         const { error: rewardError } = await supabase.rpc('award_player_rewards', {
           p_player_id: player.id,
           p_tokens_earned: tokensEarned,
-          p_pathkeys_earned: pathkeysEarned,
+          p_pathkeys_earned: null, // Pathkeys now awarded via pathkey.service.ts processGameEndPathkeys()
         } as any);
 
         if (rewardError) {

@@ -52,6 +52,7 @@ export const pathkeyService = {
         .select(`
           id,
           game_mode,
+          session_type,
           exploration_type,
           question_set_id,
           question_sets (
@@ -92,18 +93,26 @@ export const pathkeyService = {
           continue;
         }
 
-        // Section 1: Career Mastery (Top 3 in Career mode)
-        if (
+        // Section 1: Career Mastery
+        // Two paths to earn:
+        // 1. Solo career_quest: Completing any solo career quest game
+        // 2. Multiplayer exploration_type='career': Top 3 placement with minimum players
+        const isSoloCareerQuest = sessionData.game_mode === 'career_quest' && sessionData.session_type === 'solo';
+        const isMultiplayerCareerExploration =
           sessionData.exploration_type === 'career' &&
           player.placement &&
           player.placement <= 3 &&
-          totalPlayers >= minimumPlayers
-        ) {
+          totalPlayers >= minimumPlayers;
+
+        if (isSoloCareerQuest || isMultiplayerCareerExploration) {
           const questionSet = sessionData.question_sets;
           const careerId = questionSet?.career_id;
 
           if (careerId) {
-            console.log(`Checking Career Mastery for ${player.display_name} (placement ${player.placement})`);
+            const awardReason = isSoloCareerQuest
+              ? `solo career_quest completion`
+              : `placement ${player.placement} in multiplayer career exploration`;
+            console.log(`Awarding Career Mastery to ${player.display_name} - ${awardReason}`);
             await this.awardCareerMastery(player.user_id, careerId);
           }
         }
