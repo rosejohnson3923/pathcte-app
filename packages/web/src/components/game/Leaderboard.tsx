@@ -7,12 +7,14 @@
 import { Card, Badge } from '../common';
 import { Trophy } from 'lucide-react';
 import type { GamePlayer } from '@pathcte/shared';
+import { formatPlayerName } from '@pathcte/shared';
 
 export interface LeaderboardProps {
   players: GamePlayer[];
   currentPlayerId?: string;
   showPlacement?: boolean;
   compact?: boolean;
+  totalQuestions?: number;
 }
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({
@@ -20,6 +22,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   currentPlayerId,
   showPlacement = true,
   compact = false,
+  totalQuestions,
 }) => {
   // Sort players by score (descending)
   const sortedPlayers = [...players].sort((a, b) => {
@@ -43,6 +46,14 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   };
 
   const isCurrentPlayer = (player: GamePlayer) => player.id === currentPlayerId;
+
+  const calculateAccuracy = (player: GamePlayer) => {
+    // Accuracy should be based on total questions in game, not just answered questions
+    // This accounts for no-answers (unanswered due to time/skipping)
+    const questionsCount = totalQuestions || player.total_answers;
+    if (questionsCount === 0) return 0;
+    return Math.round((player.correct_answers / questionsCount) * 100);
+  };
 
   if (compact) {
     return (
@@ -78,18 +89,18 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 {/* Player Name */}
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-text-primary truncate">
-                    {player.display_name}
+                    {formatPlayerName(player.display_name)}
                   </p>
                   {player.total_answers > 0 && (
                     <div className="flex items-center gap-1 mt-0.5">
                       <div className="flex-1 h-1.5 bg-border-subtle rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500"
-                          style={{ width: `${(player.correct_answers / player.total_answers) * 100}%` }}
+                          style={{ width: `${calculateAccuracy(player)}%` }}
                         />
                       </div>
                       <span className="text-xs text-text-tertiary min-w-[3ch]">
-                        {Math.round((player.correct_answers / player.total_answers) * 100)}%
+                        {calculateAccuracy(player)}%
                       </span>
                     </div>
                   )}
@@ -106,7 +117,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                     {player.score}
                   </p>
                   <p className="text-xs text-text-tertiary">
-                    {player.correct_answers}/{player.total_answers}
+                    {player.correct_answers}/{totalQuestions || player.total_answers}
                   </p>
                 </div>
               </div>
@@ -169,7 +180,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-bold text-lg text-text-primary truncate">
-                      {player.display_name}
+                      {formatPlayerName(player.display_name)}
                     </h3>
                     {isCurrentPlayer(player) && (
                       <Badge variant="success" className="flex-shrink-0">
@@ -181,11 +192,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                   {/* Stats */}
                   <div className="flex items-center gap-4 text-sm text-text-secondary">
                     <span>
-                      {player.correct_answers} / {player.total_answers} correct
+                      {player.correct_answers} / {totalQuestions || player.total_answers} correct
                     </span>
                     {player.total_answers > 0 && (
                       <span>
-                        {Math.round((player.correct_answers / player.total_answers) * 100)}% accuracy
+                        {calculateAccuracy(player)}% accuracy
                       </span>
                     )}
                   </div>
@@ -201,7 +212,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
                             index === 2 ? 'bg-gradient-to-r from-orange-400 to-amber-500' :
                             'bg-gradient-to-r from-green-400 to-emerald-500'
                           }`}
-                          style={{ width: `${(player.correct_answers / player.total_answers) * 100}%` }}
+                          style={{ width: `${calculateAccuracy(player)}%` }}
                         />
                       </div>
                     </div>

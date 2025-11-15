@@ -5,9 +5,10 @@
  */
 
 import { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
-import { Button, Input, Card, Spinner, Badge } from '../components/common';
+import { Button, Input, Card, Spinner, Badge, QuestionCountSelector } from '../components/common';
 import { useAuth, useFilteredQuestionSets } from '../hooks';
 import { tournamentService } from '@pathcte/shared';
 import {
@@ -38,6 +39,7 @@ export default function CreateTournamentPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [selectedQuestionSet, setSelectedQuestionSet] = useState<string>('');
+  const [questionCount, setQuestionCount] = useState<number>(20);
   const [schoolName, setSchoolName] = useState('');
   const [startMode, setStartMode] = useState<TournamentStartMode>('independent');
   const [progressionMode, setProgressionMode] = useState<ProgressionMode>('manual');
@@ -54,6 +56,14 @@ export default function CreateTournamentPage() {
 
   // Get selected question set details
   const selectedSet = questionSets?.find((set) => set.id === selectedQuestionSet);
+
+  // Adjust questionCount if it exceeds available questions
+  React.useEffect(() => {
+    if (selectedSet && questionCount > selectedSet.total_questions) {
+      const availableTiers = [10, 15, 20, 25, 30].filter(t => t <= selectedSet.total_questions);
+      setQuestionCount(availableTiers[availableTiers.length - 1] || selectedSet.total_questions);
+    }
+  }, [selectedSet, questionCount]);
 
   const handleCreateTournament = async () => {
     console.log('[CreateTournamentPage] handleCreateTournament called');
@@ -95,6 +105,9 @@ export default function CreateTournamentPage() {
         maxClassrooms,
         maxPlayersPerClassroom,
         schoolName: schoolName.trim() || undefined,
+        settings: {
+          questionCount: questionCount,
+        },
       };
       console.log('[CreateTournamentPage] Creating tournament with params:', params);
 
@@ -406,6 +419,17 @@ export default function CreateTournamentPage() {
                 ) : (
                   <div className="text-center py-8 text-text-secondary">
                     No question sets found. Try adjusting your filters.
+                  </div>
+                )}
+
+                {/* Question Count Selection */}
+                {selectedSet && (
+                  <div className="pt-4 border-t border-border-default">
+                    <QuestionCountSelector
+                      selectedCount={questionCount}
+                      totalAvailable={selectedSet.total_questions}
+                      onSelectCount={setQuestionCount}
+                    />
                   </div>
                 )}
               </Card.Content>

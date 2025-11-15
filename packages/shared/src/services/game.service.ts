@@ -50,10 +50,118 @@ export interface SubmitAnswerParams {
 }
 
 /**
+ * Helper function to shuffle an array
+ */
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/**
  * Game Service
  * Handles all game session operations
  */
 export const gameService = {
+  /**
+   * Select questions with variety (avoids recently used questions)
+   *
+   * @param hostId - Teacher ID (or student ID for solo games)
+   * @param questionSetId - The question set to select from
+   * @param count - Number of questions to select (max 30)
+   * @returns Array of selected question IDs
+   */
+  async selectQuestionsWithVariety(
+    hostId: string,
+    questionSetId: string,
+    count: number
+  ): Promise<string[]> {
+    try {
+      // Get recently used questions from last 3 games
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { data: recentGames } = await supabase
+        .from('game_sessions')
+        .select('metadata')
+        .eq('host_id', hostId)
+        .eq('question_set_id', questionSetId)
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      // Extract used question IDs from metadata
+      const usedQuestionIds = new Set<string>();
+      (recentGames || []).forEach((game: any) => {
+        const selectedIds = game.metadata?.selected_question_ids || [];
+        selectedIds.forEach((id: string) => usedQuestionIds.add(id));
+      });
+
+      // Get all questions from the set
+      const { data: allQuestions, error: questionsError } = await supabase
+        .from('questions')
+        .select('id')
+        .eq('question_set_id', questionSetId);
+
+      if (questionsError || !allQuestions) {
+        throw new Error('Failed to fetch questions from question set');
+      }
+
+      // Type assertion for Supabase query result
+      const questions = allQuestions as Array<{ id: string }>;
+
+      // Separate into available (not recently used) and used
+      const availableQuestions = questions.filter(q => !usedQuestionIds.has(q.id));
+      const usedQuestions = questions.filter(q => usedQuestionIds.has(q.id));
+
+      let selectedQuestionIds: string[] = [];
+
+      if (availableQuestions.length >= count) {
+        // Enough unseen questions - randomly select from them
+        selectedQuestionIds = shuffleArray(availableQuestions)
+          .slice(0, count)
+          .map(q => q.id);
+      } else {
+        // Not enough unseen - use all available + fill from used (randomized)
+        selectedQuestionIds = [
+          ...availableQuestions.map(q => q.id),
+          ...shuffleArray(usedQuestions)
+            .slice(0, count - availableQuestions.length)
+            .map(q => q.id),
+        ];
+      }
+
+      console.log(`[GameService] Selected ${selectedQuestionIds.length} questions for variety:`, {
+        totalAvailable: questions.length,
+        recentlyUsed: usedQuestionIds.size,
+        freshQuestions: availableQuestions.length,
+        selectedCount: selectedQuestionIds.length,
+      });
+
+      return selectedQuestionIds;
+    } catch (error) {
+      console.error('[GameService] Error selecting questions with variety:', error);
+      // Fallback to simple random selection if variety logic fails
+      const { data: allQuestions } = await supabase
+        .from('questions')
+        .select('id')
+        .eq('question_set_id', questionSetId);
+
+      if (!allQuestions || allQuestions.length === 0) {
+        throw new Error('No questions available in question set');
+      }
+
+      const questions = allQuestions as Array<{ id: string }>;
+
+      return shuffleArray(questions)
+        .slice(0, Math.min(count, questions.length))
+        .map(q => q.id);
+    }
+  },
+
   /**
    * Create a new game session
    */
@@ -62,39 +170,15 @@ export const gameService = {
       // Generate unique 6-character game code
       const gameCode = await this.generateGameCode();
 
-      // If questionCount is specified, randomly select questions
+      // If questionCount is specified, select questions with variety
       let selectedQuestionIds: string[] | undefined;
       if (params.settings?.questionCount) {
-        const { questions, error: questionsError } = await this.getGameQuestions(
+        // Use the new variety-aware selection
+        selectedQuestionIds = await this.selectQuestionsWithVariety(
+          params.hostId,
           params.questionSetId,
-          true, // includeAnswers for host
-          undefined, // selectedQuestionIds
-          params.settings?.difficulty // Filter by difficulty if specified
+          params.settings.questionCount
         );
-
-        if (questionsError) {
-          console.error('Error loading questions:', questionsError);
-          throw new Error(`Failed to load questions: ${(questionsError as any)?.message || questionsError}`);
-        }
-
-        if (!questions || questions.length === 0) {
-          console.error('No questions found for questionSetId:', params.questionSetId, 'difficulty:', params.settings?.difficulty);
-          throw new Error(`No questions found for the selected question set${params.settings?.difficulty ? ` with difficulty '${params.settings.difficulty}'` : ''}`);
-        }
-
-        // Randomly select the specified number of questions
-        const availableCount = questions.length;
-        const count = Math.min(params.settings.questionCount, availableCount);
-
-        // Log warning if fewer questions available than requested (graceful degradation)
-        if (availableCount < params.settings.questionCount) {
-          console.warn(
-            `Only ${availableCount} questions available with difficulty "${params.settings.difficulty || 'any'}", requested ${params.settings.questionCount}. Using ${count} questions.`
-          );
-        }
-
-        const shuffled = [...questions].sort(() => Math.random() - 0.5);
-        selectedQuestionIds = shuffled.slice(0, count).map(q => q.id);
       }
 
       const { data: session, error } = (await supabase
@@ -658,31 +742,81 @@ export const gameService = {
 
   /**
    * Get all answers for a player with question details (for post-game review)
-   * Returns player's answers with full question data including correct answers and explanations
+   * Returns ALL questions from the game session, including unanswered ones
    */
   async getPlayerAnswersWithQuestions(playerId: string) {
     try {
-      const { data, error } = await supabase
+      // First, get the player's game session and the selected questions
+      const { data: player, error: playerError } = await supabase
+        .from('game_players')
+        .select('game_session_id, game_sessions(metadata)')
+        .eq('id', playerId)
+        .single();
+
+      if (playerError) throw playerError;
+      if (!player) throw new Error('Player not found');
+
+      const sessionMetadata = (player as any).game_sessions?.metadata;
+      const selectedQuestionIds = sessionMetadata?.selected_question_ids || [];
+
+      if (selectedQuestionIds.length === 0) {
+        return { answers: [], error: null };
+      }
+
+      // Get all questions that were in this game
+      const { data: allQuestions, error: questionsError } = await supabase
+        .from('questions')
+        .select('id, question_text, options')
+        .in('id', selectedQuestionIds);
+
+      if (questionsError) throw questionsError;
+
+      // Get all answers for this player
+      const { data: playerAnswers, error: answersError } = await supabase
         .from('game_answers')
-        .select(`
-          id,
-          selected_option_index,
-          is_correct,
-          points_earned,
-          time_taken_ms,
-          answered_at,
-          questions (
-            id,
-            question_text,
-            options
-          )
-        `)
-        .eq('player_id', playerId)
-        .order('answered_at', { ascending: true });
+        .select('id, question_id, selected_option_index, is_correct, points_earned, time_taken_ms, answered_at')
+        .eq('player_id', playerId);
 
-      if (error) throw error;
+      if (answersError) throw answersError;
 
-      return { answers: data, error: null };
+      // Type assertion for answers
+      const typedAnswers = (playerAnswers || []) as Array<{
+        id: string;
+        question_id: string;
+        selected_option_index: number;
+        is_correct: boolean;
+        points_earned: number;
+        time_taken_ms: number;
+        answered_at: string;
+      }>;
+
+      // Create a map of question_id -> answer for quick lookup
+      const answersMap = new Map(typedAnswers.map(a => [a.question_id, a]));
+
+      // Type assertion for questions
+      const typedQuestions = (allQuestions || []) as Array<{
+        id: string;
+        question_text: string;
+        options: any;
+      }>;
+
+      // Build the result with all questions, preserving the order from selected_question_ids
+      const result = selectedQuestionIds.map((questionId: string) => {
+        const question = typedQuestions.find(q => q.id === questionId);
+        const answer = answersMap.get(questionId);
+
+        return {
+          id: answer?.id || `no-answer-${questionId}`,
+          selected_option_index: answer?.selected_option_index ?? null,
+          is_correct: answer?.is_correct ?? false,
+          points_earned: answer?.points_earned ?? 0,
+          time_taken_ms: answer?.time_taken_ms ?? 0,
+          answered_at: answer?.answered_at || null,
+          questions: question,
+        };
+      });
+
+      return { answers: result, error: null };
     } catch (error) {
       console.error('Error fetching player answers with questions:', error);
       return { answers: null, error };
@@ -795,6 +929,7 @@ export const gameService = {
     careerId: string;
     careerTitle: string;
     careerSector: string;
+    questionCount?: number;
   }) {
     try {
       // PRIORITY 1: Find career-specific career quest question set
@@ -857,6 +992,7 @@ export const gameService = {
         allowLateJoin: false,
         settings: {
           progressionControl: 'auto', // Solo games always auto-advance
+          questionCount: params.questionCount || 20, // Default to 20 questions for solo
         },
       } as any);
 

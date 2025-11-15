@@ -4,10 +4,10 @@
  * Modal displaying comprehensive career information
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Modal, Badge, Button } from '../common';
-import { getCareerImageUrl, getPlaceholderImageUrl, gameService, toast } from '@pathcte/shared';
+import { Modal, Badge, Button, QuestionCountSelector } from '../common';
+import { getCareerImageUrl, getPlaceholderImageUrl, gameService, toast, supabase } from '@pathcte/shared';
 import { useAuth } from '../../hooks';
 import {
   TrendingUp,
@@ -34,8 +34,48 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
 }) => {
   const [imageError, setImageError] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  const [questionCount, setQuestionCount] = useState<number>(20);
+  const [availableQuestions, setAvailableQuestions] = useState<number>(30);
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Fetch available question count for this career
+  useEffect(() => {
+    const fetchQuestionCount = async () => {
+      if (!career) return;
+
+      try {
+        // Query question_sets table to get the actual question count for this career
+        const { data, error } = await supabase
+          .from('question_sets')
+          .select('total_questions')
+          .eq('career_id', career.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching question count:', error);
+          return;
+        }
+
+        // Type assertion for data
+        const questionSet = data as { total_questions: number } | null;
+
+        if (questionSet?.total_questions) {
+          setAvailableQuestions(questionSet.total_questions);
+          // Auto-adjust selected count if it exceeds available
+          if (questionCount > questionSet.total_questions) {
+            setQuestionCount(Math.min(20, questionSet.total_questions));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching question count:', err);
+      }
+    };
+
+    if (isOpen && career) {
+      fetchQuestionCount();
+    }
+  }, [career, isOpen]);
 
   if (!career) return null;
 
@@ -53,6 +93,7 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
         careerId: career.id,
         careerTitle: career.title,
         careerSector: career.sector || career.industry,
+        questionCount: questionCount,
       });
 
       if (error || !session) {
@@ -296,8 +337,17 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
           </div>
         )}
 
+        {/* Question Count Selection */}
+        <div className="pt-4 border-t border-border-default">
+          <QuestionCountSelector
+            selectedCount={questionCount}
+            totalAvailable={availableQuestions}
+            onSelectCount={setQuestionCount}
+          />
+        </div>
+
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-border-default">
+        <div className="flex justify-end gap-3 pt-4">
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>

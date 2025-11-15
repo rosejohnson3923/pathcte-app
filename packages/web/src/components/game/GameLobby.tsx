@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Card, Badge, Button, Spinner } from '../common';
 import { Users, Copy, Check, Crown, Wifi, WifiOff, Gamepad2 } from 'lucide-react';
 import { useGameStore } from '@pathcte/shared';
-import { gameService } from '@pathcte/shared';
+import { gameService, formatPlayerName } from '@pathcte/shared';
 
 export interface GameLobbyProps {
   sessionId: string;
@@ -142,7 +142,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-gray-900 dark:text-white truncate">
-                      {player.display_name}
+                      {formatPlayerName(player.display_name)}
                     </p>
                     {index === 0 && isHost && (
                       <Crown size={16} className="text-amber-500" />

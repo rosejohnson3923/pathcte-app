@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '../components/layout';
-import { Button, Input, Card, Spinner, Badge } from '../components/common';
+import { Button, Input, Card, Spinner, Badge, QuestionCountSelector } from '../components/common';
 import { useAuth, useFilteredQuestionSets } from '../hooks';
 import { gameService, useGameStore } from '@pathcte/shared';
 import { Gamepad2, Settings, Users, BookOpen, Play, ChevronDown, UserCheck, Filter } from 'lucide-react';
@@ -312,33 +312,11 @@ export default function HostGamePage() {
 
                     {/* Question Count Selection */}
                     <div className="mt-4 pt-4 border-t-2 border-gray-200 dark:border-gray-700">
-                      <label className="block text-sm font-medium text-text-secondary mb-3">
-                        Number of Questions
-                      </label>
-                      <div className="grid grid-cols-5 gap-2">
-                        {[10, 15, 20, 25, 30].map((count) => {
-                          const isAvailable = count <= selectedSet.total_questions;
-                          return (
-                            <button
-                              key={count}
-                              onClick={() => isAvailable && setQuestionCount(count)}
-                              disabled={!isAvailable}
-                              className={`px-4 py-3 rounded-lg border-2 font-semibold transition-all ${
-                                questionCount === count && isAvailable
-                                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                                  : isAvailable
-                                  ? 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-900 dark:text-gray-100'
-                                  : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                              }`}
-                            >
-                              {count}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        Questions will be randomly selected from the pool of {selectedSet.total_questions} available
-                      </p>
+                      <QuestionCountSelector
+                        selectedCount={questionCount}
+                        totalAvailable={selectedSet.total_questions}
+                        onSelectCount={setQuestionCount}
+                      />
                     </div>
                   </>
                 )}

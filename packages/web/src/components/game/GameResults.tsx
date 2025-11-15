@@ -12,7 +12,7 @@ import { QuestionReview } from './QuestionReview';
 import type { QuestionReviewAnswer } from './QuestionReview';
 import { Trophy, Award, Target, Zap, Home, PlayCircle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import type { GamePlayer, GameSession } from '@pathcte/shared';
-import { gameService } from '@pathcte/shared';
+import { gameService, formatPlayerName } from '@pathcte/shared';
 
 export interface GameResultsProps {
   session: GameSession;
@@ -36,8 +36,11 @@ export const GameResults: React.FC<GameResultsProps> = ({
   const [loadingReview, setLoadingReview] = useState(false);
 
   const calculateAccuracy = (player: GamePlayer) => {
-    if (player.total_answers === 0) return 0;
-    return Math.round((player.correct_answers / player.total_answers) * 100);
+    // Accuracy should be based on total questions in game, not just answered questions
+    // This accounts for no-answers (unanswered due to time/skipping)
+    const questionsCount = totalQuestions || player.total_answers;
+    if (questionsCount === 0) return 0;
+    return Math.round((player.correct_answers / questionsCount) * 100);
   };
 
   const getPlacementMessage = (placement: number | null) => {
@@ -95,7 +98,7 @@ export const GameResults: React.FC<GameResultsProps> = ({
         <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-2 border-purple-300 dark:border-purple-700 shadow-xl">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-text-primary mb-2">
-              {currentPlayer.display_name}
+              {formatPlayerName(currentPlayer.display_name)}
             </h2>
             <p className="text-xl text-purple-600 dark:text-purple-400 font-bold">
               {getPlacementMessage(currentPlayer.placement)}
@@ -240,6 +243,7 @@ export const GameResults: React.FC<GameResultsProps> = ({
         currentPlayerId={currentPlayer?.id}
         showPlacement={true}
         compact={false}
+        totalQuestions={totalQuestions}
       />
 
       {/* Actions */}

@@ -19,7 +19,8 @@ export default function JoinGamePage() {
   const { setSession, setCurrentPlayer, setIsHost } = useGameStore();
 
   const [gameCode, setGameCode] = useState('');
-  const [displayName, setDisplayName] = useState(profile?.display_name || '');
+  // Use first_name from profile (locked, not editable)
+  const displayName = (profile as any)?.first_name || profile?.display_name || '';
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,7 +111,7 @@ export default function JoinGamePage() {
               </p>
             </div>
 
-            {/* Display Name Input */}
+            {/* Display Name Input (Locked to First Name) */}
             <div>
               <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Your Name
@@ -119,13 +120,12 @@ export default function JoinGamePage() {
                 id="displayName"
                 type="text"
                 value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Enter your name"
-                disabled={isJoining}
-                maxLength={30}
+                readOnly
+                disabled
+                className="bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                This name will be visible to other players
+                Your first name from your profile will be used
               </p>
             </div>
 

@@ -47,6 +47,7 @@ export default function GamePage() {
   const [hasAnswered, setHasAnswered] = useState(false);
   const [lastAnswer, setLastAnswer] = useState<{ isCorrect: boolean; selectedIndex: number } | null>(null);
   const [questionSetTitle, setQuestionSetTitle] = useState<string>('');
+  const [isAdvancing, setIsAdvancing] = useState(false);
 
   // Use refs to keep latest values without triggering effect dependency
   const currentQuestionIndexRef = useRef(currentQuestionIndex);
@@ -91,6 +92,12 @@ export default function GamePage() {
   // Track current question changes
   useEffect(() => {
     console.log('[GamePage] Current question index changed:', currentQuestionIndex);
+    // Reset advancing flags when question actually changes (prevents double-click issues)
+    if (isAdvancingRef.current) {
+      console.log('[GamePage] Resetting isAdvancing flag after question index change');
+      isAdvancingRef.current = false;
+      setIsAdvancing(false);
+    }
   }, [currentQuestionIndex]);
 
   // Load game session and questions
@@ -469,18 +476,20 @@ export default function GamePage() {
   };
 
   const handleNextQuestion = async () => {
-    // Prevent concurrent calls (e.g., from double timer expiration)
+    // Prevent concurrent calls (e.g., from double timer expiration or double-clicks)
     if (isAdvancingRef.current) {
       console.log('[GamePage] 🚫 BLOCKED concurrent handleNextQuestion call');
       return;
     }
 
     isAdvancingRef.current = true;
+    setIsAdvancing(true);
     console.log('[GamePage] ⚠️ handleNextQuestion CALLED!');
     console.trace('[GamePage] Call stack for handleNextQuestion:');
 
     if (!sessionId) {
       isAdvancingRef.current = false;
+      setIsAdvancing(false);
       return;
     }
 
@@ -517,17 +526,19 @@ export default function GamePage() {
 
         // Note: Local state will be updated via Realtime subscription when database changes
         // No need to manually call nextQuestion() - that would cause double increment!
+        // IMPORTANT: Don't reset isAdvancing here - wait for realtime update to confirm advancement
       } catch (error) {
         console.error('[GamePage] Failed to advance question:', error);
         toast.error('Failed to advance to next question');
-      } finally {
-        // Reset flag after operation completes (success or failure)
+        // Only reset on error, not on success
         isAdvancingRef.current = false;
+        setIsAdvancing(false);
       }
     } else {
       // End game
       await handleEndGame();
       isAdvancingRef.current = false;
+      setIsAdvancing(false);
     }
   };
 
@@ -661,6 +672,8 @@ export default function GamePage() {
         toast.error('Answer submitted too quickly. Please take your time.');
       } else if (errorMessage.includes('too slow')) {
         toast.error('Time limit exceeded for this question');
+        // Mark as answered so "Next Question" button appears in solo mode
+        setHasAnswered(true);
       } else {
         toast.error('Failed to submit answer. Please try again.');
       }
@@ -771,8 +784,18 @@ export default function GamePage() {
                   {/* In multiplayer teacher-led games, students should NOT see this button */}
                   {session.session_type === 'solo' && hasAnswered && (
                     <div className="mt-6">
-                      <Button variant="primary" onClick={handleNextQuestion} className="w-full">
-                        {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'End Game'}
+                      <Button
+                        variant="primary"
+                        onClick={handleNextQuestion}
+                        disabled={isAdvancing}
+                        className="w-full"
+                      >
+                        {isAdvancing
+                          ? 'Loading...'
+                          : currentQuestionIndex < questions.length - 1
+                            ? 'Next Question'
+                            : 'End Game'
+                        }
                       </Button>
                     </div>
                   )}
@@ -782,7 +805,12 @@ export default function GamePage() {
 
             {/* Sidebar: Leaderboard */}
             <div className="lg:col-span-1">
-              <Leaderboard players={players} currentPlayerId={currentPlayer?.id} compact={true} />
+              <Leaderboard
+                players={players}
+                currentPlayerId={currentPlayer?.id}
+                compact={true}
+                totalQuestions={questions.length}
+              />
             </div>
           </div>
         )}
