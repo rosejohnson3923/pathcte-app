@@ -37,6 +37,7 @@ import { teacherAnalyticsService, useAuthStore } from '@pathcte/shared';
 export default function TeacherDashboardPage() {
   const { user } = useAuthStore();
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
+  const [pathkeyGroupBy, setPathkeyGroupBy] = useState<'career' | 'student'>('career');
 
   // Fetch teacher analytics data
   const { data: classroomAnalytics, isLoading: analyticsLoading } = useQuery({
@@ -148,6 +149,118 @@ export default function TeacherDashboardPage() {
             </div>
           </Card>
         </div>
+
+        {/* Pathkeys Awarded Details */}
+        {classroomAnalytics && classroomAnalytics.pathkey_awards.length > 0 && (
+          <Card className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Trophy className="text-amber-600" size={24} />
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Pathkeys Awarded Details
+                </h2>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPathkeyGroupBy('career')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    pathkeyGroupBy === 'career'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Group by Career
+                </button>
+                <button
+                  onClick={() => setPathkeyGroupBy('student')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    pathkeyGroupBy === 'student'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Group by Student
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {pathkeyGroupBy === 'career' ? (
+                // Group by Career
+                (() => {
+                  const groupedByCareer = classroomAnalytics.pathkey_awards.reduce((acc, award) => {
+                    if (!acc[award.career_title]) {
+                      acc[award.career_title] = [];
+                    }
+                    acc[award.career_title].push(award);
+                    return acc;
+                  }, {} as Record<string, typeof classroomAnalytics.pathkey_awards>);
+
+                  return Object.entries(groupedByCareer)
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([careerTitle, awards]) => (
+                      <div key={careerTitle} className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                            {careerTitle}
+                          </h3>
+                          <Badge variant="info">
+                            {awards.length} student{awards.length > 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1">
+                          {awards.map((award, idx) => (
+                            <div key={idx} className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between">
+                              <span>{award.student_name}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(award.completed_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ));
+                })()
+              ) : (
+                // Group by Student
+                (() => {
+                  const groupedByStudent = classroomAnalytics.pathkey_awards.reduce((acc, award) => {
+                    if (!acc[award.student_name]) {
+                      acc[award.student_name] = [];
+                    }
+                    acc[award.student_name].push(award);
+                    return acc;
+                  }, {} as Record<string, typeof classroomAnalytics.pathkey_awards>);
+
+                  return Object.entries(groupedByStudent)
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([studentName, awards]) => (
+                      <div key={studentName} className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                            {studentName}
+                          </h3>
+                          <Badge variant="info">
+                            {awards.length} pathkey{awards.length > 1 ? 's' : ''}
+                          </Badge>
+                        </div>
+                        <div className="space-y-1">
+                          {awards.map((award, idx) => (
+                            <div key={idx} className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between">
+                              <span>{award.career_title}</span>
+                              <span className="text-xs text-gray-500">
+                                {new Date(award.completed_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ));
+                })()
+              )}
+            </div>
+          </Card>
+        )}
 
         {/* Recommended Question Sets */}
         {recommendations && recommendations.length > 0 && (

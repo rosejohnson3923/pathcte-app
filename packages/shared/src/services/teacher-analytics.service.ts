@@ -49,11 +49,22 @@ export interface CareerProgress {
   business_drivers_in_progress: BusinessDriver[];
 }
 
+export interface PathkeyAward {
+  student_id: string;
+  student_name: string;
+  career_id: string;
+  career_title: string;
+  completed_at: string;
+}
+
 export interface ClassroomAnalytics {
   // Overall stats
   total_students: number;
   total_games_played: number;
   total_pathkeys_awarded: number;
+
+  // Pathkey awards detail
+  pathkey_awards: PathkeyAward[];
 
   // Popular content
   most_popular_careers: PopularityMetric[];
@@ -111,38 +122,47 @@ export interface QuestionSetRecommendation {
 // ============================================================================
 
 class TeacherAnalyticsService {
+  // Cache for student profile data
+  private studentProfileCache = new Map<string, Array<{ student_id: string; email: string; display_name: string; user_type: string }>>();
+
   /**
-   * Get all students for a teacher
+   * Get all students for a teacher with their profile data
    * Students are identified by having played in games or tournaments hosted by the teacher
    */
-  async getTeacherStudents(teacherId: string): Promise<string[]> {
+  async getTeacherStudentsWithProfiles(teacherId: string): Promise<Array<{ student_id: string; email: string; display_name: string; user_type: string }>> {
     try {
-      // Find all students who played in games hosted by this teacher
-      const { data: players } = await supabase
-        .from('game_players')
-        .select(`
-          user_id,
-          game_sessions!inner (
-            host_id
-          )
-        `)
-        .eq('game_sessions.host_id', teacherId)
-        .not('user_id', 'is', null);
+      console.log('[TeacherAnalytics] Getting students for teacher:', teacherId);
 
-      if (!players || players.length === 0) {
+      // Check cache first
+      if (this.studentProfileCache.has(teacherId)) {
+        console.log('[TeacherAnalytics] Returning cached student profiles');
+        return this.studentProfileCache.get(teacherId)!;
+      }
+
+      // Use server-side function that bypasses RLS
+      const { data: students, error } = (await (supabase.rpc as any)('get_teacher_students', {
+        p_teacher_id: teacherId
+      })) as {
+        data: Array<{ student_id: string; email: string; display_name: string; user_type: string }> | null;
+        error: any;
+      };
+
+      console.log('[TeacherAnalytics] get_teacher_students result:', { students, error });
+
+      if (error) {
+        console.error('[TeacherAnalytics] Error calling get_teacher_students:', error);
         return [];
       }
 
-      // Extract unique student IDs and verify they're students (not teachers/admins)
-      const userIds = [...new Set((players as any[]).map(p => p.user_id))];
+      if (!students || students.length === 0) {
+        console.log('[TeacherAnalytics] No students found for teacher');
+        return [];
+      }
 
-      const { data: students } = await supabase
-        .from('profiles')
-        .select('id')
-        .in('id', userIds)
-        .eq('user_type', 'student');
+      // Cache the results
+      this.studentProfileCache.set(teacherId, students);
 
-      return (students || []).map((s: any) => s.id);
+      return students;
     } catch (error) {
       console.error('[TeacherAnalytics] Error getting teacher students:', error);
       return [];
@@ -150,27 +170,29 @@ class TeacherAnalyticsService {
   }
 
   /**
+   * Get all students for a teacher (IDs only)
+   * Students are identified by having played in games or tournaments hosted by the teacher
+   */
+  async getTeacherStudents(teacherId: string): Promise<string[]> {
+    const students = await this.getTeacherStudentsWithProfiles(teacherId);
+    return students.map((s) => s.student_id);
+  }
+
+  /**
    * Get detailed pathkey progress for all students in classroom
    */
   async getStudentPathkeyProgress(teacherId: string): Promise<TeacherStudentPathkeyProgress[]> {
     try {
-      const studentIds = await this.getTeacherStudents(teacherId);
-      if (studentIds.length === 0) return [];
+      const students = await this.getTeacherStudentsWithProfiles(teacherId);
+      if (students.length === 0) return [];
 
       const progressData: TeacherStudentPathkeyProgress[] = [];
 
-      for (const studentId of studentIds) {
-        // Get student profile
-        const { data: student } = await supabase
-          .from('profiles')
-          .select('email, display_name')
-          .eq('id', studentId)
-          .single();
-
-        if (!student) continue;
+      for (const student of students) {
+        const studentId = student.student_id;
 
         // Get all student pathkey records
-        const { data: pathkeys } = await supabase
+        const { data: pathkeys, error: pathkeysError } = await supabase
           .from('student_pathkeys')
           .select(`
             *,
@@ -181,6 +203,12 @@ class TeacherAnalyticsService {
             )
           `)
           .eq('student_id', studentId);
+
+        console.log(`[TeacherAnalytics] Pathkeys for student ${student.display_name} (${studentId}):`, {
+          count: pathkeys?.length || 0,
+          error: pathkeysError,
+          data: pathkeys
+        });
 
         const pathkeysData = (pathkeys || []) as any[];
 
@@ -252,8 +280,8 @@ class TeacherAnalyticsService {
 
         progressData.push({
           student_id: studentId,
-          student_email: (student as any).email || '',
-          student_name: (student as any).display_name || '',
+          student_email: student.email || '',
+          student_name: student.display_name || '',
           total_pathkeys: pathkeysData.filter(pk =>
             pk.career_mastery_unlocked &&
             pk.industry_mastery_unlocked &&
@@ -283,10 +311,12 @@ class TeacherAnalyticsService {
    */
   async getClassroomAnalytics(teacherId: string): Promise<ClassroomAnalytics> {
     try {
-      const studentIds = await this.getTeacherStudents(teacherId);
-      if (studentIds.length === 0) {
+      const students = await this.getTeacherStudentsWithProfiles(teacherId);
+      if (students.length === 0) {
         return this.getEmptyAnalytics();
       }
+
+      const studentIds = students.map(s => s.student_id);
 
       // Get all game plays by students
       const { data: gamePlays } = await supabase
@@ -316,7 +346,6 @@ class TeacherAnalyticsService {
       // Calculate total stats
       const total_students = studentIds.length;
       const total_games_played = plays.length;
-      const total_pathkeys_awarded = plays.reduce((sum, p) => sum + (p.pathkeys_earned || 0), 0);
 
       // Calculate most popular careers
       const careerStats = new Map<string, { plays: number; students: Set<string>; total_correct: number; total_questions: number }>();
@@ -459,7 +488,9 @@ class TeacherAnalyticsService {
       plays.forEach(play => {
         const activity = studentActivityMap.get(play.user_id) || { games_played: 0, pathkeys_earned: 0, last_active: new Date(0) };
         activity.games_played++;
-        activity.pathkeys_earned += play.pathkeys_earned || 0;
+        // pathkeys_earned is a UUID[] array
+        const pathkeysArray = play.pathkeys_earned || [];
+        activity.pathkeys_earned += Array.isArray(pathkeysArray) ? pathkeysArray.length : 0;
         const playDate = new Date(play.joined_at);
         if (playDate > activity.last_active) {
           activity.last_active = playDate;
@@ -482,10 +513,52 @@ class TeacherAnalyticsService {
         .sort((a, b) => b.games_played - a.games_played)
         .slice(0, 10);
 
+      // Get completed pathkeys (all 3 sections unlocked)
+      const { data: completedPathkeys } = await supabase
+        .from('student_pathkeys')
+        .select(`
+          student_id,
+          career_id,
+          career_mastery_unlocked,
+          industry_mastery_unlocked,
+          business_driver_mastery_unlocked,
+          business_driver_mastery_unlocked_at,
+          careers!inner (
+            id,
+            title
+          )
+        `)
+        .in('student_id', studentIds)
+        .eq('career_mastery_unlocked', true)
+        .eq('industry_mastery_unlocked', true)
+        .eq('business_driver_mastery_unlocked', true);
+
+      const pathkey_awards: PathkeyAward[] = (completedPathkeys || []).map((pk: any) => {
+        const student = students.find(s => s.student_id === pk.student_id);
+        return {
+          student_id: pk.student_id,
+          student_name: student?.display_name || 'Unknown',
+          career_id: pk.career_id,
+          career_title: pk.careers?.title || 'Unknown',
+          completed_at: pk.business_driver_mastery_unlocked_at || new Date().toISOString(),
+        };
+      });
+
+      // Total pathkeys awarded = count of fully completed pathkeys (all 3 sections)
+      const total_pathkeys_awarded = pathkey_awards.length;
+
+      console.log('[TeacherAnalytics] Classroom stats:', {
+        total_students,
+        total_games_played,
+        total_pathkeys_awarded,
+        pathkey_awards_count: pathkey_awards.length
+      });
+
       return {
         total_students,
         total_games_played,
         total_pathkeys_awarded,
+        pathkey_awards,
         most_popular_careers,
         most_popular_industries,
         weakest_business_drivers,
@@ -503,9 +576,10 @@ class TeacherAnalyticsService {
    */
   async getQuestionSetRecommendations(teacherId: string): Promise<QuestionSetRecommendation[]> {
     try {
-      const studentIds = await this.getTeacherStudents(teacherId);
-      if (studentIds.length === 0) return [];
+      const students = await this.getTeacherStudentsWithProfiles(teacherId);
+      if (students.length === 0) return [];
 
+      const studentIds = students.map(s => s.student_id);
       const recommendations: QuestionSetRecommendation[] = [];
 
       // Get all student pathkey progress
@@ -527,13 +601,8 @@ class TeacherAnalyticsService {
 
       const pathkeys = (allPathkeys || []) as any[];
 
-      // Get profiles for student names
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, display_name')
-        .in('id', studentIds);
-
-      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p.display_name || 'Student']));
+      // Use cached student profiles
+      const profileMap = new Map(students.map((s: { student_id: string; display_name: string }) => [s.student_id, s.display_name || 'Student']));
 
       // Find careers where students need industry mastery
       const needIndustryMastery = pathkeys.filter(pk => !pk.industry_mastery_unlocked);
@@ -607,6 +676,7 @@ class TeacherAnalyticsService {
       total_students: 0,
       total_games_played: 0,
       total_pathkeys_awarded: 0,
+      pathkey_awards: [],
       most_popular_careers: [],
       most_popular_industries: [],
       weakest_business_drivers: [],
