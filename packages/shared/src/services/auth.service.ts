@@ -58,6 +58,34 @@ class AuthService {
     try {
       const { email, password, fullName, role } = data;
 
+      // Check if email already exists using RPC function to bypass RLS
+      console.log('[AuthService] Checking if email already exists');
+      const { data: emailExists, error: checkError } = await (supabase.rpc as any)('check_email_exists', {
+        p_email: email
+      }) as { data: boolean; error: any };
+
+      if (checkError) {
+        console.error('[AuthService] Error checking existing email:', checkError);
+        // Continue with signup if check fails - let Supabase auth handle it
+      }
+
+      if (emailExists) {
+        console.error('[AuthService] Email already exists:', {
+          email: email,
+          attemptedUserType: role,
+        });
+        return {
+          user: null,
+          session: null,
+          error: {
+            message: 'An account with this email already exists. Please use the Forgot Password link to recover your account.',
+            name: 'DuplicateEmail',
+            status: 409,
+          } as AuthError,
+        };
+      }
+
+      console.log('[AuthService] Email is available, proceeding with signup');
       console.log('[AuthService] Calling supabase.auth.signUp');
 
       // Create auth user
