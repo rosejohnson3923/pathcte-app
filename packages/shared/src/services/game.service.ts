@@ -994,6 +994,11 @@ export const gameService = {
           progressionControl: 'auto', // Solo games always auto-advance
           questionCount: params.questionCount || 20, // Default to 20 questions for solo
         },
+        metadata: {
+          careerId: params.careerId,
+          careerTitle: params.careerTitle,
+          careerSector: params.careerSector,
+        },
       } as any);
 
       if (sessionError || !session) {

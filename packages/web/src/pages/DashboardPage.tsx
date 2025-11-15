@@ -1,5 +1,5 @@
 import { DashboardLayout } from '../components/layout';
-import { useAuth, useCareerPathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames, useActiveUserTournaments } from '../hooks';
+import { useAuth, useCareerPathkeys, useGameCount, useActiveHostedGames, useActiveJoinedGames, useActiveUserTournaments, useCareersExploredCount } from '../hooks';
 import { Card, Spinner, Badge } from '../components/common';
 import { Trophy, Gamepad2, BookOpen, TrendingUp, Play, Zap } from 'lucide-react';
 import { getPlaceholderImageUrl } from '@pathcte/shared';
@@ -14,6 +14,7 @@ export default function DashboardPage() {
   // Fetch real data
   const { data: careerPathkeys, isLoading: pathkeysLoading } = useCareerPathkeys();
   const gameCount = useGameCount();
+  const { count: uniqueCareersExplored, isLoading: careersExploredLoading } = useCareersExploredCount();
   // const { data: recentGames, isLoading: gamesLoading } = useUserGamePlayers(5);
   const { data: activeHostedGames, isLoading: activeHostedLoading } = useActiveHostedGames();
   const { data: activeJoinedGames, isLoading: activeJoinedLoading } = useActiveJoinedGames();
@@ -28,7 +29,6 @@ export default function DashboardPage() {
   }, [careerPathkeys]);
 
   const pathkeyCount = pathkeysWithAnyProgress.length;
-  const uniqueCareersExplored = pathkeysWithAnyProgress.length; // Each career pathkey is unique
 
   return (
     <DashboardLayout>
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                   <BookOpen className="text-white" size={28} />
                 </div>
               </div>
-              {pathkeysLoading ? (
+              {careersExploredLoading ? (
                 <Spinner size="sm" />
               ) : (
                 <p className="text-3xl font-bold text-text-primary mb-1">{uniqueCareersExplored}</p>

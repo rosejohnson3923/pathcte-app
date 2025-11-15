@@ -204,3 +204,52 @@ export const useActiveJoinedGames = () => {
     data: activeGames,
   };
 };
+
+/**
+ * Count unique careers explored by user
+ * Based on completed career quest games where careerId is stored in metadata
+ */
+export const useCareersExploredCount = () => {
+  const { user } = useAuth();
+
+  // Get all game_players records for this user
+  const { data: gamePlayers } = useFetchMany<GamePlayer>(
+    'game_players',
+    user ? { user_id: user.id } : undefined,
+    {
+      enabled: !!user,
+    }
+  );
+
+  if (!gamePlayers) return { count: 0, isLoading: true };
+
+  // Get completed game session IDs
+  const completedGameIds = gamePlayers
+    .filter(p => p.placement !== null && p.placement !== undefined)
+    .map(p => p.game_session_id);
+
+  // Fetch those game sessions to check for career quest games
+  const { data: gameSessions, isLoading } = useFetchMany<GameSession>(
+    'game_sessions',
+    completedGameIds.length > 0 ? {} : undefined,
+    {
+      enabled: completedGameIds.length > 0,
+    }
+  );
+
+  if (isLoading || !gameSessions) return { count: 0, isLoading };
+
+  // Filter to career quest games and extract unique career IDs from metadata
+  const careerIds = new Set<string>();
+  gameSessions.forEach(session => {
+    if (
+      completedGameIds.includes(session.id) &&
+      session.game_mode === 'career_quest' &&
+      session.metadata?.careerId
+    ) {
+      careerIds.add(session.metadata.careerId);
+    }
+  });
+
+  return { count: careerIds.size, isLoading: false };
+};
