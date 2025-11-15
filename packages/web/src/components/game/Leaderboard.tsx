@@ -4,8 +4,9 @@
  * Real-time player rankings during and after game
  */
 
+import { useState } from 'react';
 import { Card, Badge } from '../common';
-import { Trophy } from 'lucide-react';
+import { Trophy, ChevronDown, ChevronUp } from 'lucide-react';
 import type { GamePlayer } from '@pathcte/shared';
 import { formatPlayerName } from '@pathcte/shared';
 
@@ -24,6 +25,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   compact = false,
   totalQuestions,
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // Sort players by score (descending)
   const sortedPlayers = [...players].sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
@@ -64,7 +67,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         </h3>
 
         <div className="space-y-2">
-          {sortedPlayers.slice(0, 5).map((player, index) => {
+          {(isExpanded ? sortedPlayers : sortedPlayers.slice(0, 5)).map((player, index) => {
             const rank = getRankBadge(index);
             return (
               <div
@@ -125,9 +128,22 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
           })}
 
           {sortedPlayers.length > 5 && (
-            <p className="text-xs text-text-tertiary text-center pt-2">
-              +{sortedPlayers.length - 5} more players
-            </p>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="w-full py-2 px-3 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp size={16} />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={16} />
+                  Show {sortedPlayers.length - 5} More Players
+                </>
+              )}
+            </button>
           )}
 
           {sortedPlayers.length === 0 && (
