@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
                       {overview?.average_class_score?.toFixed(1) || '0.0'}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      out of 100 points
+                      cumulative average across all games
                     </p>
                   </div>
                   <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
