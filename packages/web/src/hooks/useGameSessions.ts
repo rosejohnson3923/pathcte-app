@@ -4,9 +4,11 @@
  * Game session data management
  */
 
+import React from 'react';
 import { useFetchMany } from './useSupabase';
 import { useAuth } from './useAuth';
 import type { GameSession, GamePlayer } from '@pathcte/shared';
+import { supabase } from '@pathcte/shared';
 
 /**
  * Fetch user's game history
@@ -212,6 +214,8 @@ export const useActiveJoinedGames = () => {
 export const useCareersExploredCount = () => {
   const { user } = useAuth();
 
+  console.log('[useCareersExploredCount] Hook called, user:', user?.id);
+
   // Get all game_players records for this user
   const { data: gamePlayers } = useFetchMany<GamePlayer>(
     'game_players',
@@ -221,6 +225,8 @@ export const useCareersExploredCount = () => {
     }
   );
 
+  console.log('[useCareersExploredCount] Game players:', gamePlayers?.length);
+
   if (!gamePlayers) return { count: 0, isLoading: true };
 
   // Get completed game session IDs
@@ -228,28 +234,54 @@ export const useCareersExploredCount = () => {
     .filter(p => p.placement !== null && p.placement !== undefined)
     .map(p => p.game_session_id);
 
-  // Fetch those game sessions to check for career quest games
-  const { data: gameSessions, isLoading } = useFetchMany<GameSession>(
-    'game_sessions',
-    completedGameIds.length > 0 ? {} : undefined,
-    {
-      enabled: completedGameIds.length > 0,
+  console.log('[useCareersExploredCount] Completed game IDs:', completedGameIds.length, completedGameIds);
+
+  // Fetch career quest game sessions directly using Supabase query
+  const [gameSessions, setGameSessions] = React.useState<GameSession[] | null>(null);
+  const [isLoadingSessions, setIsLoadingSessions] = React.useState(true);
+
+  React.useEffect(() => {
+    if (completedGameIds.length === 0) {
+      setGameSessions([]);
+      setIsLoadingSessions(false);
+      return;
     }
-  );
 
-  if (isLoading || !gameSessions) return { count: 0, isLoading };
+    const fetchSessions = async () => {
+      setIsLoadingSessions(true);
+      const { data, error } = await supabase
+        .from('game_sessions')
+        .select('id, game_mode, metadata')
+        .in('id', completedGameIds)
+        .eq('game_mode', 'career_quest');
 
-  // Filter to career quest games and extract unique career IDs from metadata
+      if (error) {
+        console.error('[useCareersExploredCount] Error fetching sessions:', error);
+        setGameSessions([]);
+      } else {
+        setGameSessions(data as GameSession[]);
+      }
+      setIsLoadingSessions(false);
+    };
+
+    fetchSessions();
+  }, [completedGameIds.join(',')]);
+
+  console.log('[useCareersExploredCount] Game sessions:', gameSessions?.length, 'isLoading:', isLoadingSessions);
+
+  if (isLoadingSessions || !gameSessions) return { count: 0, isLoading: isLoadingSessions };
+
+  // Extract unique career IDs from metadata
   const careerIds = new Set<string>();
   gameSessions.forEach(session => {
-    if (
-      completedGameIds.includes(session.id) &&
-      session.game_mode === 'career_quest' &&
-      session.metadata?.careerId
-    ) {
+    console.log('[useCareersExploredCount] Checking session:', session.id, 'game_mode:', session.game_mode, 'metadata:', session.metadata);
+    if (session.metadata?.careerId) {
+      console.log('[useCareersExploredCount] Adding career:', session.metadata.careerId);
       careerIds.add(session.metadata.careerId);
     }
   });
+
+  console.log('[useCareersExploredCount] Final count:', careerIds.size, 'Career IDs:', Array.from(careerIds));
 
   return { count: careerIds.size, isLoading: false };
 };

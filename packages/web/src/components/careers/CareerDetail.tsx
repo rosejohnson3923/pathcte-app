@@ -88,13 +88,16 @@ export const CareerDetail: React.FC<CareerDetailProps> = ({
     setIsStarting(true);
 
     try {
-      const { session, error } = await gameService.startCareerQuest({
+      const questParams = {
         userId: user.id,
         careerId: career.id,
         careerTitle: career.title,
         careerSector: career.sector || career.industry,
         questionCount: questionCount,
-      });
+      };
+      console.log('[CareerDetail] Starting career quest with params:', questParams);
+
+      const { session, error } = await gameService.startCareerQuest(questParams);
 
       if (error || !session) {
         throw error || new Error('Failed to start career quest');

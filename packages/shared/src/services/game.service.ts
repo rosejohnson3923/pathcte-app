@@ -181,23 +181,38 @@ export const gameService = {
         );
       }
 
+      // Merge metadata: combine selected_question_ids with any metadata passed in params
+      const metadata = {
+        ...(params.metadata || {}), // Start with any metadata from params (e.g., careerId, careerTitle, careerSector)
+        ...(selectedQuestionIds ? { selected_question_ids: selectedQuestionIds } : {}), // Add selected questions if available
+      };
+
+      console.log('[GameService] createGame - final metadata being saved:', metadata);
+
+      const insertPayload = {
+        game_code: gameCode,
+        host_id: params.hostId,
+        question_set_id: params.questionSetId,
+        game_mode: params.gameMode,
+        session_type: params.sessionType || 'multiplayer',
+        status: 'waiting' as GameStatus,
+        max_players: params.maxPlayers || 50,
+        is_public: params.isPublic ?? true,
+        allow_late_join: params.allowLateJoin ?? false,
+        settings: params.settings || {},
+        metadata: metadata,
+      } as any;
+
+      console.log('[GameService] createGame - full insert payload:', JSON.stringify(insertPayload, null, 2));
+
       const { data: session, error } = (await supabase
         .from('game_sessions')
-        .insert({
-          game_code: gameCode,
-          host_id: params.hostId,
-          question_set_id: params.questionSetId,
-          game_mode: params.gameMode,
-          session_type: params.sessionType || 'multiplayer',
-          status: 'waiting' as GameStatus,
-          max_players: params.maxPlayers || 50,
-          is_public: params.isPublic ?? true,
-          allow_late_join: params.allowLateJoin ?? false,
-          settings: params.settings || {},
-          metadata: selectedQuestionIds ? { selected_question_ids: selectedQuestionIds } : {},
-        } as any)
+        .insert(insertPayload)
         .select()
         .single()) as { data: GameSession | null; error: any };
+
+      console.log('[GameService] createGame - session returned from DB:', session);
+      console.log('[GameService] createGame - session.metadata from DB:', session?.metadata);
 
       if (error) throw error;
 
@@ -982,7 +997,7 @@ export const gameService = {
       }
 
       // Create a career quest game session
-      const { session, error: sessionError } = await this.createGame({
+      const createGameParams = {
         hostId: params.userId,
         questionSetId,
         gameMode: 'career_quest' as any,
@@ -999,7 +1014,12 @@ export const gameService = {
           careerTitle: params.careerTitle,
           careerSector: params.careerSector,
         },
-      } as any);
+      } as any;
+
+      console.log('[GameService] startCareerQuest - received params:', params);
+      console.log('[GameService] startCareerQuest - creating game with metadata:', createGameParams.metadata);
+
+      const { session, error: sessionError } = await this.createGame(createGameParams);
 
       if (sessionError || !session) {
         throw sessionError || new Error('Failed to create career quest');
