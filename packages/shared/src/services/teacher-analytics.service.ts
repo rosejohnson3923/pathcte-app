@@ -112,27 +112,34 @@ export interface QuestionSetRecommendation {
 
 class TeacherAnalyticsService {
   /**
-   * Get all students for a teacher (by school or direct assignment)
+   * Get all students for a teacher
+   * Students are identified by having played in games or tournaments hosted by the teacher
    */
   async getTeacherStudents(teacherId: string): Promise<string[]> {
     try {
-      // Get teacher's school
-      const { data: teacher } = await supabase
-        .from('profiles')
-        .select('school_id')
-        .eq('id', teacherId)
-        .single();
+      // Find all students who played in games hosted by this teacher
+      const { data: players } = await supabase
+        .from('game_players')
+        .select(`
+          user_id,
+          game_sessions!inner (
+            host_id
+          )
+        `)
+        .eq('game_sessions.host_id', teacherId)
+        .not('user_id', 'is', null);
 
-      const teacherSchoolId = (teacher as any)?.school_id;
-      if (!teacherSchoolId) {
+      if (!players || players.length === 0) {
         return [];
       }
 
-      // Get all students in same school
+      // Extract unique student IDs and verify they're students (not teachers/admins)
+      const userIds = [...new Set((players as any[]).map(p => p.user_id))];
+
       const { data: students } = await supabase
         .from('profiles')
         .select('id')
-        .eq('school_id', teacherSchoolId)
+        .in('id', userIds)
         .eq('user_type', 'student');
 
       return (students || []).map((s: any) => s.id);
